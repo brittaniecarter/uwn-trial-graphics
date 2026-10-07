@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Utah water challenges: three views of how the areas connect</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap">
+<style>
+:root{--ink:#0F2439;--sand:#D1CBBD}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:var(--ink)}
+body{font:15px/1.5 Arial,Helvetica,sans-serif;padding:12px}
+h1,h2,h3,.tab,.chip{font-family:Montserrat,Arial,sans-serif}
+.tabs{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.tab{border:2px solid var(--ink);background:#fff;color:var(--ink);font-weight:600;font-size:14px;padding:6px 16px;border-radius:99px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:#fff}
+.desc{margin:0 0 10px;max-width:75ch;font-size:14px}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+@media(min-width:1000px){.wrap{grid-template-columns:minmax(0,1fr) 340px;align-items:start}}
+.stage{border:1px solid var(--sand);border-radius:8px;padding:8px}
+svg{width:100%;height:auto;display:none}
+svg.on{display:block}
+.dim{opacity:.15}
+.ctr{fill:var(--ink);font:600 17px Montserrat,Arial,sans-serif;text-anchor:middle;pointer-events:none}
+.rib{stroke:var(--ink);stroke-opacity:.45;cursor:pointer;transition:opacity .15s}
+.rib.sel{stroke-opacity:1;stroke-width:3}
+.arc{cursor:pointer;outline:none}.arc path{stroke:var(--ink);stroke-width:2}.arc:hover path,.arc.sel path,.arc:focus-visible path{stroke-width:5}
+.arc text{fill:var(--ink);pointer-events:none;font-family:Montserrat,Arial,sans-serif}
+.arc .nm{font-size:17px;font-weight:700}.arc .ct{font-size:15px}
+.petal{fill-opacity:.25;stroke-width:2;pointer-events:none;transition:transform .35s,opacity .2s}
+.petal.on{fill-opacity:.5}
+.lab{cursor:pointer;outline:none}.lab rect{fill:#fff;stroke-width:2}.lab:hover rect,.lab:focus-visible rect,.lab.sel rect{stroke-width:5}
+.lab text{fill:var(--ink);font:700 13px Montserrat,Arial,sans-serif;text-anchor:middle;pointer-events:none}
+.node{cursor:pointer;outline:none}.node .halo{fill:#fff;stroke:#fff;stroke-width:3}.node .tag{fill:#fff;opacity:.88}
+.node text{fill:var(--ink);font:500 10.5px Arial,sans-serif;text-anchor:middle;pointer-events:none}
+.node:hover .halo,.node.sel .halo,.node:focus-visible .halo{stroke:var(--ink)}
+.link{stroke-width:1.5;opacity:.35;transition:opacity .15s}.link.on{opacity:1;stroke-width:3}
+.hub{cursor:pointer;outline:none}.hub circle{stroke:#fff;stroke-width:4}.hub:hover circle,.hub.sel circle,.hub:focus-visible circle{stroke:var(--ink)}
+.hub text{fill:var(--ink);font:700 12px Montserrat,Arial,sans-serif;text-anchor:middle;pointer-events:none}
+.bdot{cursor:pointer;outline:none}.bdot circle{fill:#fff;stroke:var(--ink);stroke-width:2}.bdot:hover circle,.bdot.sel circle,.bdot:focus-visible circle{fill:var(--ink)}
+.bdot rect{fill:#fff;opacity:.88}.bdot text{fill:var(--ink);font:500 11px Arial,sans-serif;text-anchor:middle;pointer-events:none}
+.hint{margin:8px 4px 0;font-size:13px}
+aside{border:1px solid var(--sand);border-radius:8px;padding:18px 20px;max-height:760px;overflow:auto}
+aside h2{font-size:20px;line-height:1.25;margin:0 0 4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sub{margin:0 0 12px;font-size:14px}
+h3{font-size:14px;margin:16px 0 6px;padding-top:12px;border-top:1px solid var(--sand)}
+ul.l{margin:0;padding-left:18px}dl{margin:0}dt{font-weight:700;margin-top:10px}dd{margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--ink);background:#fff;color:var(--ink);font-weight:600;font-size:12.5px;padding:4px 11px;border-radius:99px;cursor:pointer}
+.chip:hover{background:var(--ink);color:#fff}
+.sw{display:inline-block;width:13px;height:13px;border-radius:50%;border:2px solid var(--ink);flex:none}
+.note{font-size:13px;margin-top:12px}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="tabs" role="tablist" aria-label="Choose a view">
+<button class="tab" role="tab" data-v="chord" aria-selected="true">Chord</button>
+<button class="tab" role="tab" data-v="flower" aria-selected="false">Flower</button>
+<button class="tab" role="tab" data-v="network" aria-selected="false">Network</button>
+</div>
+<p class="desc" id="desc"></p>
+<div class="wrap">
+<div class="stage">
+<svg id="chord" class="on" viewBox="0 0 1000 760"></svg>
+<svg id="flower" viewBox="0 0 760 700"></svg>
+<svg id="network" viewBox="0 0 760 660"></svg>
+<p class="hint">Hover to highlight connections. Select anything to read its details.</p>
+</div>
+<aside id="panel"></aside>
+</div>
+<script>
+const AREAS={
+u:{n:"Water Use / Demand",col:"#F6BD17",
+ D:["Human water use","Overallocation","Competing uses and sectors","Agricultural, municipal and industrial use","High-intensity uses (e.g., data centers)","Population growth and development","Human attitudes and behavior"],
+ P:["Limited water supply","Disconnect between competing uses and supply","Quantity and uncertainty","Not understanding trade-offs of living in the West","Systems-level barriers to water-wise landscaping","People not caring about the water they use"],
+ A:["Reduce demand to balance with supply","Alignment on use and conservation between users","Valuation of different uses","Efficiency, recycling and reuse","Better household and urban decisions (turf grass)","Public engagement in conservation and stewardship"],
+ G:["Balance between human and ecosystem needs","Optimized agricultural water use for food, soil and water security"]},
+g:{n:"Water Governance",col:"#F16278",
+ D:["Power and influence"],
+ P:["Prior Appropriation Doctrine","Users incentivized to use all water they have","Policies lack balance of human and non-human needs","Outmoded governance","Lack of coordination across scales","Disconnect between governance and management","Disconnect between scientists and decision makers"],
+ A:["Policies that encourage efficiency and value water","Alignment of governance with attitudes and expectations","Relationships, not only data and monitoring","Direct access to information and tools for decisions","Better policy to reduce use"],
+ G:["Alignment between governance and environmental conditions"]},
+i:{n:"Water Infrastructure",col:"#A2AAAD",
+ D:["Climate change (drought, aridity)","Natural disasters (wildfire, flooding, earthquake)","Hazard impacts on infrastructure"],
+ P:["Physical and legal infrastructure out of date","Aging infrastructure","Aging workforce","Water loss"],
+ A:["Workforce recruitment and retention","Regional solutions (pipelines, desalination, processed water)","Funding"],
+ G:["Infrastructure planning and design","Resiliency and redundancy"]},
+q:{n:"Water Quantity & Distribution",col:"#288DC2",
+ D:["Drought","Variability in precipitation","Climate change","Surface water and snowpack runoff"],
+ P:["Scarcity and shortage","Snowpack decline","Increasing variability","Flooding","Aging, inadequate infrastructure","Lack of predictability in supply","Lack of data management and high-quality data","Shrinking Great Salt Lake"],
+ A:["Adapting to water and climate variability","Measurement infrastructure","Better understanding of water fluxes","Data interoperability and access"],
+ G:["Reliable prediction to guide decision making"]},
+h:{n:"Hazards",col:"#F58220",
+ D:["Extremes","Climate change","Weather-related hazards","Industrial sources","Growth and development"],
+ P:["Water hazard complexity","Compound and cascading hazards","Drought","Dust from the Great Salt Lake","Wildfire and post-wildfire flooding","Flooding (flash, pluvial, snowmelt)","Inaccurate flood inundation mapping","Dam failure and ice dams","Emerging contaminants","Health hazards"],
+ A:["Community planning","Mitigation, preparedness, response, recovery","Forecasting and monitoring","Reclaiming watersheds after fire","Management and planning"],
+ G:[]},
+e:{n:"Water Quality & Ecosystems",col:"#124734",
+ D:["Human water use","Drought, dust, floods, wildfire","Agriculture, mining and industry","Stormwater and runoff","Water reuse and wastewater","Eutrophication"],
+ P:["Pollution","Biological contaminants (HABs, invasive species)","Chemical contaminants (salinity, metals, nutrients)","Physical contaminants (sediment)","Novel contaminants (PFAS, pharmaceuticals, plastics)","Habitat and species loss","Misaligned management of water and ecosystems"],
+ A:["Solving quality to increase quantity","Treatment methods and advanced treatment","Policy and regulation","Green infrastructure, BMPs, restoration","Source water protection","Public and decision-maker buy-in","Behavior change"],
+ G:["Biodiversity","Ecosystem health"]}
+};
+const BRIDGES=[
+ ["Climate change",["i","q","h","e"],"Listed as a driver or problem in Infrastructure, Quantity, Hazards and Quality."],
+ ["Drought",["u","q","h","e"],"A driver of supply shortage and water quality problems, and a hazard in its own right."],
+ ["Wildfire",["i","h","e"],"Damages infrastructure, degrades water quality, and triggers post-fire flooding."],
+ ["Flooding",["i","q","h","e"],"A hazard, a supply and runoff issue, and a stress on infrastructure and water quality."],
+ ["Dust and Great Salt Lake",["q","h","e"],"A shrinking lake, a dust driver for water quality, and a hazard on snowpack and reservoirs."],
+ ["Aging infrastructure and water loss",["u","i","q"],"Leaks and outdated systems affect demand, infrastructure and supply."],
+ ["Data and monitoring",["g","i","q","h"],"Data gaps, digital infrastructure, forecasting and decision-making tools."],
+ ["Behavior and public engagement",["u","g","e"],"Behavior change, buy-in and public understanding across use, governance and quality."],
+ ["Growth and development",["u","h","e"],"Population growth drives demand, runoff and exposure to hazards."],
+ ["Policy and regulation",["u","g","i","e"],"Regulations and policy tools appear as actions or barriers in four areas."],
+ ["Water rights",["u","g","i","q"],"Prior appropriation and rights shape use, infrastructure and distribution."],
+ ["Agriculture",["u","g","q","e"],"A major water user, a source of contaminants, and a governance issue."],
+ ["Emerging contaminants",["h","e"],"Novel contaminants appear as a quality problem and a health hazard."],
+ ["Water–energy and data centers",["u","g"],"High-intensity uses raise governance questions."]
+];
+const DESC={chord:"Each arc is an area. Each ribbon links two areas, and its width is the number of themes they share. Best for precision.",flower:"Each petal is an area, and markers in the overlaps are shared themes. A marker's ring shows every area it belongs to. Best for a first look.",network:"Large circles are areas and small nodes are themes shared by several areas. Lines show where each theme appears. Best for spotting the themes that hold the system together."};
+const ORDER=["u","g","i","q","h","e"],N=6,NS="http://www.w3.org/2000/svg",panel=document.getElementById("panel");
+const pair={};ORDER.forEach(a=>{pair[a]={};ORDER.forEach(b=>{if(a!==b)pair[a][b]=[]})});
+BRIDGES.forEach((b,i)=>b[1].forEach(x=>b[1].forEach(y=>{if(x!==y)pair[x][y].push(i)})));
+const deg={};ORDER.forEach(a=>deg[a]=ORDER.reduce((s,b)=>s+(a===b?0:pair[a][b].length),0));
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
+const sw=k=>`<span class="sw" style="background:${AREAS[k].col}"></span>`;
+const C=k=>AREAS[k].col,fx=n=>n.map(v=>v.toFixed(1)).join(" ");
+const marks=[];
+const key=(g,fn)=>{g.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fn()}}};
+
+/* ---------- CHORD ---------- */
+(()=>{const svg=document.getElementById("chord"),CX=500,CY=380,RO=225,RI=206,GAP=.07;
+const total=ORDER.reduce((s,a)=>s+deg[a],0),unit=(Math.PI*2-N*GAP)/total,seg={},arcs={};let t=-Math.PI/2-GAP/2;
+ORDER.forEach((a,ai)=>{const s=t;seg[a]={};for(let o=N-1;o>=1;o--){const b=ORDER[(ai+o)%N],w=pair[a][b].length*unit;seg[a][b]=[t,t+w];t+=w}arcs[a]=[s,t];t+=GAP});
+const P=(r,a)=>[CX+r*Math.cos(a),CY+r*Math.sin(a)],defs=el("defs",{},svg),gR=el("g",{},svg),gA=el("g",{},svg),ribs=[],ae={};
+for(let i=0;i<N;i++)for(let j=i+1;j<N;j++){const a=ORDER[i],b=ORDER[j];if(!pair[a][b].length)continue;const [s0,s1]=seg[a][b],[t0,t1]=seg[b][a];
+ const id=`c${a}${b}`,m1=P(RI,(s0+s1)/2),m2=P(RI,(t0+t1)/2),gr=el("linearGradient",{id,gradientUnits:"userSpaceOnUse",x1:m1[0],y1:m1[1],x2:m2[0],y2:m2[1]},defs);
+ el("stop",{offset:"0","stop-color":C(a)},gr);el("stop",{offset:"1","stop-color":C(b)},gr);
+ const r=el("path",{d:`M${fx(P(RI,s0))} A${RI} ${RI} 0 0 1 ${fx(P(RI,s1))} Q${CX} ${CY} ${fx(P(RI,t0))} A${RI} ${RI} 0 0 1 ${fx(P(RI,t1))} Q${CX} ${CY} ${fx(P(RI,s0))}Z`,class:"rib",fill:`url(#${id})`,"fill-opacity":.8},gR);
+ el("title",{},r).textContent=`${AREAS[a].n} and ${AREAS[b].n}: ${pair[a][b].length} shared themes`;
+ r.onclick=()=>selPair(a,b);r.onmouseenter=()=>hi([],r);r.onmouseleave=clr;ribs.push({r,a,b})}
+ORDER.forEach(a=>{const [s,e]=arcs[a],g=el("g",{class:"arc",tabindex:0,role:"button","aria-label":AREAS[a].n},gA),[x0,y0]=P(RO,s),[x1,y1]=P(RO,e),[x2,y2]=P(RI+2,e),[x3,y3]=P(RI+2,s),lg=e-s>Math.PI?1:0;
+ el("path",{d:`M${x0} ${y0} A${RO} ${RO} 0 ${lg} 1 ${x1} ${y1} L${x2} ${y2} A${RI+2} ${RI+2} 0 ${lg} 0 ${x3} ${y3}Z`,fill:C(a)},g);
+ const m=(s+e)/2,[lx,ly]=P(RO+18,m),right=Math.cos(m)>=0,w=AREAS[a].n.split(" "),mid=Math.ceil(w.length/2),ls=w.length>2?[w.slice(0,mid).join(" "),w.slice(mid).join(" ")]:[AREAS[a].n];
+ const tx=el("text",{x:lx,y:ly-ls.length*10+4,"text-anchor":right?"start":"end"},g);
+ ls.forEach((l,i)=>{el("tspan",{x:lx,dy:i?21:0,class:"nm"},tx).textContent=l});el("tspan",{x:lx,dy:21,class:"ct"},tx).textContent=`${deg[a]} theme links`;
+ g.onclick=()=>selArea(a);key(g,()=>selArea(a));g.onmouseenter=g.onfocus=()=>hi([a],null);g.onmouseleave=g.onblur=clr;ae[a]=g});
+el("text",{x:CX,y:CY-4,class:"ctr"},svg).textContent=`${BRIDGES.length} shared themes`;el("text",{x:CX,y:CY+18,class:"ctr"},svg).textContent="across 6 areas";
+function hi(keys,rib){const ak=new Set(keys);ribs.forEach(o=>{const on=rib?o.r===rib:keys.length===1&&(o.a===keys[0]||o.b===keys[0]);if(on){ak.add(o.a);ak.add(o.b)}o.r.classList.toggle("dim",!on)});ORDER.forEach(a=>ae[a].classList.toggle("dim",!ak.has(a)))}
+function clr(){ribs.forEach(o=>o.r.classList.remove("dim"));ORDER.forEach(a=>ae[a].classList.remove("dim"))}
+marks.push((a,b)=>{ribs.forEach(o=>o.r.classList.toggle("sel",!!a&&!!b&&((o.a===a&&o.b===b)||(o.a===b&&o.b===a))));ORDER.forEach(x=>ae[x].classList.toggle("sel",x===a&&!b))})})();
+
+/* ---------- FLOWER ---------- */
+(()=>{const svg=document.getElementById("flower"),CX=380,CY=350,D=122,RAD=168,LR=232,ang=k=>-Math.PI/2+ORDER.indexOf(k)*Math.PI/3,ctr=k=>({x:CX+D*Math.cos(ang(k)),y:CY+D*Math.sin(ang(k))});
+const gP=el("g",{},svg),gN=el("g",{},svg),gL=el("g",{},svg),pe={},le={},ne={};
+ORDER.forEach(k=>{const c=ctr(k);el("circle",{cx:c.x,cy:c.y,r:RAD,class:"petal",fill:C(k),stroke:"#0F2439"},gP);pe[k]=gP.lastChild});
+const bn=BRIDGES.map((b,idx)=>{let x=0,y=0;b[1].forEach(k=>{const c=ctr(k);x+=c.x;y+=c.y});x/=b[1].length;y/=b[1].length;return{b,idx,hx:x,hy:y,x:x+((idx*5)%7-3)*3,y:y+((idx*3)%5-2)*3}});
+for(let it=0;it<400;it++)bn.forEach((p,i)=>{p.x+=(p.hx-p.x)*.02;p.y+=(p.hy-p.y)*.02;bn.forEach((q,j)=>{if(i<j){const dx=q.x-p.x,dy=q.y-p.y,d=Math.hypot(dx,dy)||.1;if(d<70){const f=(70-d)/2/d;p.x-=dx*f;p.y-=dy*f;q.x+=dx*f;q.y+=dy*f}}});const d=Math.hypot(p.x-CX,p.y-CY);if(d>200){p.x=CX+(p.x-CX)*200/d;p.y=CY+(p.y-CY)*200/d}});
+bn.forEach(p=>{const g=el("g",{class:"node",tabindex:0,role:"button","aria-label":p.b[0]},gN),w=Math.min(p.b[0].length*5.4+12,142);
+ el("rect",{x:p.x-w/2,y:p.y+12,width:w,height:15,rx:4,class:"tag"},g);el("circle",{cx:p.x,cy:p.y,r:11,class:"halo"},g);
+ const n=p.b[1].length,Cc=2*Math.PI*7;p.b[1].forEach((k,j)=>el("circle",{cx:p.x,cy:p.y,r:7,fill:"none","stroke-width":7,stroke:C(k),"stroke-dasharray":`${Cc/n} ${Cc}`,"stroke-dashoffset":-j*Cc/n,transform:`rotate(-90 ${p.x} ${p.y})`},g));
+ el("text",{x:p.x,y:p.y+23},g).textContent=p.b[0].length>26?p.b[0].slice(0,25)+"…":p.b[0];
+ g.onclick=()=>selBridge(p.idx);key(g,()=>selBridge(p.idx));g.onmouseenter=g.onfocus=()=>hi("b",p.idx);g.onmouseleave=g.onblur=clr;ne[p.idx]=g});
+ORDER.forEach(k=>{const a=ang(k),x=CX+LR*Math.cos(a),y=CY+LR*Math.sin(a),g=el("g",{class:"lab",tabindex:0,role:"button","aria-label":AREAS[k].n},gL),w=AREAS[k].n.length*7.6+22;
+ el("rect",{x:x-w/2,y:y-14,width:w,height:28,rx:14,stroke:C(k)==="#F6BD17"||C(k)==="#A2AAAD"?"#0F2439":C(k)},g);el("text",{x,y:y+5},g).textContent=AREAS[k].n;
+ g.onclick=()=>selArea(k);key(g,()=>selArea(k));g.onmouseenter=g.onfocus=()=>hi("a",k);g.onmouseleave=g.onblur=clr;le[k]=g});
+function hi(type,id){const ak=new Set(),bk=new Set();if(type==="b"){BRIDGES[id][1].forEach(k=>ak.add(k));bk.add(id)}else{ak.add(id);bn.forEach(p=>{if(p.b[1].includes(id))bk.add(p.idx)})}
+ ORDER.forEach(k=>{pe[k].classList.toggle("on",ak.has(k));pe[k].classList.toggle("dim",!ak.has(k));le[k].classList.toggle("dim",!ak.has(k))});bn.forEach(p=>ne[p.idx].classList.toggle("dim",!bk.has(p.idx)))}
+function clr(){ORDER.forEach(k=>{pe[k].classList.remove("on","dim");le[k].classList.remove("dim")});bn.forEach(p=>ne[p.idx].classList.remove("dim"))}
+marks.push((a,b)=>ORDER.forEach(j=>{const s=j===a&&!b?16:0;pe[j].style.transform=`translate(${s*Math.cos(ang(j))}px,${s*Math.sin(ang(j))}px)`;le[j].classList.toggle("sel",j===a&&!b)}))})();
+
+/* ---------- NETWORK ---------- */
+(()=>{const svg=document.getElementById("network"),CX=380,CY=330,R=250,pos={};
+ORDER.forEach((k,i)=>{const a=-Math.PI/2+i*Math.PI/3;pos[k]={x:CX+R*Math.cos(a),y:CY+R*Math.sin(a)}});
+const bn=BRIDGES.map((b,idx)=>{let x=0,y=0;b[1].forEach(k=>{x+=pos[k].x;y+=pos[k].y});x/=b[1].length;y/=b[1].length;return{b,idx,x:CX+(x-CX)*.5+(idx%3-1)*6,y:CY+(y-CY)*.5+((idx*7)%3-1)*6}});
+for(let it=0;it<250;it++)bn.forEach((p,i)=>{bn.forEach((q,j)=>{if(i<j){const dx=q.x-p.x,dy=q.y-p.y,d=Math.hypot(dx,dy)||.1;if(d<64){const f=(64-d)/2/d;p.x-=dx*f;p.y-=dy*f;q.x+=dx*f;q.y+=dy*f}}});const d=Math.hypot(p.x-CX,p.y-CY);if(d>150){p.x=CX+(p.x-CX)*150/d;p.y=CY+(p.y-CY)*150/d}});
+const gL=el("g",{},svg),gB=el("g",{},svg),gA=el("g",{},svg),links=[],he={},be={};
+bn.forEach(p=>p.b[1].forEach(k=>links.push({l:el("line",{x1:p.x,y1:p.y,x2:pos[k].x,y2:pos[k].y,class:"link",stroke:k==="u"||k==="i"?"#0F2439":C(k)},gL),i:p.idx,k})));
+ORDER.forEach(k=>{const g=el("g",{class:"hub",tabindex:0,role:"button","aria-label":AREAS[k].n},gA);el("circle",{cx:pos[k].x,cy:pos[k].y,r:56,fill:C(k)},g);
+ const w=AREAS[k].n.split(" "),ls=[];let cur="";w.forEach(x=>{if((cur+" "+x).trim().length>13){ls.push(cur.trim());cur=x}else cur+=" "+x});ls.push(cur.trim());
+ const t=el("text",{x:pos[k].x,y:pos[k].y-(ls.length-1)*8+4},g);ls.forEach((l,j)=>el("tspan",{x:pos[k].x,dy:j?16:0},t).textContent=l);
+ g.onclick=()=>selArea(k);key(g,()=>selArea(k));g.onmouseenter=g.onfocus=()=>hi("a",k);g.onmouseleave=g.onblur=clr;he[k]=g});
+bn.forEach(p=>{const g=el("g",{class:"bdot",tabindex:0,role:"button","aria-label":p.b[0]},gB),w=Math.min(p.b[0].length*5.6+14,150);
+ el("rect",{x:p.x-w/2,y:p.y+9,width:w,height:17,rx:4},g);el("circle",{cx:p.x,cy:p.y,r:7},g);el("text",{x:p.x,y:p.y+21},g).textContent=p.b[0].length>26?p.b[0].slice(0,25)+"…":p.b[0];
+ g.onclick=()=>selBridge(p.idx);key(g,()=>selBridge(p.idx));g.onmouseenter=g.onfocus=()=>hi("b",p.idx);g.onmouseleave=g.onblur=clr;be[p.idx]=g});
+function hi(type,id){const ak=new Set(),bk=new Set();if(type==="b"){BRIDGES[id][1].forEach(k=>ak.add(k));bk.add(id)}else{bn.forEach(p=>{if(p.b[1].includes(id))bk.add(p.idx)});ak.add(id)}
+ links.forEach(o=>{const on=type==="b"?o.i===id:o.k===id;o.l.classList.toggle("on",on);o.l.classList.toggle("dim",!on)});ORDER.forEach(k=>he[k].classList.toggle("dim",!ak.has(k)));bn.forEach(p=>be[p.idx].classList.toggle("dim",!bk.has(p.idx)))}
+function clr(){links.forEach(o=>o.l.classList.remove("on","dim"));ORDER.forEach(k=>he[k].classList.remove("dim"));bn.forEach(p=>be[p.idx].classList.remove("dim"))}
+marks.push((a,b,i)=>{ORDER.forEach(k=>he[k].classList.toggle("sel",k===a&&!b));bn.forEach(p=>be[p.idx].classList.toggle("sel",p.idx===i))})})();
+
+/* ---------- SHARED PANEL ---------- */
+const list=(h,a)=>`<h3>${h}</h3>`+(a.length?`<ul class="l">${a.map(x=>`<li>${x}</li>`).join("")}</ul>`:`<p class="note">None listed in the dominant themes yet.</p>`);
+const mk=(a,b,i)=>marks.forEach(f=>f(a,b,i));
+function selArea(a){mk(a,null,null);const ls=ORDER.filter(b=>b!==a&&pair[a][b].length).sort((x,y)=>pair[a][y].length-pair[a][x].length);
+ panel.innerHTML=`<h2>${sw(a)}${AREAS[a].n}</h2><p class="sub">Dominant themes from the workshop summary</p>`+list("Drivers",AREAS[a].D)+list("Problems",AREAS[a].P)+list("Management actions",AREAS[a].A)+list("Goals",AREAS[a].G)+
+ `<h3>Connections to other areas</h3><div class="chips">${ls.map(b=>`<button class="chip" data-b="${b}">${sw(b)}${AREAS[b].n} (${pair[a][b].length})</button>`).join("")}</div>`;
+ panel.querySelectorAll(".chip").forEach(c=>c.onclick=()=>selPair(a,c.dataset.b))}
+function selPair(a,b){mk(a,b,null);const ids=pair[a][b];
+ panel.innerHTML=`<h2>${sw(a)}${sw(b)}${ids.length} shared theme${ids.length===1?"":"s"}</h2><p class="sub">${AREAS[a].n} and ${AREAS[b].n}</p><dl>${ids.map(i=>`<dt>${BRIDGES[i][0]}</dt><dd>${BRIDGES[i][2]}</dd>`).join("")}</dl>
+ <h3>Open an area</h3><div class="chips"><button class="chip" data-a="${a}">${sw(a)}${AREAS[a].n}</button><button class="chip" data-a="${b}">${sw(b)}${AREAS[b].n}</button></div>`;
+ panel.querySelectorAll(".chip").forEach(c=>c.onclick=()=>selArea(c.dataset.a))}
+function selBridge(i){mk(null,null,i);const b=BRIDGES[i];
+ panel.innerHTML=`<h2>${b[0]}</h2><p class="sub">Connects ${b[1].length} of the 6 areas</p><p>${b[2]}</p><h3>Appears in</h3><div class="chips">${b[1].map(k=>`<button class="chip" data-a="${k}">${sw(k)}${AREAS[k].n}</button>`).join("")}</div>`;
+ panel.querySelectorAll(".chip").forEach(c=>c.onclick=()=>selArea(c.dataset.a))}
+function home(){mk(null,null,null);panel.innerHTML=`<h2>Start anywhere</h2><p class="sub">Proof of concept</p><p>All three views show the same six challenge areas and the themes they share. Switch views with the buttons above the graphic.</p><p>Climate change, drought, flooding and agriculture each touch four areas. Quality &amp; Ecosystems and Hazards share the most themes (seven).</p><p class="note">Connections were tagged by hand from the dominant-themes sheet and are a draft for the team to review.</p>`}
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",x===t));document.querySelectorAll("svg").forEach(s=>s.classList.toggle("on",s.id===t.dataset.v));document.getElementById("desc").textContent=DESC[t.dataset.v]});
+document.getElementById("desc").textContent=DESC.chord;home();
+</script>
+</body>
+</html>
