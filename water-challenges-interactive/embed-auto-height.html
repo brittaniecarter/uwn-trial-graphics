@@ -1,0 +1,20 @@
+<iframe
+  id="water-challenge-map"
+  title="Water Challenge Connections interactive map"
+  src="https://YOUR-GITHUB-USERNAME.github.io/YOUR-REPOSITORY-NAME/chat.html"
+  width="100%"
+  height="1100"
+  style="border:0; max-width:100%;"
+  loading="lazy">
+</iframe>
+
+<script>
+  window.addEventListener("message", function (event) {
+    if (!event.data || event.data.type !== "waterChallengeMapHeight") return;
+
+    var iframe = document.getElementById("water-challenge-map");
+    if (!iframe) return;
+
+    iframe.style.height = Math.max(700, event.data.height) + "px";
+  });
+</script>
