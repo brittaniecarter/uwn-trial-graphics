@@ -1,0 +1,1649 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Water Challenges Interactive Map</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --usu-blue: #0f243f;
+      --usu-light-blue: #2f6f9f;
+      --usu-teal: #247c7a;
+      --usu-green: #5a7d2b;
+      --usu-gold: #b7791f;
+      --usu-red: #a53f2b;
+      --ink: #18212f;
+      --muted: #5c697a;
+      --line: #d7dee8;
+      --soft: #f5f7fa;
+      --panel: #ffffff;
+      --focus: #1b75bb;
+      --shadow: 0 18px 45px rgba(15, 36, 63, 0.12);
+      --radius: 8px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--soft);
+      font-size: 16px;
+      line-height: 1.45;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .water-map {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 18px;
+    }
+
+    .water-map__header {
+      margin-bottom: 20px;
+    }
+
+    .water-map__eyebrow {
+      margin: 0 0 6px;
+      color: var(--usu-light-blue);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .water-map h1 {
+      margin: 0;
+      color: var(--usu-blue);
+      font-size: clamp(1.75rem, 3vw, 2.6rem);
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .water-map__lede {
+      max-width: 820px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 1.02rem;
+    }
+
+    .water-map__layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .water-map__visual,
+    .water-map__details {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .water-map__visual {
+      padding: 18px;
+    }
+
+    .tab-button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--ink);
+      background: #fff;
+      font: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .tab-button:hover {
+      border-color: var(--usu-light-blue);
+    }
+
+    .tab-button[aria-selected="true"] {
+      border-color: var(--usu-blue);
+      color: #fff;
+      background: var(--usu-blue);
+    }
+
+    .tab-button:focus-visible,
+    .challenge-node:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
+
+    .network-wrap {
+      position: relative;
+      min-height: 560px;
+    }
+
+    .network-svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 500px;
+    }
+
+    .connection {
+      fill: none;
+      stroke: #9aa8b8;
+      stroke-width: var(--connection-width, 2px);
+      stroke-linecap: round;
+      opacity: 0.42;
+      transition: opacity 180ms ease, stroke-width 180ms ease, stroke 180ms ease;
+    }
+
+    .connection.is-active {
+      opacity: 0.9;
+      stroke-width: var(--connection-active-width, 4px);
+      stroke: var(--usu-light-blue);
+    }
+
+    .connection.is-muted {
+      opacity: 0.12;
+    }
+
+    .connection-label {
+      fill: var(--muted);
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+    }
+
+    .connection-label.is-active {
+      opacity: 1;
+    }
+
+    .challenge-node {
+      border: 0;
+      padding: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .node-circle {
+      stroke: rgba(15, 36, 63, 0.28);
+      stroke-width: 1.5;
+      transition: stroke-width 180ms ease, filter 180ms ease, opacity 180ms ease;
+    }
+
+    .challenge-node[aria-pressed="true"] .node-circle,
+    .challenge-node:hover .node-circle {
+      stroke-width: 3;
+      filter: drop-shadow(0 10px 12px rgba(15, 36, 63, 0.22));
+    }
+
+    .challenge-node.is-muted {
+      opacity: 0.38;
+    }
+
+    .node-title {
+      fill: var(--usu-blue);
+      font-size: 14px;
+      font-weight: 700;
+      pointer-events: none;
+    }
+
+    .node-count {
+      fill: var(--muted);
+      font-size: 12px;
+      pointer-events: none;
+    }
+
+    .center-label {
+      fill: var(--usu-blue);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .center-sub {
+      fill: var(--muted);
+      font-size: 13px;
+    }
+
+    .water-map__details {
+      display: flex;
+      flex-direction: column;
+      min-height: 620px;
+      overflow: hidden;
+    }
+
+    .detail-header {
+      padding: 22px 22px 18px;
+      color: #fff;
+      background: var(--usu-blue);
+    }
+
+    .detail-kicker {
+      margin: 0 0 5px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      opacity: 0.82;
+    }
+
+    .detail-title {
+      margin: 0;
+      font-size: 1.55rem;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .detail-summary {
+      margin: 10px 0 0;
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .detail-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 14px 18px 4px;
+      background: #fff;
+    }
+
+    .detail-body {
+      flex: 1;
+      padding: 16px 22px 22px;
+      background: #fff;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .detail-list li {
+      padding-left: 14px;
+      border-left: 3px solid var(--usu-light-blue);
+      color: var(--ink);
+    }
+
+    .connection-summary {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .connection-summary h3 {
+      margin: 0 0 10px;
+      color: var(--usu-blue);
+      font-size: 1rem;
+    }
+
+    .connection-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .connection-pill {
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: var(--usu-blue);
+      background: #edf4f8;
+      font-size: 0.87rem;
+      font-weight: 700;
+    }
+
+    .fallback {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 900px) {
+      .water-map__layout {
+        grid-template-columns: 1fr;
+      }
+
+      .network-wrap {
+        min-height: auto;
+      }
+
+      .water-map__details {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .water-map {
+        padding: 18px 12px;
+      }
+
+      .water-map__visual,
+      .water-map__details {
+        border-radius: 0;
+      }
+
+      .water-map__visual {
+        padding: 12px;
+      }
+
+      .network-svg {
+        min-height: 420px;
+      }
+
+      .connection-label {
+        display: none;
+      }
+
+      .tab-button {
+        flex: 1 1 auto;
+        min-width: 132px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="water-map" id="water-map">
+    <header class="water-map__header">
+      <p class="water-map__eyebrow">Utah Water Network</p>
+      <h1>Water Challenge Connections</h1>
+      <p class="water-map__lede">Explore how six water challenge areas relate through shared drivers, problems, and management actions from the cumulative workbook. Thicker lines indicate more connected themes.</p>
+    </header>
+
+    <div class="water-map__layout">
+      <section class="water-map__visual" aria-labelledby="network-title">
+        <h2 id="network-title" class="sr-only">Interactive water challenge network</h2>
+        <div class="network-wrap">
+          <svg class="network-svg" viewBox="0 0 720 640" role="img" aria-labelledby="network-svg-title network-svg-desc">
+            <title id="network-svg-title">Six water challenge areas connected by shared themes</title>
+            <desc id="network-svg-desc">A network diagram with six clickable challenge areas. Selecting an area highlights related connections and updates the detail panel.</desc>
+            <g id="connections"></g>
+            <g id="connection-labels"></g>
+            <circle id="center-circle" cx="360" cy="305" r="86" fill="#f5f7fa" stroke="#d7dee8"></circle>
+            <text class="center-label" id="center-label-1" x="360" y="292" text-anchor="middle">Water</text>
+            <text class="center-label" id="center-label-2" x="360" y="315" text-anchor="middle">Challenges</text>
+            <text class="center-sub" id="center-label-3" x="360" y="339" text-anchor="middle">shared system</text>
+            <g id="nodes"></g>
+          </svg>
+        </div>
+        <p class="fallback">Keyboard users can tab to each challenge area. The detail panel updates when a challenge area is selected.</p>
+      </section>
+
+      <aside class="water-map__details" aria-live="polite" aria-labelledby="detail-title">
+        <div class="detail-header">
+          <p class="detail-kicker" id="detail-kicker">Selected challenge area</p>
+          <h2 class="detail-title" id="detail-title"></h2>
+          <p class="detail-summary" id="detail-summary"></p>
+        </div>
+        <div class="detail-tabs" role="tablist" aria-label="Detail type">
+          <button class="tab-button" id="tab-drivers" type="button" role="tab" aria-controls="detail-panel" aria-selected="true" data-tab="drivers">Drivers</button>
+          <button class="tab-button" id="tab-problems" type="button" role="tab" aria-controls="detail-panel" aria-selected="false" data-tab="problems">Problems</button>
+          <button class="tab-button" id="tab-actions" type="button" role="tab" aria-controls="detail-panel" aria-selected="false" data-tab="actions">Actions</button>
+        </div>
+        <div class="detail-body" id="detail-panel" role="tabpanel" tabindex="-1" aria-labelledby="tab-drivers">
+          <ul class="detail-list" id="detail-list"></ul>
+          <div class="connection-summary">
+            <h3>Connected themes</h3>
+            <div class="connection-pills" id="connection-pills"></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const areas = [
+      {
+            "id": "use",
+            "title": "Water Use/Demand",
+            "shortTitle": [
+                  "Water",
+                  "Use/Demand"
+            ],
+            "color": "#2f6f9f",
+            "summary": "Focuses on water use, demand, conservation, behavior, equity, and tradeoffs among sectors.",
+            "overview": [
+                  "Shares 11 cross-cutting themes with the other challenge areas.",
+                  "Use the connection lines to see where this challenge overlaps with the rest of the system.",
+                  "Line thickness reflects the number of shared concept areas found in the cumulative workbook."
+            ],
+            "drivers": [
+                  "Human water use",
+                  "Overallocation",
+                  "Competing uses/sectors/demands",
+                  "Tradeoffs and calculus on tradeoffs are different for different groups",
+                  "Agricultural water use",
+                  "Municipal and industrial water use",
+                  "High intensity uses (e.g., data centers)",
+                  "Population growth & development",
+                  "Recreation & tourism",
+                  "Energy"
+            ],
+            "problems": [
+                  "Limited water supply",
+                  "Disconnect between competing uses and current water supply",
+                  "Inadequate planning",
+                  "Quantity and uncertainty",
+                  "Groundwater extraction & yield",
+                  "Water loss via infrastructure",
+                  "Reuse & leakage",
+                  "Human behavior",
+                  "Systems-level barriers to adopting water-wise landscaping",
+                  "public awareness of water-related risks (e.g., reservoirs)"
+            ],
+            "actions": [
+                  "Reducing water demand to balance with supply",
+                  "Decrease water use",
+                  "Valuation of different uses of water",
+                  "Alignment on water use and water conservation between users",
+                  "Better decisions by households and urban areas on water use, particularly for turf grass",
+                  "Management flexibility",
+                  "Measurement validity & reliability",
+                  "New technologies",
+                  "Water use efficiency",
+                  "Irrigation efficiency",
+                  "Motivation",
+                  "Conservation"
+            ],
+            "context": [],
+            "themes": [
+                  "Climate and drought",
+                  "Data, monitoring, and modeling",
+                  "Policy and governance",
+                  "Infrastructure and systems",
+                  "Water supply, demand, and distribution",
+                  "Water quality and ecosystems",
+                  "Hazards and cascading risk",
+                  "Agriculture and land use",
+                  "Human behavior and communication",
+                  "Conservation, reuse, and efficiency",
+                  "Energy and industry"
+            ],
+            "themeEvidence": {
+                  "Climate and drought": [
+                        "Drought affecting crop production"
+                  ],
+                  "Data, monitoring, and modeling": [
+                        "High intensity uses (e.g., data centers)",
+                        "Measurement validity & reliability"
+                  ],
+                  "Policy and governance": [
+                        "Policies & regulations",
+                        "New opportunities/rights",
+                        "Legal compacts (interstate)"
+                  ],
+                  "Infrastructure and systems": [
+                        "Water loss via infrastructure",
+                        "public awareness of water-related risks (e.g., reservoirs)",
+                        "Metering"
+                  ],
+                  "Water supply, demand, and distribution": [
+                        "Limited water supply",
+                        "Reducing water demand to balance with supply",
+                        "Competing uses/sectors/demands"
+                  ],
+                  "Water quality and ecosystems": [
+                        "Balance water between human and ecosystem needs"
+                  ],
+                  "Hazards and cascading risk": [
+                        "public awareness of water-related risks (e.g., reservoirs)",
+                        "Municipal and industrial water use"
+                  ],
+                  "Agriculture and land use": [
+                        "Optimize water use in agriculture to ensure food, soil, and water security",
+                        "Agricultural water use",
+                        "Irrigation efficiency"
+                  ],
+                  "Human behavior and communication": [
+                        "Human behavior",
+                        "Effective changes to human behavior",
+                        "Consider values, attitudes, perceptions, & behaviors"
+                  ],
+                  "Conservation, reuse, and efficiency": [
+                        "Alignment on water use and water conservation between users",
+                        "Conservation",
+                        "Reuse & leakage"
+                  ],
+                  "Energy and industry": [
+                        "Energy",
+                        "Municipal and industrial water use",
+                        "High intensity uses (e.g., data centers)"
+                  ]
+            }
+      },
+      {
+            "id": "infra",
+            "title": "Water Infrastructure",
+            "shortTitle": [
+                  "Water",
+                  "Infrastructure"
+            ],
+            "color": "#5a7d2b",
+            "summary": "Covers physical, legal, digital, and workforce systems that move, manage, and protect water.",
+            "overview": [
+                  "Shares 9 cross-cutting themes with the other challenge areas.",
+                  "Use the connection lines to see where this challenge overlaps with the rest of the system.",
+                  "Line thickness reflects the number of shared concept areas found in the cumulative workbook."
+            ],
+            "drivers": [
+                  "Malicious disasters (terrorism, cyber)",
+                  "Climate change (drought, aridity)",
+                  "Natural disasters (wildfire, flooding, sedimentation/debris, earthquake, disease)",
+                  "Hazard impacts on infrastructure"
+            ],
+            "problems": [
+                  "physical and legal infrastructure for water use and water management are out of date",
+                  "gap between our growing knowledge of water cycle and our engineering and management tools based on incomplete, antiquated knowledge",
+                  "Infrastructure",
+                  "Aging infrastructure",
+                  "Aging workforce",
+                  "Water loss",
+                  "Mistrust, disinformation, data theft, system outage, control of system, ransomware",
+                  "Drowning/public safety risk",
+                  "(Note- various infrastructures listed)"
+            ],
+            "actions": [
+                  "plan and design water infrastructure",
+                  "Resiliency & Redundancy",
+                  "Workforce recruitment & retention",
+                  "online analyzers, physical security",
+                  "Regional solutions (pipelines, desalination, processed water)",
+                  "Modeling",
+                  "Funding",
+                  "Rate structures, affordability",
+                  "Federal/State/Local funding & political will",
+                  "Master planning",
+                  "Land use preservation",
+                  "Source water preservation in watersheds"
+            ],
+            "context": [],
+            "themes": [
+                  "Climate and drought",
+                  "Data, monitoring, and modeling",
+                  "Policy and governance",
+                  "Infrastructure and systems",
+                  "Water supply, demand, and distribution",
+                  "Water quality and ecosystems",
+                  "Hazards and cascading risk",
+                  "Agriculture and land use",
+                  "Human behavior and communication"
+            ],
+            "themeEvidence": {
+                  "Climate and drought": [
+                        "Climate change (drought, aridity)"
+                  ],
+                  "Data, monitoring, and modeling": [
+                        "Mistrust, disinformation, data theft, system outage, control of system, ransomware",
+                        "Digital infrastructure & information (data)",
+                        "Canal monitoring, lining)"
+                  ],
+                  "Policy and governance": [
+                        "Regulations (new, proposed)",
+                        "Water rights",
+                        "physical and legal infrastructure for water use and water management are out of date"
+                  ],
+                  "Infrastructure and systems": [
+                        "physical and legal infrastructure for water use and water management are out of date",
+                        "plan and design water infrastructure",
+                        "Canal monitoring, lining)"
+                  ],
+                  "Water supply, demand, and distribution": [
+                        "Water rights"
+                  ],
+                  "Water quality and ecosystems": [
+                        "Natural disasters (wildfire, flooding, sedimentation/debris, earthquake, disease)"
+                  ],
+                  "Hazards and cascading risk": [
+                        "Hazard impacts on infrastructure",
+                        "Drowning/public safety risk",
+                        "Natural disasters (wildfire, flooding, sedimentation/debris, earthquake, disease)"
+                  ],
+                  "Agriculture and land use": [
+                        "Ag irrigation - tracking changes in infrastructure",
+                        "On-farm optimization",
+                        "Land use preservation"
+                  ],
+                  "Human behavior and communication": [
+                        "Drowning/public safety risk"
+                  ]
+            }
+      },
+      {
+            "id": "gov",
+            "title": "Water Governance",
+            "shortTitle": [
+                  "Water",
+                  "Governance"
+            ],
+            "color": "#b7791f",
+            "summary": "Addresses laws, institutions, incentives, coordination, pricing, policy, and decision-making across scales.",
+            "overview": [
+                  "Shares 9 cross-cutting themes with the other challenge areas.",
+                  "Use the connection lines to see where this challenge overlaps with the rest of the system.",
+                  "Line thickness reflects the number of shared concept areas found in the cumulative workbook."
+            ],
+            "drivers": [
+                  "misinformation",
+                  "Multi levels of governance and levels of control",
+                  "Water energy nexus and data centers",
+                  "Power/influence",
+                  "Agriculture",
+                  "Municipal & Industrial",
+                  "Data Centers",
+                  "Circuit boards",
+                  "Power generation"
+            ],
+            "problems": [
+                  "Prior Appropriations Doctrine",
+                  "Users incentivized to use all water they have",
+                  "Policies lack balance of human and non-human",
+                  "Quanity set up in a period when ecological \u2026 were not tracked",
+                  "Outmoded governance",
+                  "Lack of coordination of regulations and capacity across scales",
+                  "Disconnect between water governance and water management",
+                  "Disconnect between those who study hydrologic systems and those making decisions that impact those systems",
+                  "lack of consistent public (and community leadership) understanding related to hydrology/watershed science - both in quantity and quality. This results in a lack of consistent political will to make the policy changes that are needed to protect our dwindling resources",
+                  "Policies of demand"
+            ],
+            "actions": [
+                  "Develop policies that encourage efficient water use while recognizing the economic and environmental value of water and water quality",
+                  "Align governance and environmental conditions",
+                  "The best data and monitoring systems in the world cannot replace the relationships that are needed to solve our water issues.",
+                  "Assume roles and responsibilities",
+                  "Noncomplex, direct access to information and tools for decision making across the water community in Utah",
+                  "Developing effective policies",
+                  "Better policies and regulations to reduce usage in both agricultural and non-agricultural contexts",
+                  "Getting alignment on water-use and water-conservation policy between ag users, industrial users, residential users, water system operators, tribal organizations, and policy makers who have different orientations on the issues. It is a complex challenge that is defined by tradeoffs and the calculus on those tradeoffs is different for different groups",
+                  "Merge policy, water managers, finance expertise",
+                  "Potential for multi-state collaboration to better coordinate sharing seawater desalination from the Pacific or the Sea of Cortez to lighten the burde on the Colorado River",
+                  "Consider transboundary/cross-jurisdictional governance",
+                  "Policy at multiple scles"
+            ],
+            "context": [],
+            "themes": [
+                  "Data, monitoring, and modeling",
+                  "Policy and governance",
+                  "Water supply, demand, and distribution",
+                  "Water quality and ecosystems",
+                  "Hazards and cascading risk",
+                  "Agriculture and land use",
+                  "Human behavior and communication",
+                  "Conservation, reuse, and efficiency",
+                  "Energy and industry"
+            ],
+            "themeEvidence": {
+                  "Data, monitoring, and modeling": [
+                        "The best data and monitoring systems in the world cannot replace the relationships that are needed to solve our water issues.",
+                        "Water energy nexus and data centers"
+                  ],
+                  "Policy and governance": [
+                        "lack of consistent public (and community leadership) understanding related to hydrology/watershed science - both in quantity and quality. This results in a lack of consistent political will to make the policy changes that are needed to protect our dwindling resources",
+                        "Getting alignment on water-use and water-conservation policy between ag users, industrial users, residential users, water system operators, tribal organizations, and policy makers who have different orientations on the issues. It is a complex challenge that is defined by tradeoffs and the calculus on those tradeoffs is different for different groups",
+                        "Policies lack balance of human and non-human"
+                  ],
+                  "Water supply, demand, and distribution": [
+                        "Policies of demand",
+                        "Lack of information about cost/effort per $ per shortage",
+                        "lack of consistent public (and community leadership) understanding related to hydrology/watershed science - both in quantity and quality. This results in a lack of consistent political will to make the policy changes that are needed to protect our dwindling resources"
+                  ],
+                  "Water quality and ecosystems": [
+                        "Develop policies that encourage efficient water use while recognizing the economic and environmental value of water and water quality",
+                        "lack of consistent public (and community leadership) understanding related to hydrology/watershed science - both in quantity and quality. This results in a lack of consistent political will to make the policy changes that are needed to protect our dwindling resources",
+                        "Quanity set up in a period when ecological \u2026 were not tracked"
+                  ],
+                  "Hazards and cascading risk": [
+                        "Increase in risk in water management decision making",
+                        "risk communication",
+                        "wildfire mitigation strategies"
+                  ],
+                  "Agriculture and land use": [
+                        "Agriculture",
+                        "Better policies and regulations to reduce usage in both agricultural and non-agricultural contexts"
+                  ],
+                  "Human behavior and communication": [
+                        "behavior change",
+                        "voluntary vs mandated behavior change",
+                        "Align governance and attitudes & expectations"
+                  ],
+                  "Conservation, reuse, and efficiency": [
+                        "Getting alignment on water-use and water-conservation policy between ag users, industrial users, residential users, water system operators, tribal organizations, and policy makers who have different orientations on the issues. It is a complex challenge that is defined by tradeoffs and the calculus on those tradeoffs is different for different groups",
+                        "State-federal-local water conservation, multiple states",
+                        "Better policies and regulations to reduce usage in both agricultural and non-agricultural contexts"
+                  ],
+                  "Energy and industry": [
+                        "Water energy nexus and data centers",
+                        "Getting alignment on water-use and water-conservation policy between ag users, industrial users, residential users, water system operators, tribal organizations, and policy makers who have different orientations on the issues. It is a complex challenge that is defined by tradeoffs and the calculus on those tradeoffs is different for different groups",
+                        "Municipal & Industrial"
+                  ]
+            }
+      },
+      {
+            "id": "qty",
+            "title": "Water Quantity & Distribution",
+            "shortTitle": [
+                  "Water Quantity",
+                  "& Distribution"
+            ],
+            "color": "#247c7a",
+            "summary": "Focuses on available water, where it goes, how reliably it can be predicted, and how it is shared.",
+            "overview": [
+                  "Shares 12 cross-cutting themes with the other challenge areas.",
+                  "Use the connection lines to see where this challenge overlaps with the rest of the system.",
+                  "Line thickness reflects the number of shared concept areas found in the cumulative workbook."
+            ],
+            "drivers": [
+                  "Drought",
+                  "Heatwaves",
+                  "Variability in precipitation",
+                  "Climate change",
+                  "Precipitation (Phase, timing, magnitude)",
+                  "Interannual variability",
+                  "Surface water",
+                  "Surface water runoff",
+                  "Runoff from snowpack",
+                  "Streamflow"
+            ],
+            "problems": [
+                  "Water scarcity/shortage",
+                  "Snowpack decline",
+                  "Increasing variability",
+                  "Shift to rainfall",
+                  "Imbalance of supply and demand",
+                  "Return flow problems",
+                  "Decreased recharge magnitude",
+                  "Flooding",
+                  "Aging inadequate infrastructure",
+                  "It is impossible to properly manage (or understand) something that is not accurately measured and monitored."
+            ],
+            "actions": [
+                  "Keeping water in rivers",
+                  "Characterization",
+                  "adapting to water and climate variability",
+                  "Budget/balance",
+                  "Ag optimization",
+                  "Conservation",
+                  "prediction/forecast horizon = modeling, coupling",
+                  "prediction",
+                  "cloud seeding",
+                  "meteorology",
+                  "data interoperability and access",
+                  "observation"
+            ],
+            "context": [
+                  "water-energy connections"
+            ],
+            "themes": [
+                  "Climate and drought",
+                  "Data, monitoring, and modeling",
+                  "Policy and governance",
+                  "Infrastructure and systems",
+                  "Water supply, demand, and distribution",
+                  "Water quality and ecosystems",
+                  "Hazards and cascading risk",
+                  "Agriculture and land use",
+                  "Human behavior and communication",
+                  "Conservation, reuse, and efficiency",
+                  "Energy and industry",
+                  "Great Salt Lake and water-air links"
+            ],
+            "themeEvidence": {
+                  "Climate and drought": [
+                        "adapting to water and climate variability",
+                        "Climate change",
+                        "Drought"
+                  ],
+                  "Data, monitoring, and modeling": [
+                        "data interoperability and access",
+                        "data infrastructure",
+                        "It is impossible to properly manage (or understand) something that is not accurately measured and monitored."
+                  ],
+                  "Policy and governance": [
+                        "communication (with stakeholders, public, industry, policy makers)",
+                        "Water rights"
+                  ],
+                  "Infrastructure and systems": [
+                        "Aging inadequate infrastructure",
+                        "data infrastructure",
+                        "reservoir management"
+                  ],
+                  "Water supply, demand, and distribution": [
+                        "Imbalance of supply and demand",
+                        "Lack of predictability in water supply",
+                        "Water scarcity/shortage"
+                  ],
+                  "Water quality and ecosystems": [
+                        "observations quantity quality disparate",
+                        "lack of high quality data"
+                  ],
+                  "Hazards and cascading risk": [
+                        "Flooding",
+                        "communication (with stakeholders, public, industry, policy makers)",
+                        "water management (people, recreation, municipal use, agriculture, industry, energy, data centers)"
+                  ],
+                  "Agriculture and land use": [
+                        "water management (people, recreation, municipal use, agriculture, industry, energy, data centers)",
+                        "The state of Utah's general disregard for water conservation in favor of residential and commercial development and agricultural wastefulness (specifically grass, hay, and alfalfa production)",
+                        "Despite the development and growth of Utah (and the western US) being intimately intertwined with water resources management decisions and infrastructure, communication and transparency between key institutions and individuals is still lacking."
+                  ],
+                  "Human behavior and communication": [
+                        "communication (with stakeholders, public, industry, policy makers)",
+                        "Although a more comprehensive monitoring network of both human (e.g., diversion and well metering) and natural systems (e.g., improved snowpack and snowmelt prediction) is needed, I believe that communication and collaboration between water managers, users, institutions, and other key groups is perhaps the biggest water-related challenge facing Utah.",
+                        "Improve the understanding of water fluxes within the state, especially those that we can affect"
+                  ],
+                  "Conservation, reuse, and efficiency": [
+                        "Conservation",
+                        "proactive water conservation"
+                  ],
+                  "Energy and industry": [
+                        "water-energy connections",
+                        "water management (people, recreation, municipal use, agriculture, industry, energy, data centers)",
+                        "communication (with stakeholders, public, industry, policy makers)"
+                  ],
+                  "Great Salt Lake and water-air links": [
+                        "(shrinking) Great Salt Lake",
+                        "how to keep the GSL from drying up",
+                        "Feedbacks from lake decline (dust storms and loss of lake-effect snow)"
+                  ]
+            }
+      },
+      {
+            "id": "quality",
+            "title": "Water Quality & Ecosystems",
+            "shortTitle": [
+                  "Water Quality",
+                  "& Ecosystems"
+            ],
+            "color": "#6f5aa7",
+            "summary": "Links water quality, ecosystem health, contaminants, reuse, treatment, and ecological resilience.",
+            "overview": [
+                  "Shares 11 cross-cutting themes with the other challenge areas.",
+                  "Use the connection lines to see where this challenge overlaps with the rest of the system.",
+                  "Line thickness reflects the number of shared concept areas found in the cumulative workbook."
+            ],
+            "drivers": [
+                  "Drought",
+                  "Human water use",
+                  "Mining",
+                  "Runoff",
+                  "Water Availability",
+                  "Drought",
+                  "Dust",
+                  "Stormwater",
+                  "Floods",
+                  "Wildfire"
+            ],
+            "problems": [
+                  "Water quality problems and pollution",
+                  "Water quality issues",
+                  "HABs, cyanobacteria",
+                  "Emerging contaminants (PFAS, PCP, Pharmaceuticals)",
+                  "Pressure for water reuse without fully underlying hazards of emerging contaminants",
+                  "Nutrients",
+                  "Increased salinity/reduced water quality",
+                  "Sediment in reservoirs",
+                  "Manganese",
+                  "Metals and arsenic"
+            ],
+            "actions": [
+                  "Solve the water quality issue to increase water quantity",
+                  "Supply high quality water for human use that balances ecological needs",
+                  "Methods for treatment",
+                  "nutrient management",
+                  "Prioritize ecosystem health",
+                  "Prioritize biodiversity",
+                  "Policy & Regulations",
+                  "Clean Water Act",
+                  "NEPA",
+                  "Safe Drinking Water Act (SDWA)",
+                  "National Pollutant Discharge Elimination System (NPDES)",
+                  "Green Infrastructure"
+            ],
+            "context": [
+                  "Groundwater",
+                  "Surface Water",
+                  "Snowmelt",
+                  "Rivers/Streams",
+                  "Runoff",
+                  "Riparia",
+                  "Aquatic",
+                  "Lakes",
+                  "Reservoirs",
+                  "Wetlands"
+            ],
+            "themes": [
+                  "Climate and drought",
+                  "Policy and governance",
+                  "Infrastructure and systems",
+                  "Water supply, demand, and distribution",
+                  "Water quality and ecosystems",
+                  "Hazards and cascading risk",
+                  "Agriculture and land use",
+                  "Human behavior and communication",
+                  "Conservation, reuse, and efficiency",
+                  "Energy and industry",
+                  "Great Salt Lake and water-air links"
+            ],
+            "themeEvidence": {
+                  "Climate and drought": [
+                        "Climate Change",
+                        "Drought",
+                        "Snowmelt"
+                  ],
+                  "Policy and governance": [
+                        "Policy & Regulations"
+                  ],
+                  "Infrastructure and systems": [
+                        "Infrastructure",
+                        "Green Infrastructure",
+                        "Canals"
+                  ],
+                  "Water supply, demand, and distribution": [
+                        "Supply high quality water for human use that balances ecological needs",
+                        "Misaligned management of critical water resources and ecosystems to meet water supply/quality needs and minimum standards for sustainable ecosystems",
+                        "Solve the water quality issue to increase water quantity"
+                  ],
+                  "Water quality and ecosystems": [
+                        "Water quality problems and pollution",
+                        "Solve the water quality issue to increase water quantity",
+                        "Prioritize ecosystem health"
+                  ],
+                  "Hazards and cascading risk": [
+                        "Pressure for water reuse without fully underlying hazards of emerging contaminants",
+                        "Wildfire",
+                        "Floods"
+                  ],
+                  "Agriculture and land use": [
+                        "Agriculture",
+                        "poor soil health and management systems in all areas of Agriculture and Natural Resources",
+                        "Land Use Change"
+                  ],
+                  "Human behavior and communication": [
+                        "Behavior Change",
+                        "Buy-In (Public)",
+                        "Engagement"
+                  ],
+                  "Conservation, reuse, and efficiency": [
+                        "Pressure for water reuse without fully underlying hazards of emerging contaminants",
+                        "Water Reuse"
+                  ],
+                  "Energy and industry": [
+                        "Wastewater Treatment (+Energy & Materials)",
+                        "Industry",
+                        "Mining"
+                  ],
+                  "Great Salt Lake and water-air links": [
+                        "Great Salt Lake",
+                        "water-air relationships"
+                  ]
+            }
+      },
+      {
+            "id": "hazards",
+            "title": "Hazards",
+            "shortTitle": [
+                  "Hazards"
+            ],
+            "color": "#a53f2b",
+            "summary": "Covers drought, wildfire, flooding, dust, infrastructure impacts, human health, and cascading risks.",
+            "overview": [
+                  "Shares 11 cross-cutting themes with the other challenge areas.",
+                  "Use the connection lines to see where this challenge overlaps with the rest of the system.",
+                  "Line thickness reflects the number of shared concept areas found in the cumulative workbook."
+            ],
+            "drivers": [
+                  "Extremes",
+                  "Drought",
+                  "Fire",
+                  "Climate change",
+                  "cloudbursts",
+                  "weather related hazards",
+                  "Industrial sources",
+                  "urban/community growth & development (incl WUI development)",
+                  "growth & development",
+                  "wastewater treatment/biosolids"
+            ],
+            "problems": [
+                  "Water hazard complexity",
+                  "Cascading Hazards (e.g., fire-air quality - snow deposition - ET, runoff quality, snowpack, water availability, water quality problem)",
+                  "compound hazards",
+                  "air quality",
+                  "dust-GSL",
+                  "dust on snow",
+                  "deposition on reservoirs and snowpack",
+                  "Drought",
+                  "drought to dust to dust on snow",
+                  "wildfire"
+            ],
+            "actions": [
+                  "Reclaim watersheds after a fire",
+                  "community context (and impacts, mitigation, response)",
+                  "community planning",
+                  "social vulnerability (rural, tribal, unincorporated)",
+                  "recovery",
+                  "response & preparedness",
+                  "forecasting & monitoring (scenario planning)",
+                  "mitigation, nature based solutions, etc.",
+                  "proactive vs reactive",
+                  "workforce issues",
+                  "real estate",
+                  "observations"
+            ],
+            "context": [
+                  "recreation",
+                  "small business",
+                  "economics",
+                  "cyber security",
+                  "drinking water supply",
+                  "fisheries"
+            ],
+            "themes": [
+                  "Climate and drought",
+                  "Data, monitoring, and modeling",
+                  "Policy and governance",
+                  "Infrastructure and systems",
+                  "Water supply, demand, and distribution",
+                  "Water quality and ecosystems",
+                  "Hazards and cascading risk",
+                  "Agriculture and land use",
+                  "Human behavior and communication",
+                  "Energy and industry",
+                  "Great Salt Lake and water-air links"
+            ],
+            "themeEvidence": {
+                  "Climate and drought": [
+                        "Climate change",
+                        "Drought",
+                        "Cascading Hazards (e.g., fire-air quality - snow deposition - ET, runoff quality, snowpack, water availability, water quality problem)"
+                  ],
+                  "Data, monitoring, and modeling": [
+                        "forecasting & monitoring (scenario planning)",
+                        "modeling hazards",
+                        "observations"
+                  ],
+                  "Policy and governance": [
+                        "policy scales"
+                  ],
+                  "Infrastructure and systems": [
+                        "Water infrastructure impacts (dams, canals, hydro)",
+                        "deposition on reservoirs and snowpack",
+                        "ice dams"
+                  ],
+                  "Water supply, demand, and distribution": [
+                        "drinking water supply",
+                        "water loss/supply problems"
+                  ],
+                  "Water quality and ecosystems": [
+                        "Cascading Hazards (e.g., fire-air quality - snow deposition - ET, runoff quality, snowpack, water availability, water quality problem)",
+                        "air quality",
+                        "ecosystem impacts"
+                  ],
+                  "Hazards and cascading risk": [
+                        "Water hazard complexity",
+                        "Cascading Hazards (e.g., fire-air quality - snow deposition - ET, runoff quality, snowpack, water availability, water quality problem)",
+                        "risk perceptions and bias"
+                  ],
+                  "Agriculture and land use": [
+                        "urban/community growth & development (incl WUI development)",
+                        "growth & development"
+                  ],
+                  "Human behavior and communication": [
+                        "risk perceptions and bias",
+                        "social vulnerability (rural, tribal, unincorporated)"
+                  ],
+                  "Energy and industry": [
+                        "Industrial sources"
+                  ],
+                  "Great Salt Lake and water-air links": [
+                        "dust-GSL",
+                        "GSL salinity"
+                  ]
+            }
+      }
+];
+
+    const connections = [
+      {
+            "source": "use",
+            "target": "infra",
+            "themes": [
+                  "water loss and leakage",
+                  "metering",
+                  "demand on delivery systems",
+                  "rate structures",
+                  "data centers and high-intensity uses"
+            ],
+            "weight": 5,
+            "label": "5 connected themes"
+      },
+      {
+            "source": "use",
+            "target": "gov",
+            "themes": [
+                  "water rights and compacts",
+                  "pricing and rates",
+                  "conservation policy",
+                  "behavior change",
+                  "equity and access",
+                  "tradeoffs among sectors",
+                  "consumptive use"
+            ],
+            "weight": 7,
+            "label": "7 connected themes"
+      },
+      {
+            "source": "use",
+            "target": "qty",
+            "themes": [
+                  "drought",
+                  "supply-demand balance",
+                  "conservation",
+                  "groundwater extraction",
+                  "population growth",
+                  "agricultural irrigation",
+                  "measurement uncertainty"
+            ],
+            "weight": 7,
+            "label": "7 connected themes"
+      },
+      {
+            "source": "use",
+            "target": "quality",
+            "themes": [
+                  "water reuse",
+                  "human/ecosystem balance",
+                  "agricultural runoff",
+                  "landscape water use",
+                  "emerging contaminants in reuse",
+                  "ecosystem health"
+            ],
+            "weight": 6,
+            "label": "6 connected themes"
+      },
+      {
+            "source": "use",
+            "target": "hazards",
+            "themes": [
+                  "drought impacts on crops",
+                  "public risk awareness",
+                  "reservoir risk",
+                  "growth and development",
+                  "human health",
+                  "risk communication"
+            ],
+            "weight": 6,
+            "label": "6 connected themes"
+      },
+      {
+            "source": "infra",
+            "target": "gov",
+            "themes": [
+                  "funding",
+                  "permitting and regulations",
+                  "water rights",
+                  "regionalization",
+                  "rate affordability",
+                  "roles and responsibilities",
+                  "cybersecurity"
+            ],
+            "weight": 7,
+            "label": "7 connected themes"
+      },
+      {
+            "source": "infra",
+            "target": "qty",
+            "themes": [
+                  "measurement infrastructure",
+                  "reservoir management",
+                  "aging systems",
+                  "water loss",
+                  "canal monitoring",
+                  "data infrastructure",
+                  "prediction and modeling",
+                  "Colorado River management"
+            ],
+            "weight": 8,
+            "label": "8 connected themes"
+      },
+      {
+            "source": "infra",
+            "target": "quality",
+            "themes": [
+                  "wastewater treatment",
+                  "source water protection",
+                  "sediment in reservoirs",
+                  "green infrastructure",
+                  "drinking water treatment",
+                  "produced water treatment",
+                  "biosolids"
+            ],
+            "weight": 7,
+            "label": "7 connected themes"
+      },
+      {
+            "source": "infra",
+            "target": "hazards",
+            "themes": [
+                  "dam and canal impacts",
+                  "cybersecurity",
+                  "wildfire and flood damage",
+                  "public safety",
+                  "recovery and resilience",
+                  "monitoring and modeling",
+                  "workforce capacity"
+            ],
+            "weight": 7,
+            "label": "7 connected themes"
+      },
+      {
+            "source": "gov",
+            "target": "qty",
+            "themes": [
+                  "allocation",
+                  "water rights",
+                  "conservation policy",
+                  "stakeholder communication",
+                  "prediction for decisions",
+                  "Colorado River coordination",
+                  "pricing"
+            ],
+            "weight": 7,
+            "label": "7 connected themes"
+      },
+      {
+            "source": "gov",
+            "target": "quality",
+            "themes": [
+                  "standards and regulations",
+                  "Clean Water Act and SDWA",
+                  "ecological values",
+                  "reuse policy",
+                  "public buy-in",
+                  "source water protection"
+            ],
+            "weight": 6,
+            "label": "6 connected themes"
+      },
+      {
+            "source": "gov",
+            "target": "hazards",
+            "themes": [
+                  "policy scales",
+                  "risk communication",
+                  "wildfire mitigation",
+                  "preparedness and response",
+                  "social vulnerability",
+                  "proactive vs. reactive decisions"
+            ],
+            "weight": 6,
+            "label": "6 connected themes"
+      },
+      {
+            "source": "qty",
+            "target": "quality",
+            "themes": [
+                  "groundwater",
+                  "surface runoff",
+                  "snowmelt",
+                  "Great Salt Lake",
+                  "salinity",
+                  "sediment",
+                  "recharge",
+                  "water reuse",
+                  "ecosystem needs",
+                  "cyanobacteria and HABs"
+            ],
+            "weight": 10,
+            "label": "10 connected themes"
+      },
+      {
+            "source": "qty",
+            "target": "hazards",
+            "themes": [
+                  "drought",
+                  "flooding",
+                  "snowpack and snowmelt",
+                  "Great Salt Lake dust",
+                  "reservoir levels",
+                  "forecasting",
+                  "water supply problems",
+                  "wildfire runoff",
+                  "dust on snow"
+            ],
+            "weight": 9,
+            "label": "9 connected themes"
+      },
+      {
+            "source": "quality",
+            "target": "hazards",
+            "themes": [
+                  "cyanobacteria and HABs",
+                  "PFAS and emerging contaminants",
+                  "wildfire runoff",
+                  "Great Salt Lake salinity and dust",
+                  "flooding and sediment",
+                  "human health",
+                  "disease outbreak",
+                  "fisheries impacts",
+                  "drinking water supply"
+            ],
+            "weight": 9,
+            "label": "9 connected themes"
+      }
+];
+
+    const connectedThemesByArea = connections.reduce((themesByArea, connection) => {
+      [connection.source, connection.target].forEach((areaId) => {
+        if (!themesByArea[areaId]) themesByArea[areaId] = new Set();
+        connection.themes.forEach((theme) => themesByArea[areaId].add(theme));
+      });
+      return themesByArea;
+    }, {});
+
+    areas.forEach((area) => {
+      area.themes = Array.from(connectedThemesByArea[area.id] || []).sort();
+    });
+
+    const state = {
+      selectedArea: "qty",
+      selectedTab: "drivers",
+      layoutName: ""
+    };
+
+    const layouts = {
+      desktop: {
+        width: 720,
+        height: 640,
+        cx: 360,
+        cy: 305,
+        centerR: 86,
+        nodeR: 66,
+        positions: {
+          use: [360, 84],
+          infra: [598, 218],
+          gov: [598, 440],
+          qty: [360, 540],
+          quality: [122, 440],
+          hazards: [122, 218]
+        }
+      },
+      mobile: {
+        width: 360,
+        height: 620,
+        cx: 180,
+        cy: 305,
+        centerR: 66,
+        nodeR: 52,
+        positions: {
+          use: [180, 76],
+          infra: [306, 210],
+          gov: [306, 422],
+          qty: [180, 544],
+          quality: [54, 422],
+          hazards: [54, 210]
+        }
+      }
+    };
+
+    let currentLayout = layouts.desktop;
+
+    const areaById = Object.fromEntries(areas.map((area) => [area.id, area]));
+    const svg = document.querySelector(".network-svg");
+    const nodeGroup = document.getElementById("nodes");
+    const connectionGroup = document.getElementById("connections");
+    const labelGroup = document.getElementById("connection-labels");
+    const detailTitle = document.getElementById("detail-title");
+    const detailSummary = document.getElementById("detail-summary");
+    const detailList = document.getElementById("detail-list");
+    const connectionPills = document.getElementById("connection-pills");
+    const tabPanel = document.getElementById("detail-panel");
+
+    function applyLayout() {
+      const nextName = window.matchMedia("(max-width: 560px)").matches ? "mobile" : "desktop";
+      state.layoutName = nextName;
+      currentLayout = layouts[nextName];
+      svg.setAttribute("viewBox", `0 0 ${currentLayout.width} ${currentLayout.height}`);
+      areas.forEach((area) => {
+        const [x, y] = currentLayout.positions[area.id];
+        area.x = x;
+        area.y = y;
+      });
+      document.getElementById("center-circle").setAttribute("cx", currentLayout.cx);
+      document.getElementById("center-circle").setAttribute("cy", currentLayout.cy);
+      document.getElementById("center-circle").setAttribute("r", currentLayout.centerR);
+      document.getElementById("center-label-1").setAttribute("x", currentLayout.cx);
+      document.getElementById("center-label-1").setAttribute("y", currentLayout.cy - 13);
+      document.getElementById("center-label-2").setAttribute("x", currentLayout.cx);
+      document.getElementById("center-label-2").setAttribute("y", currentLayout.cy + 10);
+      document.getElementById("center-label-3").setAttribute("x", currentLayout.cx);
+      document.getElementById("center-label-3").setAttribute("y", currentLayout.cy + 34);
+    }
+
+    function connectionPath(source, target) {
+      const sx = source.x;
+      const sy = source.y;
+      const tx = target.x;
+      const ty = target.y;
+      const cx = currentLayout.cx + (sx + tx - currentLayout.cx * 2) * 0.14;
+      const cy = currentLayout.cy + (sy + ty - currentLayout.cy * 2) * 0.14;
+      return `M ${sx} ${sy} Q ${cx} ${cy} ${tx} ${ty}`;
+    }
+
+    function midpoint(source, target) {
+      return {
+        x: (source.x + target.x) / 2,
+        y: (source.y + target.y) / 2
+      };
+    }
+
+    function renderNetwork() {
+      connectionGroup.innerHTML = "";
+      labelGroup.innerHTML = "";
+      nodeGroup.innerHTML = "";
+
+      connections.forEach((connection, index) => {
+        const source = areaById[connection.source];
+        const target = areaById[connection.target];
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("class", "connection");
+        path.setAttribute("id", `connection-${index}`);
+        path.setAttribute("d", connectionPath(source, target));
+        path.style.setProperty("--connection-width", `${1.2 + connection.weight * 0.38}px`);
+        path.style.setProperty("--connection-active-width", `${2.4 + connection.weight * 0.5}px`);
+        path.dataset.source = connection.source;
+        path.dataset.target = connection.target;
+        path.dataset.themes = connection.themes.join("|");
+        path.dataset.weight = String(connection.weight);
+        path.setAttribute("aria-label", `${source.title} to ${target.title}: ${connection.weight} shared themes`);
+        connectionGroup.appendChild(path);
+
+        const labelPoint = midpoint(source, target);
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.setAttribute("class", "connection-label");
+        label.setAttribute("x", labelPoint.x);
+        label.setAttribute("y", labelPoint.y);
+        label.setAttribute("text-anchor", "middle");
+        label.dataset.source = connection.source;
+        label.dataset.target = connection.target;
+        label.dataset.themes = connection.themes.join("|");
+        label.dataset.weight = String(connection.weight);
+        label.textContent = connection.label;
+        labelGroup.appendChild(label);
+      });
+
+      areas.forEach((area) => {
+        const button = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        button.setAttribute("class", "challenge-node");
+        button.setAttribute("role", "button");
+        button.setAttribute("tabindex", "0");
+        button.setAttribute("aria-label", `Show details for ${area.title}`);
+        button.setAttribute("aria-pressed", "false");
+        button.dataset.area = area.id;
+
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("class", "node-circle");
+        circle.setAttribute("cx", area.x);
+        circle.setAttribute("cy", area.y);
+        circle.setAttribute("r", currentLayout.nodeR);
+        circle.setAttribute("fill", area.color + "26");
+        button.appendChild(circle);
+
+        area.shortTitle.forEach((line, index) => {
+          const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          text.setAttribute("class", "node-title");
+          text.setAttribute("x", area.x);
+          text.setAttribute("y", area.y - 10 + index * 18);
+          text.setAttribute("text-anchor", "middle");
+          text.textContent = line;
+          button.appendChild(text);
+        });
+
+        const count = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        count.setAttribute("class", "node-count");
+        count.setAttribute("x", area.x);
+        count.setAttribute("y", area.y + 36);
+        count.setAttribute("text-anchor", "middle");
+        count.textContent = `${area.themes.length} shared themes`;
+        button.appendChild(count);
+
+        button.addEventListener("click", () => selectArea(area.id));
+        button.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            selectArea(area.id);
+          }
+        });
+
+        nodeGroup.appendChild(button);
+      });
+    }
+
+    function isConnectionActive(connection) {
+      return connection.source === state.selectedArea || connection.target === state.selectedArea;
+    }
+
+    function updateNetwork() {
+      const activeConnections = connections.filter(isConnectionActive);
+      const activeAreaIds = new Set([state.selectedArea]);
+      activeConnections.forEach((connection) => {
+        activeAreaIds.add(connection.source);
+        activeAreaIds.add(connection.target);
+      });
+
+      document.querySelectorAll(".connection").forEach((path) => {
+        const active = isConnectionActive(path.dataset);
+        path.classList.toggle("is-active", active);
+        path.classList.toggle("is-muted", !active);
+      });
+
+      document.querySelectorAll(".connection-label").forEach((label) => {
+        label.classList.toggle("is-active", isConnectionActive(label.dataset));
+      });
+
+      document.querySelectorAll(".challenge-node").forEach((node) => {
+        const areaId = node.dataset.area;
+        node.setAttribute("aria-pressed", String(areaId === state.selectedArea));
+        node.classList.toggle("is-muted", !activeAreaIds.has(areaId));
+      });
+    }
+
+    function updateDetails() {
+      const area = areaById[state.selectedArea];
+      detailTitle.textContent = area.title;
+      detailSummary.textContent = area.summary;
+      detailList.innerHTML = "";
+
+      const items = area[state.selectedTab] || [];
+      if (items.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = `No ${state.selectedTab} items are listed for this challenge area in the cumulative workbook.`;
+        detailList.appendChild(li);
+      }
+
+      items.forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        detailList.appendChild(li);
+      });
+
+      connectionPills.innerHTML = "";
+      area.themes.forEach((theme) => {
+        const span = document.createElement("span");
+        span.className = "connection-pill";
+        span.textContent = theme;
+        connectionPills.appendChild(span);
+      });
+
+      tabPanel.setAttribute("aria-labelledby", `tab-${state.selectedTab}`);
+      requestHeightUpdate();
+    }
+
+    function selectArea(areaId) {
+      state.selectedArea = areaId;
+      update();
+    }
+
+    function selectTab(tab) {
+      state.selectedTab = tab;
+      document.querySelectorAll(".tab-button").forEach((button) => {
+        const selected = button.dataset.tab === tab;
+        button.setAttribute("aria-selected", String(selected));
+      });
+      updateDetails();
+    }
+
+    function update() {
+      updateNetwork();
+      updateDetails();
+      requestHeightUpdate();
+    }
+
+    function postFrameHeight() {
+      const height = Math.ceil(document.documentElement.scrollHeight);
+      window.parent.postMessage({
+        type: "waterChallengeMapHeight",
+        height
+      }, "*");
+    }
+
+    function requestHeightUpdate() {
+      window.requestAnimationFrame(postFrameHeight);
+    }
+
+    document.querySelectorAll(".tab-button").forEach((button) => {
+      button.addEventListener("click", () => selectTab(button.dataset.tab));
+    });
+
+    applyLayout();
+    renderNetwork();
+    update();
+
+    window.addEventListener("resize", () => {
+      const nextName = window.matchMedia("(max-width: 560px)").matches ? "mobile" : "desktop";
+      if (nextName !== state.layoutName) {
+        applyLayout();
+        renderNetwork();
+        update();
+      }
+      requestHeightUpdate();
+    });
+
+    window.addEventListener("load", requestHeightUpdate);
+  </script>
+</body>
+</html>
+
