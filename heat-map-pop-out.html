@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UWN Survey Heat Map</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@500;700;900&display=swap");
+
+    :root {
+      color-scheme: light;
+      --ink: #142233;
+      --muted: #5d6f7f;
+      --line: #c4d4e2;
+      --paper: #f7fafc;
+      --panel: #ffffff;
+      --blue-1: #dbe7f1;
+      --blue-2: #9fbbd2;
+      --blue-3: #5f8fb5;
+      --blue-4: #2f6f9f;
+      --blue-5: #0f2439;
+      --orange: #ffad73;
+      --orange-dark: #d86e31;
+      --shadow: 0 18px 55px rgba(29, 71, 105, 0.16);
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+    }
+
+    .uwn-map {
+      min-height: 100vh;
+      padding: clamp(18px, 3vw, 34px);
+      display: block;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      min-height: 920px;
+      border-radius: 6px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255, 173, 115, 0.18), transparent 22%),
+        linear-gradient(180deg, #ffffff, #f2f7fb);
+      box-shadow: var(--shadow);
+    }
+
+    .network-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .detail-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .network-line {
+      stroke: var(--line);
+      stroke-linecap: round;
+      transition: stroke 180ms ease, stroke-width 180ms ease, opacity 180ms ease;
+    }
+
+    .network-line.is-selected {
+      stroke: var(--orange-dark);
+      opacity: 0.82;
+    }
+
+    .network-line.is-muted {
+      opacity: 0.16;
+    }
+
+    .detail-line {
+      stroke: var(--orange-dark);
+      stroke-linecap: round;
+      opacity: 0.58;
+    }
+
+    .hub {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: clamp(176px, 21vw, 232px);
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: var(--orange);
+      color: #111;
+      text-align: center;
+      font-family: "Roboto Condensed", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: clamp(28px, 3.2vw, 44px);
+      line-height: 0.96;
+      font-weight: 900;
+      z-index: 2;
+    }
+
+    .node {
+      position: absolute;
+      left: calc(var(--x) * 1%);
+      top: calc(var(--y) * 1%);
+      width: clamp(150px, 14vw, 190px);
+      min-height: 96px;
+      transform: translate(-50%, -50%);
+      border: 0;
+      border-radius: 10px;
+      padding: 14px 16px 12px;
+      background: var(--fill);
+      color: var(--node-ink, #0e1a25);
+      box-shadow: 0 1px 0 rgba(18, 42, 62, 0.25), 0 14px 28px rgba(39, 83, 116, 0.16);
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 8px;
+      place-items: center;
+      text-align: center;
+      font: inherit;
+      font-family: "Roboto Condensed", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-weight: 700;
+      font-size: clamp(15px, 1.32vw, 20px);
+      line-height: 1.02;
+      cursor: pointer;
+      z-index: 3;
+      transition: transform 180ms ease, box-shadow 180ms ease, outline-color 180ms ease;
+    }
+
+    .node:hover,
+    .node:focus-visible,
+    .node.is-selected {
+      transform: translate(-50%, -50%) scale(1.04);
+      outline: 3px solid rgba(216, 110, 49, 0.62);
+      outline-offset: 4px;
+      box-shadow: 0 18px 42px rgba(27, 68, 103, 0.25);
+    }
+
+    .node.is-muted {
+      opacity: 0.22;
+      filter: saturate(0.55);
+    }
+
+    .node-count {
+      min-width: 42px;
+      padding: 5px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.92);
+      color: #0f2439;
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 1;
+      box-shadow: 0 6px 14px rgba(39, 83, 116, 0.1);
+    }
+
+    .node.low {
+      color: #162434;
+    }
+
+    .node.high {
+      color: white;
+    }
+
+    .selection-label {
+      position: absolute;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      z-index: 8;
+      max-width: min(620px, calc(100% - 40px));
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(15, 36, 57, 0.92);
+      color: white;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 700;
+      box-shadow: 0 14px 28px rgba(15, 36, 57, 0.22);
+    }
+
+    .detail-node {
+      position: absolute;
+      left: calc(var(--dx) * 1%);
+      top: calc(var(--dy) * 1%);
+      width: clamp(118px, 10vw, 154px);
+      min-height: 54px;
+      transform: translate(-50%, -50%) scale(0.96);
+      border-radius: 8px;
+      padding: 9px 10px;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 6px;
+      place-items: center;
+      background: var(--detail-fill);
+      color: var(--detail-ink);
+      text-align: center;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: clamp(11px, 0.95vw, 14px);
+      font-weight: 700;
+      line-height: 1.08;
+      z-index: 7;
+      box-shadow: 0 11px 22px rgba(39, 83, 116, 0.16);
+      opacity: 0;
+      animation: detail-pop 180ms ease forwards;
+    }
+
+    .detail-count {
+      min-width: 34px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.92);
+      color: #0f2439;
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 800;
+    }
+
+    .detail-node.zero {
+      box-shadow: inset 0 0 0 1px #cbd8e4, 0 8px 18px rgba(39, 83, 116, 0.1);
+    }
+
+    @keyframes detail-pop {
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+
+    .detail {
+      min-height: 690px;
+      border-radius: 6px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: clamp(20px, 3vw, 28px);
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .detail-kicker {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+    }
+
+    .detail h1 {
+      margin: 4px 0 0;
+      font-family: "Roboto Condensed", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: clamp(28px, 3.2vw, 42px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .detail-summary {
+      display: grid;
+      grid-template-columns: 108px minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #d7e2eb;
+    }
+
+    .score {
+      width: 104px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--score-fill);
+      color: var(--score-ink);
+      font-family: "Roboto Condensed", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 38px;
+      font-weight: 900;
+      box-shadow: inset 0 0 0 6px rgba(255, 255, 255, 0.24);
+    }
+
+    .summary-copy {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .category-list {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .category {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 44px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .category-label {
+      min-width: 0;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.18;
+    }
+
+    .bar-track {
+      position: relative;
+      height: 12px;
+      margin-top: 6px;
+      border-radius: 999px;
+      background: #e7eef4;
+      overflow: hidden;
+    }
+
+    .bar {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: calc(var(--w) * 1%);
+      border-radius: inherit;
+      background: var(--bar-fill);
+    }
+
+    .bar.zero {
+      width: 100%;
+      opacity: 0.28;
+      background: repeating-linear-gradient(
+        90deg,
+        #dbe7f1 0,
+        #dbe7f1 6px,
+        #eef4f8 6px,
+        #eef4f8 12px
+      );
+    }
+
+    .category-value {
+      justify-self: end;
+      min-width: 38px;
+      padding: 5px 8px;
+      border: 1px solid #aebfcd;
+      border-radius: 7px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 800;
+      background: #fff;
+    }
+
+    .bubble-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      min-height: 68px;
+    }
+
+    .bubble {
+      width: calc(18px + var(--s) * 0.72px);
+      height: calc(18px + var(--s) * 0.72px);
+      max-width: 60px;
+      max-height: 60px;
+      min-width: 18px;
+      min-height: 18px;
+      border-radius: 50%;
+      background: var(--bar-fill);
+      border: 2px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 4px 10px rgba(39, 83, 116, 0.18);
+    }
+
+    .bubble.zero {
+      background: #eef4f8;
+      border-color: #cbd8e4;
+      box-shadow: inset 0 0 0 2px #dbe7f1;
+    }
+
+    @media (max-width: 980px) {
+      .canvas-wrap {
+        min-height: 840px;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .uwn-map {
+        padding: 0;
+        gap: 0;
+      }
+
+      .canvas-wrap {
+        min-height: 980px;
+        border-radius: 0;
+      }
+
+      .hub {
+        top: 50%;
+        width: 142px;
+        font-size: 23px;
+      }
+
+      .node {
+        left: calc(var(--mx, var(--x)) * 1%);
+        top: calc(var(--my, var(--y)) * 1%);
+        width: 132px;
+        min-height: 78px;
+        font-size: 13px;
+        padding: 9px 10px;
+      }
+
+      .node-count {
+        min-width: 34px;
+        font-size: 12px;
+        padding: 4px 6px;
+      }
+
+      .detail {
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .detail-node {
+        left: calc(var(--mdx, var(--dx)) * 1%);
+        top: calc(var(--mdy, var(--dy)) * 1%);
+        width: 122px;
+        min-height: 56px;
+        font-size: 11px;
+      }
+
+      .selection-label {
+        bottom: 12px;
+        font-size: 13px;
+        border-radius: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="uwn-map" aria-label="Utah Water Network survey heat map">
+    <section class="canvas-wrap" aria-label="Network groups">
+      <svg class="network-svg" aria-hidden="true">
+        <g id="lines"></g>
+      </svg>
+      <svg class="detail-svg" aria-hidden="true">
+        <g id="detailLines"></g>
+      </svg>
+      <div class="hub">Utah's<br>Faculty<br>Water<br>Network</div>
+      <div id="nodes"></div>
+      <div id="detailNodes"></div>
+      <div class="selection-label" id="selectionLabel"></div>
+    </section>
+  </main>
+
+  <script>
+    const maxGroup = 80;
+    const maxChild = 62;
+
+    const groups = [
+      {
+        id: "regional",
+        label: "Regional Water Governance",
+        count: 9,
+        x: 50,
+        y: 17,
+        mx: 50,
+        my: 15,
+        children: [
+          ["Upper Colorado River Commission", 6],
+          ["Bear River Commission", 5],
+          ["Western States Water Council", 2],
+          ["Western Governors Association", 0],
+          ["Others", 0]
+        ]
+      },
+      {
+        id: "university",
+        label: "Utah's University Water Network",
+        count: 80,
+        x: 76,
+        y: 28,
+        mx: 80,
+        my: 29,
+        children: [
+          ["Utah State", 62],
+          ["University of Utah", 48],
+          ["Brigham Young", 37],
+          ["Utah Valley University", 14],
+          ["Weber State", 10],
+          ["Westminster University", 10],
+          ["Southern Utah University", 5],
+          ["Utah Tech University", 2],
+          ["Others", 0]
+        ]
+      },
+      {
+        id: "management",
+        label: "Utah's Water Management",
+        count: 54,
+        x: 82,
+        y: 50,
+        mx: 83,
+        my: 50,
+        children: [
+          ["Cities & Towns", 31],
+          ["Water Conservancy Districts", 24],
+          ["Consulting Firms/Engineering Firms", 22],
+          ["Counties", 20],
+          ["Irrigation/Canal Companies", 16],
+          ["River Commissions", 11],
+          ["Soil & Water Conservation Districts", 9],
+          ["Utah Lake Authority", 8],
+          ["Watershed Councils", 7],
+          ["Others", 7],
+          ["Rural Water Association of Utah", 6],
+          ["Municipal Separate Storm Sewer System Operators", 5],
+          ["Special Service Districts", 4]
+        ]
+      },
+      {
+        id: "industry",
+        label: "Utah Water Innovation & Industry",
+        count: 26,
+        x: 76,
+        y: 72,
+        mx: 80,
+        my: 71,
+        children: [
+          ["Business & Industry", 24],
+          ["Innovation Catalyst", 5],
+          ["Others", 7]
+        ]
+      },
+      {
+        id: "state",
+        label: "Utah's State Government",
+        count: 65,
+        x: 50,
+        y: 83,
+        mx: 50,
+        my: 85,
+        children: [
+          ["Dept of Natural Resources", 53],
+          ["Dept of Environmental Quality", 39],
+          ["Dept of Agriculture & Food", 18],
+          ["Utah's Legislature", 16],
+          ["Utah's Governor's Office", 8],
+          ["Others", 8],
+          ["Utah Watersheds Council", 5],
+          ["Water Development Coordinating Council", 1]
+        ]
+      },
+      {
+        id: "ngos",
+        label: "NGOs & Foundations",
+        count: 50,
+        x: 24,
+        y: 72,
+        mx: 20,
+        my: 71,
+        children: [
+          ["Professional Societies", 23],
+          ["Local NGOs", 22],
+          ["National NGOs", 19],
+          ["State or Regional NGOs", 17],
+          ["Media", 13],
+          ["Foundations", 9],
+          ["Others", 0]
+        ]
+      },
+      {
+        id: "federal",
+        label: "Federal Government",
+        count: 68,
+        x: 18,
+        y: 50,
+        mx: 17,
+        my: 50,
+        children: [
+          ["Environmental Protection Agency", 17],
+          ["Department of Agriculture", 16],
+          ["Department of Interior", 15],
+          ["Others", 14],
+          ["Department of Commerce", 11],
+          ["Department of Energy", 11],
+          ["Department of Defense", 9],
+          ["Utah's Federal Delegation", 3]
+        ]
+      },
+      {
+        id: "tribes",
+        label: "Utah Tribes",
+        count: 19,
+        x: 24,
+        y: 28,
+        mx: 20,
+        my: 29,
+        children: [
+          ["Navajo Nation", 13],
+          ["Northwestern Band Shoshone", 6],
+          ["Ute Mountain Ute Tribe", 2],
+          ["Ute Indian Tribe of the Uintah and Ouray Reservation", 1],
+          ["Skull Valley Band of Goshute", 0],
+          ["Confederated Tribes of Goshute", 0],
+          ["Paiute Indian Tribe of Utah", 0],
+          ["San Juan Southern Paiute Tribe", 0],
+          ["Others", 0]
+        ]
+      }
+    ];
+
+    const nodes = document.getElementById("nodes");
+    const lines = document.getElementById("lines");
+    const detailLines = document.getElementById("detailLines");
+    const detailNodes = document.getElementById("detailNodes");
+    const selectionLabel = document.getElementById("selectionLabel");
+    const canvas = document.querySelector(".canvas-wrap");
+    const hub = document.querySelector(".hub");
+    const svg = document.querySelector(".network-svg");
+    const detailSvg = document.querySelector(".detail-svg");
+
+    const detailLayouts = {
+      regional: [[28, 8], [42, 6], [58, 6], [72, 8], [50, 30]],
+      university: [[88, 10], [88, 20], [88, 30], [88, 40], [88, 50], [88, 60], [88, 70], [88, 80], [73, 13]],
+      management: [[88, 8], [88, 15], [88, 22], [88, 29], [88, 36], [88, 43], [88, 50], [88, 57], [88, 64], [88, 71], [88, 78], [88, 85], [88, 92]],
+      industry: [[88, 63], [88, 74], [88, 85]],
+      state: [[22, 92], [34, 92], [46, 92], [58, 92], [70, 92], [30, 80], [50, 80], [70, 80]],
+      ngos: [[12, 61], [12, 70], [12, 79], [12, 88], [24, 88], [24, 79], [24, 61]],
+      federal: [[12, 19], [12, 28], [12, 37], [12, 46], [12, 55], [12, 64], [12, 73], [12, 82]],
+      tribes: [[12, 8], [12, 17], [12, 26], [12, 35], [12, 44], [24, 8], [24, 17], [24, 26], [24, 35]]
+    };
+
+    const mobileDetailLayouts = {
+      regional: [[18, 6], [50, 6], [82, 6], [18, 18], [82, 18]],
+      university: [[82, 7], [82, 16], [82, 25], [82, 34], [82, 43], [82, 52], [82, 61], [82, 70], [82, 79]],
+      management: [[82, 20], [82, 27], [82, 34], [82, 41], [82, 48], [82, 55], [82, 62], [82, 69], [82, 76], [82, 83], [82, 90], [50, 92], [18, 90]],
+      industry: [[82, 67], [82, 76], [82, 85]],
+      state: [[18, 91], [50, 91], [82, 91], [18, 82], [50, 82], [82, 82], [34, 73], [66, 73]],
+      ngos: [[18, 63], [18, 72], [18, 81], [18, 90], [50, 91], [50, 82], [50, 73]],
+      federal: [[18, 20], [18, 29], [18, 38], [18, 47], [18, 56], [18, 65], [18, 74], [18, 83]],
+      tribes: [[18, 7], [18, 16], [18, 25], [18, 34], [18, 43], [50, 7], [50, 16], [50, 25], [50, 34]]
+    };
+
+    function intensity(value, max) {
+      const ratio = Math.max(0, Math.min(1, value / max));
+      if (ratio >= 0.78) return { fill: "var(--blue-5)", ink: "#fff", bar: "#184f82", level: "high" };
+      if (ratio >= 0.55) return { fill: "var(--blue-4)", ink: "#fff", bar: "#2f6f9f", level: "high" };
+      if (ratio >= 0.34) return { fill: "var(--blue-3)", ink: "#fff", bar: "#5f8fb5", level: "high" };
+      if (ratio > 0) return { fill: "var(--blue-2)", ink: "#122132", bar: "#9fbbd2", level: "low" };
+      return { fill: "var(--blue-1)", ink: "#152638", bar: "#dbe7f1", level: "low" };
+    }
+
+    function renderMap() {
+      groups.forEach((group) => {
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("stroke-width", String(1.5 + (group.count / maxGroup) * 5));
+        line.setAttribute("opacity", String(0.35 + (group.count / maxGroup) * 0.45));
+        line.classList.add("network-line");
+        line.dataset.id = group.id;
+        lines.appendChild(line);
+
+        const style = intensity(group.count, maxGroup);
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `node ${style.level}`;
+        button.dataset.id = group.id;
+        button.style.setProperty("--x", group.x);
+        button.style.setProperty("--y", group.y);
+        button.style.setProperty("--mx", group.mx || group.x);
+        button.style.setProperty("--my", group.my || group.y);
+        button.style.setProperty("--fill", style.fill);
+        button.style.setProperty("--node-ink", style.ink);
+        button.innerHTML = `<span>${group.label}</span><span class="node-count">${group.count}</span>`;
+        button.addEventListener("click", () => selectGroup(group.id));
+        nodes.appendChild(button);
+      });
+
+      requestAnimationFrame(redrawLines);
+    }
+
+    function center(rect, rootRect) {
+      return {
+        x: rect.left - rootRect.left + rect.width / 2,
+        y: rect.top - rootRect.top + rect.height / 2,
+        width: rect.width,
+        height: rect.height
+      };
+    }
+
+    function circleEdge(from, to, radius) {
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      const distance = Math.hypot(dx, dy) || 1;
+      return {
+        x: from.x + (dx / distance) * radius,
+        y: from.y + (dy / distance) * radius
+      };
+    }
+
+    function boxEdge(from, to) {
+      const dx = from.x - to.x;
+      const dy = from.y - to.y;
+      const halfWidth = to.width / 2;
+      const halfHeight = to.height / 2;
+      const tx = dx === 0 ? Infinity : halfWidth / Math.abs(dx);
+      const ty = dy === 0 ? Infinity : halfHeight / Math.abs(dy);
+      const scale = Math.min(tx, ty);
+      return {
+        x: to.x + dx * scale,
+        y: to.y + dy * scale
+      };
+    }
+
+    function redrawLines() {
+      const rootRect = canvas.getBoundingClientRect();
+      const hubRect = hub.getBoundingClientRect();
+      const hubCenter = center(hubRect, rootRect);
+      svg.setAttribute("viewBox", `0 0 ${rootRect.width} ${rootRect.height}`);
+      svg.setAttribute("width", rootRect.width);
+      svg.setAttribute("height", rootRect.height);
+      detailSvg.setAttribute("viewBox", `0 0 ${rootRect.width} ${rootRect.height}`);
+      detailSvg.setAttribute("width", rootRect.width);
+      detailSvg.setAttribute("height", rootRect.height);
+
+      document.querySelectorAll(".network-line").forEach((line) => {
+        const node = document.querySelector(`.node[data-id="${line.dataset.id}"]`);
+        if (!node) return;
+        const nodeCenter = center(node.getBoundingClientRect(), rootRect);
+        const start = circleEdge(hubCenter, nodeCenter, hubRect.width / 2);
+        const end = boxEdge(hubCenter, nodeCenter);
+        line.setAttribute("x1", start.x);
+        line.setAttribute("y1", start.y);
+        line.setAttribute("x2", end.x);
+        line.setAttribute("y2", end.y);
+      });
+      redrawDetailLines();
+    }
+
+    function renderDetailNodes(group) {
+      detailNodes.replaceChildren();
+      detailLines.replaceChildren();
+      selectionLabel.textContent = `${group.label}: ${group.children.length} subcategories`;
+      const desktopPositions = detailLayouts[group.id] || [];
+      const mobilePositions = mobileDetailLayouts[group.id] || desktopPositions;
+
+      group.children
+        .slice()
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .forEach(([label, value], index) => {
+          const style = intensity(value, maxChild);
+          const desktop = desktopPositions[index] || desktopPositions[desktopPositions.length - 1] || [50, 50];
+          const mobile = mobilePositions[index] || desktop;
+          const detail = document.createElement("div");
+          detail.className = `detail-node ${style.level}${value === 0 ? " zero" : ""}`;
+          detail.dataset.parent = group.id;
+          detail.style.setProperty("--dx", desktop[0]);
+          detail.style.setProperty("--dy", desktop[1]);
+          detail.style.setProperty("--mdx", mobile[0]);
+          detail.style.setProperty("--mdy", mobile[1]);
+          detail.style.setProperty("--detail-fill", style.fill);
+          detail.style.setProperty("--detail-ink", style.ink);
+          detail.style.animationDelay = `${Math.min(index * 22, 180)}ms`;
+          detail.innerHTML = `<span>${label}</span><span class="detail-count">${value}</span>`;
+          detailNodes.appendChild(detail);
+
+          const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          line.classList.add("detail-line");
+          line.dataset.parent = group.id;
+          line.dataset.index = String(index);
+          line.setAttribute("stroke-width", String(1.1 + (value / maxChild) * 3.8));
+          detailLines.appendChild(line);
+        });
+
+      requestAnimationFrame(redrawLines);
+    }
+
+    function redrawDetailLines() {
+      const selected = document.querySelector(".node.is-selected");
+      if (!selected) return;
+      const rootRect = canvas.getBoundingClientRect();
+      const sourceCenter = center(selected.getBoundingClientRect(), rootRect);
+      document.querySelectorAll(".detail-line").forEach((line) => {
+        const detail = detailNodes.children[Number(line.dataset.index)];
+        if (!detail) return;
+        const detailCenter = center(detail.getBoundingClientRect(), rootRect);
+        const start = boxEdge(detailCenter, sourceCenter);
+        const end = boxEdge(sourceCenter, detailCenter);
+        line.setAttribute("x1", start.x);
+        line.setAttribute("y1", start.y);
+        line.setAttribute("x2", end.x);
+        line.setAttribute("y2", end.y);
+      });
+    }
+
+    function selectGroup(id) {
+      const group = groups.find((item) => item.id === id) || groups[0];
+      const style = intensity(group.count, maxGroup);
+      document.querySelectorAll(".node").forEach((node) => {
+        node.classList.toggle("is-selected", node.dataset.id === group.id);
+        node.classList.toggle("is-muted", node.dataset.id !== group.id);
+      });
+      document.querySelectorAll(".network-line").forEach((line) => {
+        line.classList.toggle("is-selected", line.dataset.id === group.id);
+        line.classList.toggle("is-muted", line.dataset.id !== group.id);
+      });
+
+      renderDetailNodes(group);
+    }
+
+    renderMap();
+    selectGroup("university");
+    window.addEventListener("resize", redrawLines);
+    if ("ResizeObserver" in window) {
+      new ResizeObserver(redrawLines).observe(canvas);
+    }
+    if (document.fonts) {
+      document.fonts.ready.then(redrawLines).catch(() => {});
+    }
+  </script>
+</body>
+</html>
