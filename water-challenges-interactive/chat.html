@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Water Challenges Interactive Map</title>
   <style>
+    @import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@500;700;900&display=swap");
+
     :root {
       color-scheme: light;
       --usu-blue: #0f243f;
@@ -70,8 +72,10 @@
     .water-map h1 {
       margin: 0;
       color: var(--usu-blue);
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
       font-size: clamp(1.75rem, 3vw, 2.6rem);
       line-height: 1.1;
+      font-weight: 900;
       letter-spacing: 0;
     }
 
@@ -109,7 +113,9 @@
       color: var(--ink);
       background: #fff;
       font: inherit;
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
       font-size: 0.9rem;
+      font-weight: 500;
       cursor: pointer;
     }
 
@@ -128,6 +134,7 @@
       color: var(--ink);
       background: #fff;
       font: inherit;
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
       text-align: left;
       cursor: pointer;
     }
@@ -244,6 +251,7 @@
 
     .node-title {
       fill: var(--usu-blue);
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
       font-size: 14px;
       font-weight: 700;
       pointer-events: none;
@@ -251,14 +259,16 @@
 
     .node-count {
       fill: var(--muted);
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
       font-size: 12px;
       pointer-events: none;
     }
 
     .center-label {
       fill: var(--usu-blue);
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
       font-size: 18px;
-      font-weight: 700;
+      font-weight: 900;
     }
 
     .center-sub {
@@ -290,8 +300,10 @@
 
     .detail-title {
       margin: 0;
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
       font-size: 1.55rem;
       line-height: 1.15;
+      font-weight: 900;
       letter-spacing: 0;
     }
 
@@ -353,6 +365,7 @@
       color: var(--usu-blue);
       background: #edf4f8;
       font: inherit;
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
       font-size: 0.87rem;
       font-weight: 700;
       cursor: pointer;
@@ -430,7 +443,7 @@
 <body>
   <main class="water-map" id="water-map">
     <header class="water-map__header">
-      <p class="water-map__eyebrow">Utah Water Network</p>
+      <p class="water-map__eyebrow">Utah's Water Faculty Network</p>
       <h1>Water Challenge Connections</h1>
       <p class="water-map__lede">Explore how six water challenge areas relate through shared drivers, problems, and management actions from the cumulative workbook. Thicker lines indicate more connected themes.</p>
     </header>
