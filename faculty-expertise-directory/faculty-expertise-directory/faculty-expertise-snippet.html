@@ -1,0 +1,426 @@
+<section class="uwn-directory" id="uwn-faculty-directory">
+  <div class="uwn-directory__inner">
+    <div class="uwn-directory__header">
+      <div>
+        <h2>Utah water expertise directory</h2>
+        <p class="uwn-directory__intro">Search faculty by expertise, water challenge, institution, or geographic focus.</p>
+      </div>
+      <div class="uwn-directory__count" data-uwn-count aria-live="polite">0 experts shown</div>
+    </div>
+
+    <div class="uwn-directory__tools" aria-label="Directory filters">
+      <label>
+        Search by topic or name
+        <input data-uwn-search type="search" placeholder="Try hydrology, policy, wetlands, irrigation" autocomplete="off">
+      </label>
+      <label>
+        Institution
+        <select data-uwn-institution>
+          <option value="">All institutions</option>
+        </select>
+      </label>
+      <label>
+        Region
+        <select data-uwn-region>
+          <option value="">All regions</option>
+        </select>
+      </label>
+      <label class="uwn-directory__switch">
+        <input data-uwn-primary-only type="checkbox">
+        Only primary water focus
+      </label>
+    </div>
+
+    <div class="uwn-directory__topics" data-uwn-topics aria-label="Water challenge filters"></div>
+    <div class="uwn-directory__empty" data-uwn-empty hidden>No matching faculty found. Try a broader topic or clear one of the filters.</div>
+    <div class="uwn-directory__results" data-uwn-results></div>
+  </div>
+</section>
+<style>
+
+:root {
+  --uwn-ink: #17242f;
+  --uwn-muted: #5e6a73;
+  --uwn-line: #d9e1e5;
+  --uwn-bg: #f7f9f9;
+  --uwn-panel: #ffffff;
+  --uwn-blue: #1d5f8a;
+  --uwn-teal: #0d766d;
+  --uwn-gold: #b98220;
+  --uwn-green-soft: #e6f2ef;
+  --uwn-blue-soft: #e8f1f7;
+  --uwn-gold-soft: #f8efdF;
+}
+
+.uwn-directory {
+  color: var(--uwn-ink);
+  background: var(--uwn-bg);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.45;
+  padding: 24px;
+}
+
+.uwn-directory * {
+  box-sizing: border-box;
+}
+
+.uwn-directory__inner {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.uwn-directory__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 18px;
+}
+
+.uwn-directory h2 {
+  margin: 0 0 6px;
+  font-size: clamp(1.6rem, 2.4vw, 2.4rem);
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+.uwn-directory__intro {
+  max-width: 760px;
+  margin: 0;
+  color: var(--uwn-muted);
+}
+
+.uwn-directory__count {
+  min-width: 170px;
+  padding: 10px 12px;
+  border-left: 4px solid var(--uwn-teal);
+  background: var(--uwn-panel);
+  font-weight: 700;
+  text-align: right;
+}
+
+.uwn-directory__tools {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.5fr) repeat(2, minmax(180px, 0.7fr));
+  gap: 12px;
+  align-items: end;
+  padding: 16px;
+  background: var(--uwn-panel);
+  border: 1px solid var(--uwn-line);
+  border-radius: 8px;
+  margin-bottom: 14px;
+}
+
+.uwn-directory label {
+  display: grid;
+  gap: 6px;
+  color: var(--uwn-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.uwn-directory input,
+.uwn-directory select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--uwn-line);
+  border-radius: 6px;
+  color: var(--uwn-ink);
+  background: #fff;
+  font: inherit;
+  padding: 9px 10px;
+}
+
+.uwn-directory input:focus,
+.uwn-directory select:focus,
+.uwn-directory button:focus {
+  outline: 3px solid rgba(29, 95, 138, 0.2);
+  outline-offset: 2px;
+}
+
+.uwn-directory__switch {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 42px;
+  color: var(--uwn-ink);
+  font-weight: 600;
+}
+
+.uwn-directory__switch input {
+  width: 18px;
+  min-height: 18px;
+}
+
+.uwn-directory__topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 18px;
+}
+
+.uwn-directory button {
+  min-height: 38px;
+  border: 1px solid var(--uwn-line);
+  border-radius: 999px;
+  color: var(--uwn-ink);
+  background: var(--uwn-panel);
+  font: inherit;
+  font-weight: 700;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.uwn-directory button[aria-pressed="true"] {
+  border-color: var(--uwn-blue);
+  color: #fff;
+  background: var(--uwn-blue);
+}
+
+.uwn-directory__results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.uwn-person {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: 16px;
+  border: 1px solid var(--uwn-line);
+  border-radius: 8px;
+  background: var(--uwn-panel);
+}
+
+.uwn-person[hidden],
+.uwn-directory__empty[hidden] {
+  display: none;
+}
+
+.uwn-person__top {
+  display: grid;
+  gap: 4px;
+}
+
+.uwn-person h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.25;
+}
+
+.uwn-person__meta {
+  color: var(--uwn-muted);
+  font-size: 0.92rem;
+}
+
+.uwn-person__expertise {
+  display: grid;
+  gap: 6px;
+}
+
+.uwn-person__label {
+  color: var(--uwn-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.uwn-person p {
+  margin: 0;
+}
+
+.uwn-person__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.uwn-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 4px 9px;
+  background: var(--uwn-blue-soft);
+  color: var(--uwn-ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.uwn-chip--region {
+  background: var(--uwn-green-soft);
+}
+
+.uwn-chip--term {
+  background: var(--uwn-gold-soft);
+  font-weight: 600;
+}
+
+.uwn-person__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.uwn-person a {
+  color: var(--uwn-blue);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.uwn-directory__empty {
+  padding: 22px;
+  border: 1px dashed var(--uwn-line);
+  border-radius: 8px;
+  background: var(--uwn-panel);
+  color: var(--uwn-muted);
+}
+
+@media (max-width: 760px) {
+  .uwn-directory {
+    padding: 16px;
+  }
+
+  .uwn-directory__header,
+  .uwn-directory__tools {
+    grid-template-columns: 1fr;
+  }
+
+  .uwn-directory__count {
+    text-align: left;
+  }
+}
+
+</style>
+<script>
+window.UWN_FACULTY_DATA = [{"name": "Dan Ames", "lastName": "Ames", "email": "dan.ames@byu.edu", "university": "Brigham Young Unviersity", "department": "Civil & Construction Engineering", "title": "Professor", "website": "https://cce.byu.edu/directory/dan-ames", "waterFocus": "Water is my primary focus.", "primary": "", "specific": "Modeling, data science, hydroinformatics", "challenges": ["Hazards"], "regions": ["Colorado River Basin"], "terms": ["Modeling", "data science", "hydroinformatics", "Hazards", "Colorado River Basin"]}, {"name": "David Anderson", "lastName": "Anderson", "email": "david.anderson@usu.edu", "university": "Utah State University", "department": "Landscape Architecture & Environmental Planning", "title": "Professional Practice Professor", "website": "https://qanr.usu.edu/directory/anderson-david", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Landscape Architecture, Community Engaged Learning, Water Conservation, Stormwater Management, Sustainability, Regional Identity, Environmental Education", "specific": "water-wise landscaping, stormwater management", "challenges": ["Water quality and ecosystems", "Water use and demand"], "regions": [], "terms": ["Landscape Architecture", "Community Engaged Learning", "Water Conservation", "Stormwater Management", "Sustainability", "Regional Identity", "Environmental Education", "water-wise landscaping", "Water quality", "ecosystems", "Water use", "demand"]}, {"name": "Luiza Aparecido", "lastName": "Aparecido", "email": "luiza.aparecido@biology.utah.edu", "university": "University of Utah", "department": "School of Biological Sciences", "title": "Assistant Professor", "website": "https://www.aparecidolab.com", "waterFocus": "Water is a secondary focus area for me.", "primary": "Plant ecophysiology/ecohydrology", "specific": "Ecohydrology (plant-water relations)", "challenges": ["Water quality and ecosystems"], "regions": [], "terms": ["Plant ecophysiology", "ecohydrology", "Ecohydrology (plant-water relations)", "Water quality", "ecosystems"]}, {"name": "Michelle Baker", "lastName": "Baker", "email": "michelle.baker@usu.edu", "university": "Utah State", "department": "Biology", "title": "Professor", "website": "https://artsci.usu.edu/biology/directory/baker-michelle", "waterFocus": "Water is my primary focus.", "primary": "biogeochemistry, ecology, hydrology", "specific": "A goal of my research is to understand how water movement within the landscape influences ecosystem structure and function. I use an interdisciplinary approach, involving tools from ecology, hydrology, and geochemistry to ask questions about how hydrologic linkages within watersheds influence energy flow and nutrient cycling.", "challenges": ["Water quality and ecosystems"], "regions": ["Northern Utah", "Wasatch Front"], "terms": ["biogeochemistry", "ecology", "hydrology", "A goal of my research is to understand how water movement within the landscape influences ecosystem structure", "function. I use an interdisciplinary approach", "involving tools from ecology", "geochemistry to ask questions about how hydrologic linkages within watersheds influence energy flow", "nutrient cycling", "Water quality", "ecosystems", "Northern Utah", "Wasatch Front"]}, {"name": "Burdette Barker", "lastName": "Barker", "email": "burdette.barker@usu.edu", "university": "USU", "department": "4110 Old Main Hill", "title": "Extension Irrigation Specialist", "website": "https://irrigation.usu.edu", "waterFocus": "Water is my primary focus.", "primary": "Irrigation", "specific": "irrigation system performance; irrigation system design; evapotranspiration measurement; evapotranspiration modeling; irrigation management", "challenges": ["Water quantity and distribution", "Water use and demand"], "regions": [], "terms": ["Irrigation", "irrigation system performance", "irrigation system design", "evapotranspiration measurement", "evapotranspiration modeling", "irrigation management", "Water quantity", "distribution", "Water use", "demand"]}, {"name": "Brennan Bean", "lastName": "Bean", "email": "brennan.bean@usu.edu", "university": "Utah State University", "department": "Mathematics and Statistics", "title": "Associate Professor", "website": "https://artsci.usu.edu/math-stats/directory/faculty/bean-brennan", "waterFocus": "Water is a secondary focus area for me.", "primary": "spatial statistics", "specific": "extreme snow accumulation, snow mapping", "challenges": ["Hazards"], "regions": [], "terms": ["spatial statistics", "extreme snow accumulation", "snow mapping", "Hazards"]}, {"name": "Maria Blevins", "lastName": "Blevins", "email": "maria.blevins@uvu.edu", "university": "Utah Valley University", "department": "Communicaion", "title": "Associate Professor", "website": "https://www.mariablevins.com/", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Policy, rhetorical arguments around water, the social world of river guides", "specific": "How we talk about water, sexual harassment in river guiding communities", "challenges": ["Water governance"], "regions": ["Wasatch Back"], "terms": ["Policy", "rhetorical arguments around water", "the social world of river guides", "How we talk about water", "sexual harassment in river guiding communities", "Water governance", "Wasatch Back"]}, {"name": "Hannah Bonner", "lastName": "Bonner", "email": "hbonner@byu.edu", "university": "BYU", "department": "Geology", "title": "Assistant Professor", "website": "https://geology.byu.edu/directory/hannah-bonner", "waterFocus": "Water is my primary focus.", "primary": "Hydrology", "specific": "Harmful algae (cyanobacteria), water contaminants, snow water quantification, snow modeling", "challenges": ["Water quality and ecosystems", "Hazards"], "regions": ["Wasatch Front", "Southeastern Utah", "Southwestern Utah", "Colorado River Basin"], "terms": ["Hydrology", "Harmful algae (cyanobacteria)", "water contaminants", "snow water quantification", "snow modeling", "Water quality", "ecosystems", "Hazards", "Wasatch Front", "Southeastern Utah", "Southwestern Utah", "Colorado River Basin"]}, {"name": "Roslynn Brain", "lastName": "Brain", "email": "roslynn.brain@usu.edu", "university": "Utah State", "department": "Environment & Society", "title": "Professor, Sustainable Communities Extension Specialist", "website": "https://extension.usu.edu/sustainability/", "waterFocus": "Water is a secondary focus area for me.", "primary": "Fostering environmental behavior", "specific": "water-harvesting earthworks", "challenges": ["Water quantity and distribution", "Water quality and ecosystems", "Water infrastructure"], "regions": ["Northern Utah", "Wasatch Front", "Southeastern Utah", "Southwestern Utah"], "terms": ["Fostering environmental behavior", "water-harvesting earthworks", "Water quantity", "distribution", "Water quality", "ecosystems", "Water infrastructure", "Northern Utah", "Wasatch Front", "Southeastern Utah", "Southwestern Utah"]}, {"name": "Paul Brooks", "lastName": "Brooks", "email": "paul.brooks@utah.edu", "university": "University of Utah", "department": "Geology and Geophysics", "title": "Professor", "website": "https://scholar.google.com/citations?user=cJndGdYAAAAJ&hl=en", "waterFocus": "Water is my primary focus.", "primary": "hydrology", "specific": "snow, snowmelt, ecohydrology, hydrologic partitioning, evaporation vs transpiration, forest disturbance, climate change, biogeochemistry", "challenges": ["Water quantity and distribution", "Water quality and ecosystems"], "regions": ["Northern Utah", "Wasatch Front", "Wasatch Back", "Uintah Basin/Northeastern Utah", "Southeastern Utah", "Great Salt Lake Basin", "Colorado River Basin"], "terms": ["hydrology", "snow", "snowmelt", "ecohydrology", "hydrologic partitioning", "evaporation vs transpiration", "forest disturbance", "climate change", "biogeochemistry", "Water quantity", "distribution", "Water quality"]}, {"name": "Damon Cann", "lastName": "Cann", "email": "damon.cann@usu.edu", "university": "Utah State", "department": "Political Science", "title": "Professor", "website": "", "waterFocus": "Water is a secondary focus area for me.", "primary": "State & Local Government", "specific": "Municipal water systems and governance thereof", "challenges": ["Water governance"], "regions": [], "terms": ["State & Local Government", "Municipal water systems", "governance thereof", "Water governance"]}, {"name": "Grant Cardon", "lastName": "Cardon", "email": "grant.cardon@usu.edu", "university": "Utah State", "department": "Plants, Soils and Climate", "title": "Professor and Extension Soils Specialist", "website": "https://qanr.usu.edu/directory/cardon-grant", "waterFocus": "Water is among my multiple major focus areas.", "primary": "", "specific": "Irrigation management, Soil-water-plant-atmosphere interactions, soil and irrigation water salinity", "challenges": ["Water quantity and distribution", "Water quality and ecosystems", "Water use and demand"], "regions": [], "terms": ["Irrigation management", "Soil-water-plant-atmosphere interactions", "soil", "irrigation water salinity", "Water quantity", "distribution", "Water quality", "ecosystems", "Water use", "demand"]}, {"name": "Alice Carter", "lastName": "Carter", "email": "alice.carter@usu.edu", "university": "Utah State University", "department": "Department of Mathematics and Statistics", "title": "Assistant Professor of the Practice", "website": "https://amcarter.github.io/alicecarter/", "waterFocus": "Water is my primary focus.", "primary": "Biogeochemistry, time series modeling", "specific": "Rivers, Carbon Cycling, Algae, Ecosystem Processes, Metabolism, Biogeochemistry, Time Series Modeling, Statistics", "challenges": ["Water quality and ecosystems", "Hazards"], "regions": ["Northern Utah", "Wasatch Front", "Southeastern Utah"], "terms": ["Biogeochemistry", "time series modeling", "Rivers", "Carbon Cycling", "Algae", "Ecosystem Processes", "Metabolism", "Statistics", "Water quality", "ecosystems", "Hazards", "Northern Utah"]}, {"name": "Brent Chamberlain", "lastName": "Chamberlain", "email": "brent.chamberlain@usu.edu", "university": "Utah State University", "department": "Landscape Architecture and Environmental Planning", "title": "Professor", "website": "https://qanr.usu.edu/directory/chamberlain-brent", "waterFocus": "Water is a secondary focus area for me.", "primary": "GIS, GeoAI, Land-use planning, environmental visualization (3D, 4D)", "specific": "Urban and regional planning, water-wise development, sea-level rise", "challenges": ["Hazards"], "regions": [], "terms": ["GIS", "GeoAI", "Land-use planning", "environmental visualization (3D", "4D)", "Urban", "regional planning", "water-wise development", "sea-level rise", "Hazards"]}, {"name": "Yoshi Chikamoto", "lastName": "Chikamoto", "email": "yoshi.chikamoto@usu.edu", "university": "Utah State University", "department": "Plants, Soils & Climate", "title": "Associate Professor", "website": "https://climate.usu.edu/people/yoshi/index.html", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Climate Dynamics, Seasonal-to-Decadal Earth System Prediction", "specific": "Multi-year Drought Forecast (or Water Supply Forecast)", "challenges": ["Hazards"], "regions": ["Wasatch Front", "Great Salt Lake Basin", "Colorado River Basin"], "terms": ["Climate Dynamics", "Seasonal-to-Decadal Earth System Prediction", "Multi-year Drought Forecast (or Water Supply Forecast)", "Hazards", "Wasatch Front", "Great Salt Lake Basin", "Colorado River Basin"]}, {"name": "Elizabeth Cohen", "lastName": "Cohen", "email": "elizabeth.cohen@usu.edu", "university": "Utah State University", "department": "Extension - Ag/NR", "title": "Assistant Professor for Extension", "website": "", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Water Quality/Ag", "specific": "Nonpoint source pollution, agriculture", "challenges": ["Water quality and ecosystems"], "regions": [], "terms": ["Water Quality", "Nonpoint source pollution", "agriculture", "ecosystems"]}, {"name": "Brian Crookston", "lastName": "Crookston", "email": "brian.crookston@usu.edu", "university": "USU", "department": "UWRL", "title": "Associate Professor", "website": "https://engineering.usu.edu/cee/people/faculty/crookston-brian", "waterFocus": "Water is my primary focus.", "primary": "Hydraulics", "specific": "water sustainability, flooding, dams and spillways, public safety, surface hydrology, instrumentation, modeling, hazard identification and risk assessments", "challenges": ["Water quantity and distribution", "Water infrastructure", "Hazards"], "regions": ["Great Salt Lake Basin"], "terms": ["Hydraulics", "water sustainability", "flooding", "dams", "spillways", "public safety", "surface hydrology", "instrumentation", "modeling", "hazard identification", "risk assessments", "Water quantity"]}, {"name": "Justin DeRose", "lastName": "DeRose", "email": "justin.derose@usu.edu", "university": "Utah State", "department": "WILD", "title": "Associate Professor", "website": "https://qanr.usu.edu/wild/labs/derose-lab/", "waterFocus": "Water is a secondary focus area for me.", "primary": "Forestry, Forest Ecology, Dendrochronology (climate reconstruction, including water resources)", "specific": "Dendrochronology - the study of tree-rings to understand the past. As part of my research program, I have used tree-ring science to reconstruct water-related climate variables, such as precipitation and mean annual stream flow (as measured by stream gauges) as far as 2,000 years into the past.", "challenges": ["Water quantity and distribution", "Hazards"], "regions": ["Northern Utah", "Wasatch Front", "Wasatch Back", "Uintah Basin/Northeastern Utah", "Great Salt Lake Basin"], "terms": ["Forestry", "Forest Ecology", "Dendrochronology (climate reconstruction", "including water resources)", "Dendrochronology - the study of tree-rings to understand the past. As part of my research program", "I have used tree-ring science to reconstruct water-related climate variables", "such as precipitation", "mean annual stream flow (as measured by stream gauges) as far as 2", "000 years into the past", "Water quantity", "distribution", "Hazards"]}, {"name": "Katherine Dowdell", "lastName": "Dowdell", "email": "k.dowdell@utah.edu", "university": "University of Utah", "department": "Civil & Environmental Engineering", "title": "Assistant Professor", "website": "https://www.katherinedowdell.com/", "waterFocus": "Water is my primary focus.", "primary": "Drinking water engineering", "specific": "Drinking water engineering, microbiology, opportunistic pathogens, wildfire impacts on water", "challenges": ["Water quality and ecosystems", "Water infrastructure", "Hazards"], "regions": ["Wasatch Front"], "terms": ["Drinking water engineering", "microbiology", "opportunistic pathogens", "wildfire impacts on water", "Water quality", "ecosystems", "Water infrastructure", "Hazards", "Wasatch Front"]}, {"name": "Chelsea Duball", "lastName": "Duball", "email": "chelsea.duball@usu.edu", "university": "Utah State University", "department": "Plants, Soils, and Climate", "title": "Assistant Professor of Environmental Soil Science", "website": "https://qanr.usu.edu/directory/duball-chelsea", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Soil Science, Biogeochemistry, Wetland Ecosystem Science", "specific": "Wetland ecosystem science and wetland identification", "challenges": ["Water quantity and distribution", "Water quality and ecosystems"], "regions": ["Northern Utah", "Wasatch Front", "Great Salt Lake Basin", "Colorado River Basin"], "terms": ["Soil Science", "Biogeochemistry", "Wetland Ecosystem Science", "wetland identification", "Water quantity", "distribution", "Water quality", "ecosystems", "Northern Utah", "Wasatch Front", "Great Salt Lake Basin", "Colorado River Basin"]}, {"name": "R Ryan Dupont", "lastName": "Dupont", "email": "ryan.dupont@usu.edu", "university": "Utah State University", "department": "Civil & Environmental Engineering/UWRL", "title": "Cazier Professor of Civil & Environmental Engineering", "website": "https://uwrl.usu.edu/people/faculty/dupont-robert", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Environmental engineering, biological wastewater treatment", "specific": "biological wastewater treatment, water reuse, biosolids management", "challenges": ["Water quality and ecosystems"], "regions": ["Northern Utah"], "terms": ["Environmental engineering", "biological wastewater treatment", "water reuse", "biosolids management", "Water quality", "ecosystems", "Northern Utah"]}, {"name": "Sarah Erwin", "lastName": "Erwin", "email": "sarah.erwin@usu.edu", "university": "Utah State University", "department": "Extension - Water Quality", "title": "Assistant Professor for Water Quality Stewardship & Watershed Education", "website": "https://extension.usu.edu/directory/erwin-sarah", "waterFocus": "Water is my primary focus.", "primary": "Natural Resources, Watershed Science, Biology", "specific": "Water Quality Stewardship; Watershed Education; Wetland & Riparian Habitat Preservation; Nonpoint Source Pollution Awareness & Prevention; Community Outreach", "challenges": ["Water quality and ecosystems"], "regions": [], "terms": ["Natural Resources", "Watershed Science", "Biology", "Water Quality Stewardship", "Watershed Education", "Wetland & Riparian Habitat Preservation", "Nonpoint Source Pollution Awareness & Prevention", "Community Outreach", "Water quality", "ecosystems"]}, {"name": "Courtney Flint", "lastName": "Flint", "email": "courtney.flint@usu.edu", "university": "USU", "department": "ENVS/UWRL", "title": "Professor/Assoc. Director UWRL", "website": "https://qanr.usu.edu/directory/flint-courtney", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Natural Resource and Community Sociology", "specific": "Human Dimensions of Water, Water Hazards, water governance and management, communities and water, public perceptions and concerns, community engagement, earth systems science", "challenges": ["Water use and demand", "Water governance", "Hazards"], "regions": ["Northern Utah", "Wasatch Front", "Wasatch Back", "Uintah Basin/Northeastern Utah", "Southeastern Utah", "Southwestern Utah", "Great Salt Lake Basin"], "terms": ["Natural Resource", "Community Sociology", "Human Dimensions of Water", "Water Hazards", "water governance", "communities", "public perceptions", "concerns", "community engagement", "earth systems science", "Water use", "demand"]}, {"name": "Jennifer Follstad Shah", "lastName": "Follstad Shah", "email": "jennifer.shah@ess.utah.edu", "university": "University of Utah", "department": "School for the Environment, Society & Sustainability", "title": "Associate Professor", "website": "https://profiles.faculty.utah.edu/u0957378", "waterFocus": "Water is among my multiple major focus areas.", "primary": "ecosystem ecology, microbial ecology, riparian ecology, biogeochemistry, water quality", "specific": "understanding how global changes (eg, climate, urbanization, plant invasion) affect ecosystem processes, especially those mediated by microbial or riparian communities", "challenges": ["Water quality and ecosystems"], "regions": ["Wasatch Front"], "terms": ["ecosystem ecology", "microbial ecology", "riparian ecology", "biogeochemistry", "water quality", "understanding how global changes (eg", "climate", "urbanization", "plant invasion) affect ecosystem processes", "especially those mediated by microbial or riparian communities", "ecosystems", "Wasatch Front"]}, {"name": "Rick Forster", "lastName": "Forster", "email": "rick.forster@geog.utah.edu", "university": "University of Utah", "department": "School of Environment, Society, and Sustainability", "title": "professor", "website": "https://profiles.faculty.utah.edu/u0085651", "waterFocus": "Water is among my multiple major focus areas.", "primary": "cryosphere", "specific": "remote sensing of seasonal snow and ice", "challenges": ["Water quantity and distribution"], "regions": ["Great Salt Lake Basin", "Colorado River Basin"], "terms": ["cryosphere", "remote sensing of seasonal snow", "ice", "Water quantity", "distribution", "Great Salt Lake Basin", "Colorado River Basin"]}, {"name": "Gina Gilson", "lastName": "Gilson", "email": "gina.gilson@usu.edu", "university": "USU", "department": "ENVS", "title": "Assistant Professor, Interim Director Center for Colorado River Studies", "website": "https://qanr.usu.edu/directory/gilson-gina", "waterFocus": "Water is my primary focus.", "primary": "Governance", "specific": "policy and governance, stakeholder engagement, institutions, trust, social norms", "challenges": ["Water quantity and distribution", "Water use and demand", "Water governance", "Hazards"], "regions": ["Colorado River Basin"], "terms": ["Governance", "policy", "stakeholder engagement", "institutions", "trust", "social norms", "Water quantity", "distribution", "Water use", "demand", "Water governance", "Hazards"]}, {"name": "Neil Hansen", "lastName": "Hansen", "email": "nel_hansen@byu.edu", "university": "Brigham Young University", "department": "Plant and Wildlife Sciences", "title": "Professor", "website": "https://pws.byu.edu/neil-hansen-lab", "waterFocus": "Water is my primary focus.", "primary": "water conservation in irrigated systems", "specific": "Soil water sensing; Precision irrigation for crops; Residential irrigation assessments", "challenges": ["Water use and demand"], "regions": ["Northern Utah", "Wasatch Front", "Great Salt Lake Basin", "Colorado River Basin"], "terms": ["water conservation in irrigated systems", "Soil water sensing", "Precision irrigation for crops", "Residential irrigation assessments", "Water use", "demand", "Northern Utah", "Wasatch Front", "Great Salt Lake Basin", "Colorado River Basin"]}, {"name": "John Horel", "lastName": "Horel", "email": "john.horel@utah.edu", "university": "Utah", "department": "Atmospheric Sciences", "title": "Professor", "website": "https://horel.chpc.utah.edu", "waterFocus": "Water is among my multiple major focus areas.", "primary": "atmospheric sciences", "specific": "environmental monitoring; weather and climate; flash flooding; Great Salt Lake studies", "challenges": ["Water infrastructure", "Hazards"], "regions": ["Northern Utah", "Wasatch Front", "Great Salt Lake Basin", "Colorado River Basin"], "terms": ["atmospheric sciences", "environmental monitoring", "weather", "climate", "flash flooding", "Great Salt Lake studies", "Water infrastructure", "Hazards", "Northern Utah", "Wasatch Front", "Great Salt Lake Basin", "Colorado River Basin"]}, {"name": "Jeff Horsburgh", "lastName": "Horsburgh", "email": "jeff.horsburgh@usu.edu", "university": "USU", "department": "CEE/UWRL", "title": "Professor", "website": "https://engineering.usu.edu/cee/people/faculty/horsburgh-jeff", "waterFocus": "Water is my primary focus.", "primary": "Hydroinformatics", "specific": "Hydroinformatics, environmental sensing, monitoring networks, surface water hydrology, water quality, cyberinfrastructure, modeling, infrastructure around modeling", "challenges": ["Water quantity and distribution", "Water quality and ecosystems", "Water use and demand", "Water infrastructure"], "regions": ["Northern Utah"], "terms": ["Hydroinformatics", "environmental sensing", "monitoring networks", "surface water hydrology", "water quality", "cyberinfrastructure", "modeling", "infrastructure around modeling", "Water quantity", "distribution", "ecosystems", "Water use"]}, {"name": "Scott Hotaling", "lastName": "Hotaling", "email": "scott.hotaling@usu.edu", "university": "Utah State University", "department": "Department of Wildland Resources", "title": "Assistant Professor", "website": "https://qanr.usu.edu/research/ccml/", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Stream ecology", "specific": "Stream biodiversity, long-term monitoring, cryosphere (glaciers, rock glaciers, snowpack), water supply, climate change impacts", "challenges": ["Water quantity and distribution", "Water quality and ecosystems"], "regions": ["Wasatch Front", "Southeastern Utah"], "terms": ["Stream ecology", "Stream biodiversity", "long-term monitoring", "cryosphere (glaciers", "rock glaciers", "snowpack)", "water supply", "climate change impacts", "Water quantity", "distribution", "Water quality", "ecosystems"]}, {"name": "Liyuan Hou", "lastName": "Hou", "email": "liyuan.hou@usu.edu", "university": "Utah State University", "department": "Biological and Chemical Engineering", "title": "Assistant professor", "website": "https://www.thehoulab.com/", "waterFocus": "Water is my primary focus.", "primary": "Water pollution and water treatment", "specific": "Emerging Contaminants and Microbial Biogeochemical Cycles in Aquatic Environments", "challenges": ["Water quality and ecosystems", "Hazards"], "regions": [], "terms": ["Water pollution", "water treatment", "Emerging Contaminants", "Microbial Biogeochemical Cycles in Aquatic Environments", "Water quality", "ecosystems", "Hazards"]}, {"name": "Hilary Hungerford", "lastName": "Hungerford", "email": "hilary.hungerford@uvu.edu", "university": "Utah Valley University", "department": "Earth Science and Integrated Studies", "title": "Professor", "website": "", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Human Geography", "specific": "Social science, qualitative methods, infrastructure, household decision making, water access in cities in the Global South, Utah Lake", "challenges": ["Water infrastructure", "Water governance"], "regions": ["Wasatch Front"], "terms": ["Human Geography", "Social science", "qualitative methods", "infrastructure", "household decision making", "water access in cities in the Global South", "Utah Lake", "Water infrastructure", "Water governance", "Wasatch Front"]}, {"name": "Michael Johnson", "lastName": "Johnson", "email": "michael.johnson@usu.edu", "university": "USU", "department": "UWRL", "title": "Research Professor", "website": "", "waterFocus": "Water is my primary focus.", "primary": "Fluid mechanics and hydraulics.", "specific": "Water conveyance, control and measurement.", "challenges": ["Water quantity and distribution", "Water infrastructure"], "regions": [], "terms": ["Fluid mechanics", "hydraulics", "Water conveyance", "control", "measurement", "Water quantity", "distribution", "Water infrastructure"]}, {"name": "Paul Johnson", "lastName": "Johnson", "email": "paul.johnson@usu.edu", "university": "Utah State University", "department": "Plants, Soils, & Climate/Utah Agricultural Experiment Station", "title": "Professor/Associate Director", "website": "https://qanr.usu.edu/directory/johnson-paul", "waterFocus": "Water is a secondary focus area for me.", "primary": "Turfgrass management and ecology, plant breeding", "specific": "Water use in urban landscapes, specifically related to turfgrasses.", "challenges": ["Water use and demand"], "regions": [], "terms": ["Turfgrass management", "ecology", "plant breeding", "Water use in urban landscapes", "specifically related to turfgrasses", "Water use", "demand"]}, {"name": "William Johnson", "lastName": "Johnson", "email": "william.johnson@utah.edu", "university": "U. Utah", "department": "Geology & Geophysics", "title": "Professor", "website": "https://Web page: https://faculty.utah.edu/u0034962-WILLIAM_P_JOHNSON/research/index.hml Google Scholar: https://scholar.google.com/citations?user=C9gB_GgAAAAJ&hl=en&authuser=1", "waterFocus": "Water is my primary focus.", "primary": "transport and fate in groundwater and aquatic systems", "specific": "Contaminant transport in groundwater with focus on nano- and micro-particles", "challenges": ["Water quality and ecosystems", "Hazards"], "regions": [], "terms": ["transport", "fate in groundwater", "aquatic systems", "Contaminant transport in groundwater with focus on nano-", "micro-particles", "Water quality", "ecosystems", "Hazards"]}, {"name": "Scott Jones", "lastName": "Jones", "email": "scott.jones@usu.edu", "university": "Utah State University", "department": "Plants, Soils and Climate", "title": "Professor", "website": "https://qanr.usu.edu/directory/jones-scott", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Environmental Soil Physics", "specific": "Soil water content measurement/monitoring, Evapotranspiration, Soil water fluxes, AI-based and Numerical-simulations of soil processes", "challenges": ["Water quantity and distribution", "Water use and demand"], "regions": ["Northern Utah", "Great Salt Lake Basin"], "terms": ["Environmental Soil Physics", "Soil water content measurement", "monitoring", "Evapotranspiration", "Soil water fluxes", "AI-based", "Numerical-simulations of soil processes", "Water quantity", "distribution", "Water use", "demand", "Northern Utah"]}, {"name": "Amita Kaundal", "lastName": "Kaundal", "email": "amita.kaundal@usu.edu", "university": "Utah State University", "department": "Plants,Soils, and Climate", "title": "Associate Professor", "website": "", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Plant Stress Physiology and plant Microbe Interactions", "specific": "Development of drought resilience crops", "challenges": ["Water use and demand"], "regions": ["Northern Utah"], "terms": ["Plant Stress Physiology", "plant Microbe Interactions", "Development of drought resilience crops", "Water use", "demand", "Northern Utah"]}, {"name": "Man-Keun Kim", "lastName": "Kim", "email": "mk.kim@usu.edu", "university": "Utah State University", "department": "Agricultural and Resource Economics (ARE)", "title": "Professor", "website": "https://sites.google.com/view/mkmkya/bio", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Environmental and resource economics; regional economic impact analysis", "specific": "Water use and demand; economics of water conservation and allocation; economic valuation of water quality and water-related ecosystem services; and regional economic impacts of drought and water scarcity.", "challenges": ["Water quality and ecosystems", "Water use and demand", "Hazards"], "regions": [], "terms": ["Environmental", "resource economics", "regional economic impact analysis", "Water use", "demand", "economics of water conservation", "allocation", "economic valuation of water quality", "water-related ecosystem services", "regional economic impacts of drought", "water scarcity", "Water quality"]}, {"name": "Kelly Kopp", "lastName": "Kopp", "email": "kelly.kopp@usu.edu", "university": "Utah State University", "department": "Plants, Soils & Climate", "title": "Professor and Extension Specialist", "website": "https://qanr.usu.edu/directory/kopp-kelly", "waterFocus": "Water is my primary focus.", "primary": "Plant water use efficiency, irrigation technologies, landscape ecosystem services", "specific": "Landscape water use efficiency, plant water use efficiency, landscape ecosystem services, sustainable landscape management", "challenges": ["Water use and demand"], "regions": [], "terms": ["Plant water use efficiency", "irrigation technologies", "landscape ecosystem services", "Landscape water use efficiency", "sustainable landscape management", "Water use", "demand"]}, {"name": "Joshua lenart", "lastName": "lenart", "email": "j.lenart@utah.edu", "university": "University of Utah", "department": "Dept Civil & Environmental", "title": "Associate Professor (Clinical)", "website": "https://profiles.faculty.utah.edu/u0556171/about", "waterFocus": "Water is among my multiple major focus areas.", "primary": "His teaching expertise includes administrative and organizational writing, grant writing, teambuilding, and strategic communications. His research expertise utilizes utilize quantitative and qualitative analysis, and focuses on natural resource management policy as it relates to landscape-scale impacts on wildlife habitat, hydrologic systems, community resilience, adaptation planning, and long-term land use conservation.", "specific": "Water infrastructure; water policy planning; Watershed Restoration Initiative; and aquatics habitat improvements w/ UT DWR, USFWS, and NGOs.", "challenges": ["Water quality and ecosystems", "Water infrastructure", "Water governance"], "regions": ["Wasatch Front", "Southeastern Utah", "Great Salt Lake Basin", "Colorado River Basin"], "terms": ["His teaching expertise includes administrative", "organizational writing", "grant writing", "teambuilding", "strategic communications. His research expertise utilizes utilize quantitative", "qualitative analysis", "focuses on natural resource management policy as it relates to landscape-scale impacts on wildlife habitat", "hydrologic systems", "community resilience", "adaptation planning", "long-term land use conservation", "Water infrastructure"]}, {"name": "Carlos Licon", "lastName": "Licon", "email": "carlos.licon@usu.edu", "university": "Utah State University", "department": "Landscape Architecture & Environmental Planning", "title": "Associate Professor", "website": "https://qanr.usu.edu/directory/licon-carlos", "waterFocus": "Water is a secondary focus area for me.", "primary": "Design and Planning", "specific": "Environmental Planning and Sustainability", "challenges": [], "regions": [], "terms": ["Design", "Planning", "Environmental Planning", "Sustainability"]}, {"name": "Michael Christopher Low", "lastName": "Low", "email": "m.chris.low@utah.edu", "university": "University of Utah", "department": "History/Middle East Center", "title": "Associate Professor of History; Director, Middle East Center", "website": "https://history.utah.edu/faculty/chris-low.php", "waterFocus": "Water is among my multiple major focus areas.", "primary": "I specialize in Middle Eastern history. I'm currently finishing a book, Saltwater Kingdoms (under contract with University of California Press), on the history of desalination technology in Arabia. However, the book and several collaborative projects are intertwined with the history of desalination in the American West, particularly in California, during the Cold War (1952-1975). I'm also currently writing a chapter on the failure to build out desalination in California and to establish pipelines to provide desalination to Arizona and other adjacent states. I have also developed good contacts with colleagues at Arizona State's Water Institute.", "specific": "I've written extensively about desalination in Saudi Arabia, the Persian Gulf, and their connections to the US West. For a sampling of some of my commentary on the recent attacks on desalination plants during the Iran war, see: https://attheu.utah.edu/law-politics/gulf-desalination-plants-in-irans-crosshairs/.", "challenges": ["Water infrastructure"], "regions": [], "terms": ["I specialize in Middle Eastern history. I'm currently finishing a book", "Saltwater Kingdoms (under contract with University of California Press)", "on the history of desalination technology in Arabia. However", "the book", "several collaborative projects are intertwined with the history of desalination in the American West", "particularly in California", "during the Cold War (1952-1975). I'm also currently writing a chapter on the failure to build out desalination in California", "to establish pipelines to provide desalination to Arizona", "other adjacent states. I have also developed good contacts with colleagues at Arizona State's Water Institute", "I've written extensively about desalination in Saudi Arabia", "the Persian Gulf", "their connections to the US West. For a sampling of some of my commentary on the recent attacks on desalination plants during the Iran war"]}, {"name": "Joan McLean", "lastName": "McLean", "email": "joan.mclean@usu.edu", "university": "USU", "department": "UWRL", "title": "Research Professor", "website": "https://uwrl.usu.edu/people/faculty/mclean-joan", "waterFocus": "Water is my primary focus.", "primary": "Biogeochemistry", "specific": "Fate and behavior of contaminants in water and soil systems. Interaction of biology and chemistry", "challenges": ["Water quantity and distribution", "Water quality and ecosystems"], "regions": ["Northern Utah", "Great Salt Lake Basin"], "terms": ["Biogeochemistry", "Fate", "behavior of contaminants in water", "soil systems. Interaction of biology", "chemistry", "Water quantity", "distribution", "Water quality", "ecosystems", "Northern Utah", "Great Salt Lake Basin"]}, {"name": "Jon Meyer", "lastName": "Meyer", "email": "jon.meyer@usu.edu", "university": "Utah State University", "department": "Plants, Soils, and Climate", "title": "Assistant State Climatologist", "website": "", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Weather and Climate", "specific": "Drought monitoring, water-use and irrigation guidance, operational support for Utah's cloud seeding program.", "challenges": ["Water use and demand"], "regions": [], "terms": ["Weather", "Climate", "Drought monitoring", "water-use", "irrigation guidance", "operational support for Utah's cloud seeding program", "Water use", "demand"]}, {"name": "Nathan Moodie", "lastName": "Moodie", "email": "nathan.moodie@m.cc.utah.edu", "university": "University of Utah", "department": "Civil & Environmental Engineering / Energy & Geoscience Institute", "title": "Research Assistant Professor", "website": "https://profiles.faculty.utah.edu/u0061647", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Geologic carbon storage", "specific": "Water quality of potential storage reservoirs and protecting groundwater quality from geologic carbon storage", "challenges": ["Water use and demand"], "regions": ["Uintah Basin/Northeastern Utah", "Southwestern Utah"], "terms": ["Geologic carbon storage", "Water quality of potential storage reservoirs", "protecting groundwater quality from geologic carbon storage", "Water use", "demand", "Uintah Basin", "Northeastern Utah", "Southwestern Utah"]}, {"name": "Kyle Moor", "lastName": "Moor", "email": "kyle.moor@usu.edu", "university": "USU", "department": "BCE", "title": "Asst. Prof.", "website": "", "waterFocus": "Water is among my multiple major focus areas.", "primary": "environmental chemistry", "specific": "pollutants, surface water photochemistry", "challenges": ["Hazards"], "regions": [], "terms": ["environmental chemistry", "pollutants", "surface water photochemistry", "Hazards"]}, {"name": "Bethany Neilson", "lastName": "Neilson", "email": "bethany.neilson@usu.edu", "university": "Utah State University", "department": "Civil and Environmental Engineering/Utah Water Research Laboratory", "title": "Professor/Director", "website": "https://engineering.usu.edu/cee/people/faculty/neilson-bethany", "waterFocus": "Water is my primary focus.", "primary": "hydrology, water management", "specific": "groundwater/surface water interactions; water management; hydrologic measurement; hydrologic modeling; surface water quality; karst hydrology; permafrost hydrology;", "challenges": ["Water quantity and distribution", "Water quality and ecosystems", "Water use and demand", "Water governance"], "regions": ["Northern Utah", "Wasatch Front", "Great Salt Lake Basin"], "terms": ["hydrology", "water management", "groundwater", "surface water interactions", "hydrologic measurement", "hydrologic modeling", "surface water quality", "karst hydrology", "permafrost hydrology", "Water quantity", "distribution", "Water quality"]}, {"name": "Sarah Null", "lastName": "Null", "email": "sarah.null@usu.edu", "university": "Utah State", "department": "WEES", "title": "Professor", "website": "https://sites.google.com/usu.edu/sarahnull-acwa/home", "waterFocus": "Water is my primary focus.", "primary": "environmental water management", "specific": "My research addresses the potential to protect aquatic ecosystems while maintaining water resource benefits for people in water scarce regions. Ongoing research includes improving aquatic habitat objectives in water resources systems models, evaluating tradeoffs between human and environmental water uses with uncertainty, identifying climate adaptations for water systems, and environmental water management for saline lakes. Systems modeling, mathematical modeling, and field studies are methods I use to improve understanding of systems and explore promising solutions to problems. My research informs river restoration and water resources decision-making to enhance water sustainability in an uncertain future.", "challenges": ["Water quantity and distribution", "Water quality and ecosystems", "Water use and demand", "Water infrastructure", "Water governance"], "regions": ["Northern Utah", "Wasatch Front", "Wasatch Back", "Uintah Basin/Northeastern Utah", "Southeastern Utah", "Southwestern Utah", "Great Salt Lake Basin", "Colorado River Basin"], "terms": ["environmental water management", "My research addresses the potential to protect aquatic ecosystems while maintaining water resource benefits for people in water scarce regions. Ongoing research includes improving aquatic habitat objectives in water resources systems models", "evaluating tradeoffs between human", "environmental water uses with uncertainty", "identifying climate adaptations for water systems", "environmental water management for saline lakes. Systems modeling", "mathematical modeling", "field studies are methods I use to improve understanding of systems", "explore promising solutions to problems. My research informs river restoration", "water resources decision-making to enhance water sustainability in an uncertain future", "Water quantity", "distribution"]}, {"name": "Matt Olson", "lastName": "Olson", "email": "matt.olson@uvu.edu", "university": "Utah Valley University", "department": "Department of Earth Science", "title": "Assistant Professor", "website": "https://www.uvu.edu/directory/employee/?id=aWRudXZiTlQ1U1pXTU1qV1l1ai94Zz09", "waterFocus": "Water is my primary focus.", "primary": "Snow hydrology", "specific": "Snow surface energy and mass balance modeling; snowmelt runoff relationships; optical remote sensing", "challenges": ["Water quantity and distribution"], "regions": ["Wasatch Front", "Wasatch Back", "Uintah Basin/Northeastern Utah", "Great Salt Lake Basin", "Colorado River Basin"], "terms": ["Snow hydrology", "Snow surface energy", "mass balance modeling", "snowmelt runoff relationships", "optical remote sensing", "Water quantity", "distribution", "Wasatch Front", "Wasatch Back", "Uintah Basin", "Northeastern Utah", "Great Salt Lake Basin"]}, {"name": "Kevin Perry", "lastName": "Perry", "email": "kevin.perry@utah.edu", "university": "University of Utah", "department": "Atmospheric Sciences", "title": "Professor", "website": "https://profiles.faculty.utah.edu/u0302380", "waterFocus": "Water is a secondary focus area for me.", "primary": "Air Quality", "specific": "Great Salt Lake, dust mitigation", "challenges": ["Water quality and ecosystems", "Hazards"], "regions": ["Wasatch Front", "Great Salt Lake Basin"], "terms": ["Air Quality", "Great Salt Lake", "dust mitigation", "Water quality", "ecosystems", "Hazards", "Wasatch Front", "Great Salt Lake Basin"]}, {"name": "Christie Pondell", "lastName": "Pondell", "email": "christina.pondell@utahtech.edu", "university": "Utah Tech University", "department": "Earth and Environmental Science", "title": "Assistant Professor", "website": "", "waterFocus": "Water is among my multiple major focus areas.", "primary": "geochemistry", "specific": "water quality monitoring, carbon sequestration and transport in rivers, impact of dams on river and coastal geochemistry, coastal geochemistry", "challenges": ["Water quality and ecosystems", "Water infrastructure"], "regions": ["Southwestern Utah", "Colorado River Basin"], "terms": ["geochemistry", "water quality monitoring", "carbon sequestration", "transport in rivers", "impact of dams on river", "coastal geochemistry", "Water quality", "ecosystems", "Water infrastructure", "Southwestern Utah", "Colorado River Basin"]}, {"name": "Jake Powell", "lastName": "Powell", "email": "jake.powell@usu.edu", "university": "Utah State University", "department": "Landscape Architecture and Environmental Planning", "title": "Associate Professor, Extension Specialist", "website": "https://qanr.usu.edu/directory/powell-jake", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Landscape Design", "specific": "Waterwise landscape design, green stormwater infrastructure", "challenges": ["Water use and demand"], "regions": ["Northern Utah", "Wasatch Front", "Wasatch Back", "Uintah Basin/Northeastern Utah", "Southeastern Utah", "Southwestern Utah", "Great Salt Lake Basin", "Colorado River Basin"], "terms": ["Landscape Design", "Waterwise landscape design", "green stormwater infrastructure", "Water use", "demand", "Northern Utah", "Wasatch Front", "Wasatch Back", "Uintah Basin", "Northeastern Utah", "Southeastern Utah", "Southwestern Utah"]}, {"name": "Annika Quick", "lastName": "Quick", "email": "annika.quick@byu.edu", "university": "Brigham Young University", "department": "Plant and Wildlife Sciences", "title": "Assistant Professor", "website": "https://scholar.google.com/citations?user=m-1uMygAAAAJ&hl=en", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Biogeochemistry, hydrology", "specific": "Nitrogen and carbon cycling, urban streams", "challenges": ["Water quality and ecosystems", "Water use and demand", "Water infrastructure"], "regions": ["Wasatch Front", "Great Salt Lake Basin"], "terms": ["Biogeochemistry", "hydrology", "Nitrogen", "carbon cycling", "urban streams", "Water quality", "ecosystems", "Water use", "demand", "Water infrastructure", "Wasatch Front", "Great Salt Lake Basin"]}, {"name": "Tammy Rittenour", "lastName": "Rittenour", "email": "tammy.rittenour@usu.edu", "university": "Utah State University", "department": "Water, Earth and Env Sciences", "title": "Professor", "website": "https://www.usu.edu/geo/osl/", "waterFocus": "Water is a secondary focus area for me.", "primary": "My primary research foci include landscape response to climate change, geomorphology, geoarchaeology", "specific": "records of past water use (geoarchaeology) and records of water levels and flows of the past (geomorphology)", "challenges": ["Hazards"], "regions": ["Northern Utah", "Southwestern Utah", "Great Salt Lake Basin", "Colorado River Basin"], "terms": ["My primary research foci include landscape response to climate change", "geomorphology", "geoarchaeology", "records of past water use (geoarchaeology)", "records of water levels", "flows of the past (geomorphology)", "Hazards", "Northern Utah", "Southwestern Utah", "Great Salt Lake Basin", "Colorado River Basin"]}, {"name": "David Rosenberg", "lastName": "Rosenberg", "email": "david.rosenberg@usu.edu", "university": "Utah State University", "department": "8200 Old Main Hill", "title": "Professor", "website": "http://rosenberg.usu.edu", "waterFocus": "Water is my primary focus.", "primary": "Water resources management, water conservation, participatory modeling, collaborative modeling, reservoirs, integrated and systems modeling, also work in many of the related disciplines, economics, policy, psychology, legal, collaboration, conflict.", "specific": "See above. Water systems and all the components that systems integrate across.", "challenges": ["Water quantity and distribution", "Water quality and ecosystems", "Water use and demand", "Water infrastructure", "Water governance"], "regions": ["Northern Utah", "Wasatch Front", "Great Salt Lake Basin", "Colorado River Basin"], "terms": ["Water resources management", "water conservation", "participatory modeling", "collaborative modeling", "reservoirs", "integrated", "systems modeling", "also work in many of the related disciplines", "economics", "policy", "psychology", "legal"]}, {"name": "Summer Rupper", "lastName": "Rupper", "email": "summer.rupper@ess.utah.edu", "university": "University of Utah", "department": "Schoold of Environment, Society, and Sustainability", "title": "Professor, Associate Dean of Research", "website": "", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Cryosphere/glaciology", "specific": "Role of snow and glaciers in water seasonality and spatial distribution, and response to climate change. Role of the cryosphere in mountain systems.", "challenges": ["Water quantity and distribution", "Hazards"], "regions": ["Great Salt Lake Basin", "Colorado River Basin"], "terms": ["Cryosphere", "glaciology", "Role of snow", "glaciers in water seasonality", "spatial distribution", "response to climate change. Role of the cryosphere in mountain systems", "Water quantity", "distribution", "Hazards", "Great Salt Lake Basin", "Colorado River Basin"]}, {"name": "Stacia Ryder", "lastName": "Ryder", "email": "stacia.ryder@usu.edu", "university": "Utah State University", "department": "Sociology/School of Social Sciences", "title": "Assistant Professor", "website": "", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Sociology", "specific": "Environmental and climate justice and equity; drying lakes in arid climates; Great Salt Lake", "challenges": ["Water governance", "Hazards"], "regions": ["Great Salt Lake Basin"], "terms": ["Sociology", "Environmental", "climate justice", "equity", "drying lakes in arid climates", "Great Salt Lake", "Water governance", "Hazards", "Great Salt Lake Basin"]}, {"name": "Pin Shuai", "lastName": "Shuai", "email": "Pin.shuai@usu.edu", "university": "Utah State University", "department": "Civil and Environmental Engineering", "title": "Assistant Professor", "website": "https://groundwater.usu.edu/", "waterFocus": "Water is my primary focus.", "primary": "Hydrology", "specific": "Groundwater-surface water interactions, contaminant transport, hydrologic modeling", "challenges": ["Water quantity and distribution", "Water quality and ecosystems", "Water use and demand"], "regions": ["Northern Utah", "Great Salt Lake Basin", "Colorado River Basin"], "terms": ["Hydrology", "Groundwater-surface water interactions", "contaminant transport", "hydrologic modeling", "Water quantity", "distribution", "Water quality", "ecosystems", "Water use", "demand", "Northern Utah", "Great Salt Lake Basin"]}, {"name": "D. Kip Solomon", "lastName": "Solomon", "email": "kip.solomon@utah.edu", "university": "Utah", "department": "Geology and Geophysics", "title": "Distinguished Professor", "website": "", "waterFocus": "Water is my primary focus.", "primary": "hydrogeology and tracers", "specific": "Regional groundwater, groundwater - surface water interactions", "challenges": ["Water quantity and distribution", "Water quality and ecosystems", "Hazards"], "regions": ["Northern Utah", "Wasatch Front", "Wasatch Back", "Great Salt Lake Basin", "Colorado River Basin"], "terms": ["hydrogeology", "tracers", "Regional groundwater", "groundwater - surface water interactions", "Water quantity", "distribution", "Water quality", "ecosystems", "Hazards", "Northern Utah", "Wasatch Front", "Wasatch Back"]}, {"name": "Courtenay Strong", "lastName": "Strong", "email": "court.strong@utah.edu", "university": "University of Utah", "department": "Atmospheric Sciences", "title": "Professor", "website": "https://www.home.chpc.utah.edu/~strong/", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Weather and climate", "specific": "Supply variability, downscaling, forecasting, climate projection", "challenges": ["Water quantity and distribution", "Water use and demand", "Hazards"], "regions": ["Northern Utah", "Wasatch Front", "Wasatch Back", "Uintah Basin/Northeastern Utah", "Southeastern Utah", "Southwestern Utah", "Great Salt Lake Basin", "Colorado River Basin"], "terms": ["Weather", "climate", "Supply variability", "downscaling", "forecasting", "climate projection", "Water quantity", "distribution", "Water use", "demand", "Hazards", "Northern Utah"]}, {"name": "Yiming Su", "lastName": "Su", "email": "yiming.su@usu.edu", "university": "USU", "department": "Biological and Chemical Engineering", "title": "Assistant Professor", "website": "", "waterFocus": "Water is my primary focus.", "primary": "Water chemistry; geochemistry; functional nanomaterial; Physical chemical processes in environmental engineering; environmental engineering;", "specific": "Emerging contamination (PFAS, Micro/nanoplastic) quantification and removal in the environment; Fate and transport of of emerging contaminants and their human health impacts; Nanomaterials development for sustainable environment and agriculture;", "challenges": ["Water quality and ecosystems", "Hazards"], "regions": [], "terms": ["Water chemistry", "geochemistry", "functional nanomaterial", "Physical chemical processes in environmental engineering", "environmental engineering", "Emerging contamination (PFAS", "Micro", "nanoplastic) quantification", "removal in the environment", "Fate", "transport of of emerging contaminants", "their human health impacts"]}, {"name": "David Tarboton", "lastName": "Tarboton", "email": "david.tarboton@usu.edu", "university": "USU", "department": "CEE/UWRL", "title": "Professor", "website": "https://uwrl.usu.edu/people/faculty/tarboton-david", "waterFocus": "Water is my primary focus.", "primary": "Hydrology", "specific": "surface water hydrology, stochastic hydrology, digital elevation models, information systems, terrain analysis", "challenges": ["Water quantity and distribution", "Water use and demand", "Hazards"], "regions": ["Northern Utah", "Great Salt Lake Basin", "Colorado River Basin"], "terms": ["Hydrology", "surface water hydrology", "stochastic hydrology", "digital elevation models", "information systems", "terrain analysis", "Water quantity", "distribution", "Water use", "demand", "Hazards", "Northern Utah"]}, {"name": "Blake Tullis", "lastName": "Tullis", "email": "blake.tullis@usu.edu", "university": "USU", "department": "CEE/UWRL", "title": "Professor", "website": "https://engineering.usu.edu/cee/people/faculty/tullis-blake", "waterFocus": "Water is my primary focus.", "primary": "Hydraulics", "specific": "Hydraulics, Fluid Mechanics, Hydraulic structures (spillways, pipeline, culverts, control structures), erosion control, valves and flow meters, workforce development", "challenges": ["Water quantity and distribution", "Water infrastructure", "Hazards"], "regions": [], "terms": ["Hydraulics", "Fluid Mechanics", "Hydraulic structures (spillways", "pipeline", "culverts", "control structures)", "erosion control", "valves", "flow meters", "workforce development", "Water quantity", "distribution"]}, {"name": "Xuming Wang", "lastName": "Wang", "email": "x.wang@utah.edu", "university": "University of Utah", "department": "Metallugical Engineering", "title": "Research Professor", "website": "https://scholar.google.com/citations?user=tXbTDacAAAAJ&hl=en", "waterFocus": "Water is among my multiple major focus areas.", "primary": "primary focus is on Mineral Processing, hydrometallurgical techniques, and wastewater treatment for the recovery and recycling of critical minerals, and the surface chemistry underlying these processes.", "specific": "Wastewater treatment and valuable element recovery from water", "challenges": ["Water quality and ecosystems", "Hazards"], "regions": [], "terms": ["primary focus is on Mineral Processing", "hydrometallurgical techniques", "wastewater treatment for the recovery", "recycling of critical minerals", "the surface chemistry underlying these processes", "Wastewater treatment", "valuable element recovery from water", "Water quality", "ecosystems", "Hazards"]}, {"name": "Sara Warix", "lastName": "Warix", "email": "sara.warix@utah.edu", "university": "University of Utah", "department": "Geology and Geophysics", "title": "Assistant Professor", "website": "https://sarawarix.com", "waterFocus": "Water is my primary focus.", "primary": "Hydrology, geochemistry", "specific": "groundwater-surface water interactions, rock weathering, intermittent streams, groundwater age dating", "challenges": ["Water quantity and distribution", "Water quality and ecosystems", "Water use and demand"], "regions": ["Northern Utah", "Wasatch Front", "Wasatch Back", "Uintah Basin/Northeastern Utah", "Great Salt Lake Basin", "Colorado River Basin"], "terms": ["Hydrology", "geochemistry", "groundwater-surface water interactions", "rock weathering", "intermittent streams", "groundwater age dating", "Water quantity", "distribution", "Water quality", "ecosystems", "Water use", "demand"]}, {"name": "Jennifer Weidhaas", "lastName": "Weidhaas", "email": "jennifer.weidhaas@utah.edu", "university": "University of Utah", "department": "Civil and Environmental Engineering", "title": "Professor", "website": "https://profiles.faculty.utah.edu/u6007279", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Environmental Engineering, Risk Assessment, Environmental Microbiology", "specific": "environmental microbiology, industrial wastewater treatment, remediation", "challenges": ["Water quality and ecosystems"], "regions": [], "terms": ["Environmental Engineering", "Risk Assessment", "Environmental Microbiology", "industrial wastewater treatment", "remediation", "Water quality", "ecosystems"]}, {"name": "Steven Wilcox", "lastName": "Wilcox", "email": "steven.wilcox@usu.edu", "university": "Utah State University", "department": "Agricultural and Resource Economics", "title": "Assistant Professor", "website": "https://www.swwilcox.com", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Natural resource and environmental economics", "specific": "I have current projects on water pricing in Utah at the municipal level and associated state-level policies, air quality hazards associated with water distribution in the Bonneville Basin (e.g., GSL dust), and an ocean fisheries project in Mexico.", "challenges": ["Water quantity and distribution", "Water use and demand", "Water governance", "Hazards"], "regions": [], "terms": ["Natural resource", "environmental economics", "I have current projects on water pricing in Utah at the municipal level", "associated state-level policies", "air quality hazards associated with water distribution in the Bonneville Basin (e.g", "GSL dust)", "an ocean fisheries project in Mexico", "Water quantity", "distribution", "Water use", "demand", "Water governance"]}, {"name": "Wayne Wurtsbaugh", "lastName": "Wurtsbaugh", "email": "Wayne.wurtsbaugh@usu.edu", "university": "Utah State University", "department": "Wildland Resources", "title": "Emeritus Professor", "website": "", "waterFocus": "Water is my primary focus.", "primary": "Limnology", "specific": "Fish ecology, plankton, water pollution, cyanobacteria, lakes", "challenges": ["Water quality and ecosystems"], "regions": ["Great Salt Lake Basin"], "terms": ["Limnology", "Fish ecology", "plankton", "water pollution", "cyanobacteria", "lakes", "Water quality", "ecosystems", "Great Salt Lake Basin"]}, {"name": "Reagan Wytsalucy", "lastName": "Wytsalucy", "email": "reagan.wytsalucy@usu.edu", "university": "Utah State University", "department": "Extension", "title": "Agriculture|Natural Resources Associate Professor", "website": "", "waterFocus": "Water is among my multiple major focus areas.", "primary": "Horticulture", "specific": "Agriculture water use", "challenges": ["Water quantity and distribution"], "regions": ["Southeastern Utah"], "terms": ["Horticulture", "Agriculture water use", "Water quantity", "distribution", "Southeastern Utah"]}, {"name": "Sara Yeo", "lastName": "Yeo", "email": "sara.yeo@utah.edu", "university": "University of Utah", "department": "Communication", "title": "Professor", "website": "https://profiles.faculty.utah.edu/u0986341", "waterFocus": "Water is among my multiple major focus areas.", "primary": "science communication", "specific": "Communication of water-related issues.", "challenges": [], "regions": [], "terms": ["science communication", "Communication of water-related issues"]}, {"name": "Matt Yost", "lastName": "Yost", "email": "matt.yost@usu.edu", "university": "USU", "department": "PSC", "title": "Professor and Agroclimate Extension Specialist", "website": "https://qanr.usu.edu/directory/yost-matt", "waterFocus": "Water is among my multiple major focus areas.", "primary": "agriculture water optimization, irrigation, agronomy", "specific": "Nutrient management, soil health, irrigation, distribution system measurements", "challenges": ["Water quantity and distribution", "Water quality and ecosystems", "Water use and demand"], "regions": ["Northern Utah", "Wasatch Front", "Wasatch Back", "Uintah Basin/Northeastern Utah", "Southeastern Utah", "Southwestern Utah", "Great Salt Lake Basin", "Colorado River Basin"], "terms": ["agriculture water optimization", "irrigation", "agronomy", "Nutrient management", "soil health", "distribution system measurements", "Water quantity", "distribution", "Water quality", "ecosystems", "Water use", "demand"]}, {"name": "Amy Zhang", "lastName": "Zhang", "email": "w.zhang@usu.edu", "university": "USU", "department": "Plants, Soils and Climate", "title": "Associate Professor", "website": "https://scholar.google.com/citations?hl=en&user=qnAR1zcAAAAJ&view_op=list_works&sortby=pubdate", "waterFocus": "Water is my primary focus.", "primary": "hydroclimate", "specific": "seasonal-to-decadal prediction, water budget, droughts/floods, modeling", "challenges": ["Water quantity and distribution", "Hazards"], "regions": ["Great Salt Lake Basin", "Colorado River Basin"], "terms": ["hydroclimate", "seasonal-to-decadal prediction", "water budget", "droughts", "floods", "modeling", "Water quantity", "distribution", "Hazards", "Great Salt Lake Basin", "Colorado River Basin"]}];
+</script>
+<script>
+
+(function () {
+  const root = document.getElementById("uwn-faculty-directory");
+  if (!root) return;
+
+  const data = window.UWN_FACULTY_DATA || [];
+  const search = root.querySelector("[data-uwn-search]");
+  const institution = root.querySelector("[data-uwn-institution]");
+  const region = root.querySelector("[data-uwn-region]");
+  const primaryOnly = root.querySelector("[data-uwn-primary-only]");
+  const count = root.querySelector("[data-uwn-count]");
+  const topics = root.querySelector("[data-uwn-topics]");
+  const results = root.querySelector("[data-uwn-results]");
+  const empty = root.querySelector("[data-uwn-empty]");
+  let activeTopic = "All";
+
+  const challengeNames = ["Water quantity and distribution", "Water quality and ecosystems", "Water use and demand", "Water infrastructure", "Water governance", "Hazards"];
+  const institutions = [...new Set(data.map(item => item.university).filter(Boolean))].sort();
+  const regions = [...new Set(data.flatMap(item => item.regions || []))].sort();
+
+  function option(value) {
+    const opt = document.createElement("option");
+    opt.value = value;
+    opt.textContent = value;
+    return opt;
+  }
+
+  institutions.forEach(value => institution.appendChild(option(value)));
+  regions.forEach(value => region.appendChild(option(value)));
+
+  function matches(item) {
+    const query = search.value.trim().toLowerCase();
+    const searchable = [
+      item.name,
+      item.email,
+      item.university,
+      item.department,
+      item.title,
+      item.waterFocus,
+      item.primary,
+      item.specific,
+      ...(item.challenges || []),
+      ...(item.regions || []),
+      ...(item.terms || [])
+    ].join(" ").toLowerCase();
+
+    if (query && !searchable.includes(query)) return false;
+    if (institution.value && item.university !== institution.value) return false;
+    if (region.value && !(item.regions || []).includes(region.value)) return false;
+    if (activeTopic !== "All" && !(item.challenges || []).includes(activeTopic)) return false;
+    if (primaryOnly.checked && !String(item.waterFocus || "").toLowerCase().includes("primary")) return false;
+    return true;
+  }
+
+  function chip(text, modifier) {
+    return `<span class="uwn-chip${modifier ? ` ${modifier}` : ""}">${escapeHtml(text)}</span>`;
+  }
+
+  function escapeHtml(value) {
+    return String(value || "").replace(/[&<>"']/g, character => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[character]));
+  }
+
+  function card(item) {
+    const profile = item.website ? `<a href="${escapeHtml(item.website)}" target="_blank" rel="noopener">Profile</a>` : "";
+    const email = item.email ? `<a href="mailto:${escapeHtml(item.email)}">Email</a>` : "";
+    return `
+      <article class="uwn-person">
+        <div class="uwn-person__top">
+          <h3>${escapeHtml(item.name)}</h3>
+          <div class="uwn-person__meta">${escapeHtml(item.title || "Faculty")}</div>
+          <div class="uwn-person__meta">${escapeHtml([item.department, item.university].filter(Boolean).join(", "))}</div>
+        </div>
+        <div class="uwn-person__expertise">
+          <div class="uwn-person__label">Primary expertise</div>
+          <p>${escapeHtml(item.primary || "Not listed")}</p>
+        </div>
+        ${item.specific ? `<div class="uwn-person__expertise"><div class="uwn-person__label">Specific focus areas</div><p>${escapeHtml(item.specific)}</p></div>` : ""}
+        ${(item.challenges || []).length ? `<div class="uwn-person__chips" aria-label="Water challenge expertise">${item.challenges.map(value => chip(value, "")).join("")}</div>` : ""}
+        ${(item.regions || []).length ? `<div class="uwn-person__chips" aria-label="Geographic focus">${item.regions.map(value => chip(value, "uwn-chip--region")).join("")}</div>` : ""}
+        ${(item.terms || []).length ? `<div class="uwn-person__chips" aria-label="Search topics">${item.terms.slice(0, 5).map(value => chip(value, "uwn-chip--term")).join("")}</div>` : ""}
+        ${(profile || email) ? `<div class="uwn-person__links">${[profile, email].filter(Boolean).join("")}</div>` : ""}
+      </article>
+    `;
+  }
+
+  function renderTopics() {
+    topics.innerHTML = ["All", ...challengeNames].map(value => {
+      const pressed = value === activeTopic ? "true" : "false";
+      return `<button type="button" aria-pressed="${pressed}" data-topic="${escapeHtml(value)}">${escapeHtml(value)}</button>`;
+    }).join("");
+  }
+
+  function render() {
+    const filtered = data.filter(matches);
+    count.textContent = `${filtered.length} ${filtered.length === 1 ? "expert" : "experts"} shown`;
+    results.innerHTML = filtered.map(card).join("");
+    empty.hidden = filtered.length > 0;
+  }
+
+  topics.addEventListener("click", event => {
+    const button = event.target.closest("button[data-topic]");
+    if (!button) return;
+    activeTopic = button.dataset.topic;
+    renderTopics();
+    render();
+  });
+
+  [search, institution, region, primaryOnly].forEach(control => {
+    control.addEventListener("input", render);
+    control.addEventListener("change", render);
+  });
+
+  renderTopics();
+  render();
+}());
+
+</script>
