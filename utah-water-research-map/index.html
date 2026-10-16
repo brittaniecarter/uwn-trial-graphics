@@ -57,39 +57,10 @@
       padding: 28px 18px;
     }
 
-    .geo-map__header {
-      margin-bottom: 20px;
-    }
-
-    .geo-map__eyebrow {
-      margin: 0 0 6px;
-      color: var(--usu-light-blue);
-      font-size: 0.82rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
-    .geo-map h1,
     .detail-title,
     .count-value {
       font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
       letter-spacing: 0;
-    }
-
-    .geo-map h1 {
-      margin: 0;
-      color: var(--usu-blue);
-      font-size: clamp(1.75rem, 3vw, 2.65rem);
-      line-height: 1.08;
-      font-weight: 900;
-    }
-
-    .geo-map__lede {
-      max-width: 860px;
-      margin: 10px 0 0;
-      color: var(--muted);
-      font-size: 1.02rem;
     }
 
     .geo-map__layout {
@@ -160,39 +131,42 @@
       min-height: 520px;
     }
 
-    .county {
+    .state-base {
       fill: var(--map-base);
-      stroke: #ffffff;
-      stroke-width: 1.25;
-      transition: fill 160ms ease, opacity 160ms ease, stroke 160ms ease, stroke-width 160ms ease;
+      stroke: none;
+      pointer-events: none;
+    }
+
+    .region-fill {
+      fill: transparent;
+      stroke: none;
       cursor: pointer;
+      pointer-events: all;
+      transition: fill 160ms ease;
     }
 
-    .county.is-related {
-      fill: var(--map-mid);
-    }
-
-    .county.is-active {
+    .region-fill.is-selected {
       fill: var(--map-strong);
-      stroke: var(--usu-blue);
-      stroke-width: 1.8;
     }
 
-    .county.is-hovered {
-      fill: var(--usu-orange);
-      stroke: var(--usu-orange-dark);
-      stroke-width: 2.2;
-    }
-
-    .county.is-muted {
-      opacity: 0.34;
+    .region-fill:hover,
+    .region-fill:focus {
+      fill: rgba(47, 111, 159, 0.72);
+      outline: none;
     }
 
     .state-outline {
       fill: none;
       stroke: var(--usu-blue);
-      stroke-width: 2.5;
-      pointer-events: none;
+      stroke-width: 5;
+      cursor: pointer;
+      pointer-events: stroke;
+    }
+
+    .state-outline:hover,
+    .state-outline:focus {
+      stroke-width: 6.5;
+      outline: none;
     }
 
     .area-label {
@@ -306,7 +280,8 @@
       font-weight: 700;
     }
 
-    .count-context {
+    .count-context,
+    .directory-note {
       margin: 5px 0 0;
       color: var(--muted);
       font-size: 0.92rem;
@@ -409,14 +384,9 @@
         padding: 0;
       }
 
-      .geo-map__header,
       .map-panel,
       .detail-panel {
         border-radius: 0;
-      }
-
-      .geo-map__header {
-        padding: 20px 16px 0;
       }
 
       .geo-map__layout {
@@ -447,21 +417,15 @@
 </head>
 <body>
   <main class="geo-map" aria-label="Utah water research geographic focus map">
-    <header class="geo-map__header">
-      <p class="geo-map__eyebrow">Utah's Water Faculty Network</p>
-      <h1>Where survey participants focus their water research</h1>
-      <p class="geo-map__lede">Hover over Utah counties or choose a survey geography to see how many respondents work in that area.</p>
-    </header>
-
     <div class="geo-map__layout">
       <section class="map-panel" aria-label="Interactive Utah map">
-        <div class="area-controls" id="areaControls" aria-label="Survey geographic focus areas"></div>
+        <div class="area-controls" id="areaControls" aria-label="Faculty research focus areas"></div>
         <div class="map-wrap" id="mapWrap">
           <div class="loading" id="loading">Loading Utah map...</div>
           <svg class="utah-svg" id="utahSvg" role="img" aria-labelledby="mapTitle mapDesc"></svg>
           <div class="tooltip" id="tooltip" role="tooltip" aria-hidden="true"></div>
         </div>
-        <p class="map-note">Some survey geographies overlap. Hovering a county shows every survey area that includes that county.</p>
+        <p class="map-note">This graphic reflects self-reported research areas from UWN faculty. It does not represent all water research conducted across Utah.</p>
       </section>
 
       <aside class="detail-panel" aria-live="polite">
@@ -474,8 +438,9 @@
         <div class="count-card">
           <div class="count-value" id="detailCount"></div>
           <div>
-            <p class="count-label">Survey respondents</p>
+            <p class="count-label">Faculty members</p>
             <p class="count-context" id="detailContext"></p>
+            <p class="directory-note">Please refer to the Faculty Expertise Directory for more details about the faculty working in each area.</p>
           </div>
         </div>
 
@@ -484,10 +449,6 @@
           <div class="ranking" id="ranking"></div>
         </section>
 
-        <section>
-          <p class="detail-kicker">Counties highlighted</p>
-          <ul class="county-list" id="countyList"></ul>
-        </section>
       </aside>
     </div>
   </main>
@@ -502,7 +463,7 @@
         fullLabel: "Great Salt Lake Basin",
         count: 38,
         counties: ["49003", "49005", "49011", "49023", "49029", "49033", "49035", "49043", "49045", "49049", "49051", "49057"],
-        note: "Respondents who marked GSL Basin Geographic Focus."
+        note: "Faculty members who reported research in the Great Salt Lake Basin."
       },
       {
         id: "northern-utah",
@@ -510,7 +471,7 @@
         fullLabel: "Northern Utah",
         count: 34,
         counties: ["49003", "49005", "49011", "49029", "49033", "49057"],
-        note: "Respondents with any nonblank Northern Utah response."
+        note: "Faculty members who reported research in Northern Utah."
       },
       {
         id: "wasatch-front",
@@ -518,7 +479,7 @@
         fullLabel: "Wasatch Front",
         count: 34,
         counties: ["49011", "49035", "49045", "49049", "49057"],
-        note: "Respondents who marked Wasatch Front Geographic Focus."
+        note: "Faculty members who reported research along the Wasatch Front."
       },
       {
         id: "colorado-river",
@@ -526,7 +487,7 @@
         fullLabel: "Colorado River Basin",
         count: 28,
         counties: ["49007", "49009", "49013", "49015", "49017", "49019", "49025", "49031", "49037", "49039", "49041", "49047", "49055"],
-        note: "Respondents who marked Colorado River Basin Geographic Focus."
+        note: "Faculty members who reported research in the Colorado River Basin."
       },
       {
         id: "southeastern-utah",
@@ -534,7 +495,7 @@
         fullLabel: "Southeastern Utah",
         count: 12,
         counties: ["49007", "49015", "49019", "49037", "49055"],
-        note: "Respondents who marked Southeastern Utah Geographic Focus."
+        note: "Faculty members who reported research in Southeastern Utah."
       },
       {
         id: "wasatch-back",
@@ -542,7 +503,7 @@
         fullLabel: "Wasatch Back",
         count: 11,
         counties: ["49029", "49043", "49051"],
-        note: "Respondents who marked Wasatch Back Geographic Focus."
+        note: "Faculty members who reported research in the Wasatch Back."
       },
       {
         id: "southwestern-utah",
@@ -550,7 +511,7 @@
         fullLabel: "Southwestern Utah",
         count: 11,
         counties: ["49001", "49017", "49021", "49025", "49031", "49053"],
-        note: "Respondents who marked Southwestern Utah Geographic Focus."
+        note: "Faculty members who reported research in Southwestern Utah."
       },
       {
         id: "uintah-basin",
@@ -558,7 +519,7 @@
         fullLabel: "Uintah Basin / Northeastern Utah",
         count: 10,
         counties: ["49009", "49013", "49047"],
-        note: "Respondents who marked Uintah Basin/Northeastern Utah Geographic Focus."
+        note: "Faculty members who reported research in the Uintah Basin and Northeastern Utah."
       }
     ];
 
@@ -581,10 +542,20 @@
       "southeastern-utah": [-109.65, 38.05],
       "wasatch-back": [-111.25, 40.75],
       "southwestern-utah": [-113.05, 37.65],
-      "uintah-basin": [-109.85, 40.45]
+      "uintah-basin": [-109.85, 40.45],
+      "statewide": [-111.2, 39.35]
     };
 
-    const maxCount = Math.max(...areaData.map((area) => area.count));
+    const statewideArea = {
+      id: "statewide",
+      label: "State-wide",
+      fullLabel: "State-wide",
+      count: 45,
+      counties: [],
+      note: "Faculty members who reported research across the state."
+    };
+    const allAreas = [...areaData, statewideArea];
+    const maxCount = Math.max(...allAreas.map((area) => area.count));
     const controls = document.getElementById("areaControls");
     const svg = d3.select("#utahSvg");
     const loading = document.getElementById("loading");
@@ -596,25 +567,33 @@
     const detailCount = document.getElementById("detailCount");
     const detailContext = document.getElementById("detailContext");
     const ranking = document.getElementById("ranking");
-    const countyList = document.getElementById("countyList");
-
     let selectedArea = areaData[0];
     let counties = [];
+    let countyTopology = null;
+    let countyGeometryById = new Map();
     let stateFeature = null;
     let projection = null;
     let path = null;
 
     function areaForId(id) {
-      return areaData.find((area) => area.id === id) || areaData[0];
+      return allAreas.find((area) => area.id === id) || areaData[0];
     }
 
     function areasForCounty(countyId) {
       return areaData.filter((area) => area.counties.includes(countyId));
     }
 
+    function mergedFeatureForArea(area) {
+      if (area.id === "statewide") return stateFeature;
+      const geometries = area.counties
+        .map((id) => countyGeometryById.get(id))
+        .filter(Boolean);
+      return topojson.merge(countyTopology, geometries);
+    }
+
     function renderControls() {
       controls.replaceChildren();
-      areaData.forEach((area) => {
+      allAreas.forEach((area) => {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "area-button";
@@ -630,7 +609,7 @@
 
     function renderRanking() {
       ranking.replaceChildren();
-      areaData
+      allAreas
         .slice()
         .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
         .forEach((area) => {
@@ -648,48 +627,19 @@
         });
     }
 
-    function renderCountyList(area) {
-      countyList.replaceChildren();
-      area.counties
-        .map((id) => countyNames[id] || id)
-        .sort((a, b) => a.localeCompare(b))
-        .forEach((name) => {
-          const item = document.createElement("li");
-          item.textContent = name;
-          countyList.appendChild(item);
-        });
-    }
-
-    function updateDetails(area, countyFeature) {
-      if (countyFeature) {
-        const countyAreas = areasForCounty(countyFeature.id).sort((a, b) => b.count - a.count);
-        detailKicker.textContent = "Hovered county";
-        detailTitle.textContent = `${countyNames[countyFeature.id] || countyFeature.properties.name} County`;
-        detailText.textContent = countyAreas.length
-          ? "Survey geographies associated with this county are highlighted below."
-          : "This county is not assigned to a displayed survey geography.";
-        detailCount.textContent = countyAreas.length ? countyAreas[0].count : "0";
-        detailContext.textContent = countyAreas.length
-          ? `${countyAreas[0].fullLabel} has the largest respondent count among this county's survey geographies.`
-          : "No respondents are assigned through the displayed survey geography groups.";
-        renderCountyList(area);
-        return;
-      }
-
+    function updateDetails(area) {
       detailKicker.textContent = "Selected area";
       detailTitle.textContent = area.fullLabel;
       detailText.textContent = area.note;
       detailCount.textContent = area.count;
-      detailContext.textContent = `${area.count} of 93 survey records marked this geographic focus.`;
-      renderCountyList(area);
+      detailContext.textContent = area.id === "statewide"
+        ? `${area.count} faculty members report research statewide.`
+        : `${area.count} faculty members report research in this area.`;
     }
 
     function updateMap() {
-      const active = new Set(selectedArea.counties);
-      svg.selectAll(".county")
-        .classed("is-active", (d) => active.has(d.id))
-        .classed("is-related", (d) => areasForCounty(d.id).length > 0)
-        .classed("is-muted", (d) => !active.has(d.id) && areasForCounty(d.id).length > 0);
+      svg.selectAll(".region-fill")
+        .classed("is-selected", (d) => d.id === selectedArea.id);
 
       svg.selectAll(".area-label")
         .style("display", (d) => d.id === selectedArea.id ? null : "none");
@@ -705,15 +655,11 @@
       updateMap();
     }
 
-    function showTooltip(event, county) {
-      const countyAreas = areasForCounty(county.id).sort((a, b) => b.count - a.count);
+    function showTooltip(event, title, text) {
       const rect = mapWrap.getBoundingClientRect();
-      const lines = countyAreas.length
-        ? countyAreas.map((area) => `${area.fullLabel}: ${area.count}`).join("<br>")
-        : "No displayed survey geography";
       tooltip.innerHTML = `
-        <p class="tooltip-title">${countyNames[county.id] || county.properties.name} County</p>
-        <p class="tooltip-line">${lines}</p>
+        <p class="tooltip-title">${title}</p>
+        <p class="tooltip-line">${text}</p>
       `;
       tooltip.style.left = `${event.clientX - rect.left}px`;
       tooltip.style.top = `${event.clientY - rect.top}px`;
@@ -726,6 +672,13 @@
       tooltip.setAttribute("aria-hidden", "true");
     }
 
+    function showAreaTooltip(event, area) {
+      const text = area.id === "statewide"
+        ? `${area.count} faculty members report research statewide`
+        : `${area.count} faculty members report research in this area`;
+      showTooltip(event, area.fullLabel, text);
+    }
+
     function drawMap() {
       const width = Math.max(320, svg.node().clientWidth || 650);
       const height = Math.max(500, Math.round(width * 1.02));
@@ -733,44 +686,47 @@
       svg.selectAll("*").remove();
 
       svg.append("title").attr("id", "mapTitle").text("Utah geographic focus areas");
-      svg.append("desc").attr("id", "mapDesc").text("County map of Utah highlighting survey geographic focus areas and respondent counts.");
+      svg.append("desc").attr("id", "mapDesc").text("Map of Utah highlighting faculty research focus areas and faculty member counts.");
 
       projection = d3.geoAlbersUsa();
       path = d3.geoPath(projection);
       projection.fitSize([width - 28, height - 24], stateFeature);
       projection.translate([projection.translate()[0] + 14, projection.translate()[1] + 12]);
 
-      const countyGroup = svg.append("g").attr("aria-label", "Utah counties");
-      countyGroup.selectAll("path")
-        .data(counties)
+      svg.append("path")
+        .datum(stateFeature)
+        .attr("class", "state-base")
+        .attr("d", path);
+
+      svg.append("g")
+        .attr("aria-label", "Research focus regions")
+        .selectAll("path")
+        .data([statewideArea, ...areaData])
         .join("path")
-        .attr("class", "county")
-        .attr("d", path)
+        .attr("class", "region-fill")
+        .classed("is-selected", (d) => d.id === selectedArea.id)
+        .attr("d", (d) => path(mergedFeatureForArea(d)))
         .attr("tabindex", 0)
         .attr("role", "button")
-        .attr("aria-label", (d) => `${countyNames[d.id] || d.properties.name} County`)
-        .on("mouseenter focus", function(event, d) {
-          d3.select(this).classed("is-hovered", true);
-          updateDetails(selectedArea, d);
-          showTooltip(event, d);
-        })
-        .on("mousemove", function(event, d) {
-          showTooltip(event, d);
-        })
-        .on("mouseleave blur", function() {
-          d3.select(this).classed("is-hovered", false);
-          updateDetails(selectedArea);
-          hideTooltip();
-        });
+        .attr("aria-label", (d) => d.id === "statewide"
+          ? `${d.fullLabel}: ${d.count} faculty members report research statewide`
+          : `${d.fullLabel}: ${d.count} faculty members report research in this area`)
+        .on("mouseenter focus", (event, d) => showAreaTooltip(event, d))
+        .on("mousemove", (event, d) => showAreaTooltip(event, d))
+        .on("mouseleave blur", hideTooltip)
+        .on("click", (event, d) => selectArea(d.id));
 
       svg.append("path")
         .datum(stateFeature)
         .attr("class", "state-outline")
-        .attr("d", path);
+        .attr("d", path)
+        .attr("tabindex", 0)
+        .attr("role", "img")
+        .attr("aria-hidden", "true");
 
       const labelGroup = svg.append("g").attr("aria-hidden", "true");
       labelGroup.selectAll("text")
-        .data(areaData)
+        .data(allAreas)
         .join("text")
         .attr("class", "area-label")
         .attr("x", (d) => projection(labelPositions[d.id])[0])
@@ -791,7 +747,7 @@
             }
           });
           lines.push(line);
-          lines.push(`${d.count} respondents`);
+          lines.push(`${d.count} faculty`);
           return lines.map((text, i) => ({ text, i }));
         })
         .join("tspan")
@@ -809,12 +765,12 @@
 
       try {
         const topology = await d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/counties-10m.json");
+        countyTopology = topology;
         const allCounties = topojson.feature(topology, topology.objects.counties).features;
         counties = allCounties.filter((feature) => String(feature.id).startsWith("49"));
-        stateFeature = {
-          type: "FeatureCollection",
-          features: counties
-        };
+        const utahGeometries = topology.objects.counties.geometries.filter((geometry) => String(geometry.id).startsWith("49"));
+        countyGeometryById = new Map(utahGeometries.map((geometry) => [String(geometry.id), geometry]));
+        stateFeature = topojson.merge(topology, utahGeometries);
         loading.remove();
         drawMap();
       } catch (error) {
