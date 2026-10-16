@@ -1,5 +1,28 @@
 [
   {
+    "name": "Sherzod Akhundjanov",
+    "lastName": "Akhundjanov",
+    "email": "sherzod.akhundjanov@usu.edu",
+    "university": "Utah State University",
+    "department": "Department of Agricultural & Resource Economics",
+    "title": "Professor",
+    "website": "https://qanr.usu.edu/directory/akhundjanov-sherzod",
+    "specific": "• Water policies & institutions • Economic analysis • Water transfers",
+    "specificItems": [
+      "Water policies & institutions",
+      "Economic analysis",
+      "Water transfers"
+    ],
+    "challenges": [
+      "Water governance",
+      "Water quantity and distribution"
+    ],
+    "regions": [
+      "Colorado River Basin",
+      "Great Salt Lake Basin"
+    ]
+  },
+  {
     "name": "Dan Ames",
     "lastName": "Ames",
     "email": "dan.ames@byu.edu",
@@ -436,6 +459,31 @@
       "Great Salt Lake Basin",
       "Utah Other",
       "Utah Statewide"
+    ]
+  },
+  {
+    "name": "Lawrence Culver",
+    "lastName": "Culver",
+    "email": "lawrence.culver@usu.edu",
+    "university": "Utah State University",
+    "department": "History",
+    "title": "Associate Professor",
+    "website": "https://artsci.usu.edu/history-cultures-ideas/history/directory/lawrence-culver",
+    "specific": "• Water use/infrastructure history • Environmental hazards • Environmental/urban history • Climate history",
+    "specificItems": [
+      "Water use/infrastructure history",
+      "Environmental hazards",
+      "Environmental/urban history",
+      "Climate history"
+    ],
+    "challenges": [
+      "Hazards",
+      "Water infrastructure"
+    ],
+    "regions": [
+      "Great Salt Lake Basin",
+      "Northern Utah",
+      "Wasatch Front"
     ]
   },
   {
