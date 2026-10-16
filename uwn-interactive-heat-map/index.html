@@ -41,7 +41,7 @@
       margin: 0 auto;
       padding: 28px 18px;
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr);
       grid-template-columns: minmax(0, 1.36fr) minmax(320px, 0.64fr);
       gap: 22px;
       align-items: stretch;
@@ -201,7 +201,7 @@
       font-weight: 700;
     }
 
-    .detail h2 {
+    .detail h1 {
       margin: 4px 0 0;
       font-family: "Roboto Condensed", "Helvetica Neue", Helvetica, Arial, sans-serif;
       font-size: clamp(28px, 3.2vw, 42px);
@@ -418,11 +418,6 @@
 </head>
 <body>
   <main class="uwn-map" aria-label="Utah Water Network survey heat map">
-    <header class="graphic-header">
-      <p class="graphic-subtitle">Utah's Water Faculty Network</p>
-      <h1 class="graphic-title">Faculty Network</h1>
-    </header>
-
     <section class="canvas-wrap" aria-label="Network groups">
       <svg class="network-svg" aria-hidden="true">
         <g id="lines"></g>
@@ -434,7 +429,7 @@
     <aside class="detail" id="networkDetail" aria-labelledby="detailTitle" aria-live="polite">
       <div>
         <p class="detail-kicker">Selected network</p>
-        <h2 id="detailTitle"></h2>
+        <h1 id="detailTitle"></h1>
       </div>
       <div class="detail-summary">
         <div class="score" id="detailScore"></div>
