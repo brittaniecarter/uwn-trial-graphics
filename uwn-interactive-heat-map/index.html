@@ -181,6 +181,7 @@
     }
 
     .detail {
+      min-width: 0;
       min-height: 690px;
       border-radius: 6px;
       background: var(--panel);
@@ -200,7 +201,7 @@
       font-weight: 700;
     }
 
-    .detail h1 {
+    .detail h2 {
       margin: 4px 0 0;
       font-family: "Roboto Condensed", "Helvetica Neue", Helvetica, Arial, sans-serif;
       font-size: clamp(28px, 3.2vw, 42px);
@@ -247,11 +248,13 @@
     }
 
     .category-list {
+      margin: 0;
+      padding: 0 4px 0 0;
+      list-style: none;
       display: grid;
       gap: 10px;
       align-content: start;
       overflow: auto;
-      padding-right: 4px;
     }
 
     .category {
@@ -263,6 +266,7 @@
 
     .category-label {
       min-width: 0;
+      overflow-wrap: anywhere;
       font-size: 14px;
       font-weight: 700;
       line-height: 1.18;
@@ -312,7 +316,7 @@
 
     @media (max-width: 980px) {
       .uwn-map {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
       }
 
       .canvas-wrap,
@@ -332,20 +336,35 @@
       }
 
       .canvas-wrap {
-        min-height: 720px;
+        min-height: 0;
+        padding: 20px;
         border-radius: 6px;
       }
 
+      .network-svg {
+        display: none;
+      }
+
       .hub {
-        top: 50%;
+        position: static;
+        transform: none;
+        margin: 0 auto 24px;
         width: 142px;
         font-size: 23px;
       }
 
+      #nodes {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+      }
+
       .node {
-        left: calc(var(--mx, var(--x)) * 1%);
-        top: calc(var(--my, var(--y)) * 1%);
-        width: 132px;
+        position: static;
+        transform: none;
+        width: 100%;
+        min-width: 0;
+        overflow-wrap: anywhere;
         min-height: 78px;
         font-size: 13px;
         padding: 9px 10px;
@@ -360,6 +379,39 @@
       .detail {
         border-radius: 6px;
         box-shadow: none;
+      }
+
+      .node:hover,
+      .node:focus-visible,
+      .node.is-selected {
+        transform: none;
+      }
+    }
+
+    .node:focus-visible {
+      outline: 3px solid var(--blue-5);
+      outline-offset: 4px;
+    }
+
+    @media (max-width: 400px) {
+      #nodes {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .detail-summary {
+        gap: 12px;
+        padding: 12px;
+      }
+
+      .score {
+        width: 80px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .node,
+      .network-line {
+        transition: none;
       }
     }
   </style>
@@ -379,10 +431,10 @@
       <div id="nodes"></div>
     </section>
 
-    <aside class="detail" aria-live="polite">
+    <aside class="detail" id="networkDetail" aria-labelledby="detailTitle" aria-live="polite">
       <div>
         <p class="detail-kicker">Selected network</p>
-        <h1 id="detailTitle"></h1>
+        <h2 id="detailTitle"></h2>
       </div>
       <div class="detail-summary">
         <div class="score" id="detailScore"></div>
@@ -391,7 +443,7 @@
           <p class="count-context">UWN faculty members reporting connections in this area.</p>
         </div>
       </div>
-      <div class="category-list" id="categoryList"></div>
+      <ul class="category-list" id="categoryList" role="list" aria-label="Connections by subcategory"></ul>
     </aside>
   </main>
 
@@ -582,6 +634,8 @@
         const style = intensity(group.count, maxGroup);
         const button = document.createElement("button");
         button.type = "button";
+        button.setAttribute("aria-pressed", "false");
+        button.setAttribute("aria-controls", "networkDetail");
         button.className = `node ${style.level}`;
         button.dataset.id = group.id;
         button.style.setProperty("--x", group.x);
@@ -657,6 +711,7 @@
       const style = intensity(group.count, maxGroup);
       document.querySelectorAll(".node").forEach((node) => {
         node.classList.toggle("is-selected", node.dataset.id === group.id);
+        node.setAttribute("aria-pressed", String(node.dataset.id === group.id));
       });
       document.querySelectorAll(".network-line").forEach((line) => {
         line.classList.toggle("is-selected", line.dataset.id === group.id);
@@ -675,7 +730,7 @@
           const childStyle = intensity(value, maxChild);
           const width = maxChild === 0 ? 0 : (value / maxChild) * 100;
 
-          const row = document.createElement("div");
+          const row = document.createElement("li");
           row.className = "category";
           row.innerHTML = `
             <div>
