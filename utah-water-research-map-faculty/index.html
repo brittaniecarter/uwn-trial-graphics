@@ -1,0 +1,2232 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Utah Water Research Geographic Focus</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@500;700;900&display=swap");
+
+    :root {
+      color-scheme: light;
+      --usu-blue: #0f243f;
+      --usu-light-blue: #2f6f9f;
+      --usu-teal: #247c7a;
+      --usu-orange: #ffad73;
+      --usu-orange-dark: #d86e31;
+      --ink: #18212f;
+      --muted: #5c697a;
+      --line: #d7dee8;
+      --soft: #f5f7fa;
+      --panel: #ffffff;
+      --map-base: #dbe7f1;
+      --map-mid: #9fbbd2;
+      --map-strong: #2f6f9f;
+      --shadow: 0 18px 45px rgba(15, 36, 63, 0.12);
+      --radius: 8px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--soft);
+      font-size: 16px;
+      line-height: 1.45;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .geo-map {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 18px;
+    }
+
+    .detail-title,
+    .count-value {
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
+      letter-spacing: 0;
+    }
+
+    .geo-map__layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .map-panel,
+    .detail-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .map-panel {
+      position: relative;
+      min-height: 660px;
+      padding: 18px;
+      overflow: hidden;
+    }
+
+    .area-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .area-button {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 11px;
+      color: var(--ink);
+      background: #fff;
+      font: inherit;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .area-button:hover,
+    .area-button:focus-visible {
+      border-color: var(--usu-light-blue);
+      outline: none;
+      transform: translateY(-1px);
+    }
+
+    .area-button[aria-pressed="true"] {
+      border-color: var(--usu-blue);
+      color: #fff;
+      background: var(--usu-blue);
+    }
+
+    .map-wrap {
+      position: relative;
+      min-height: 560px;
+    }
+
+    .utah-svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 520px;
+    }
+
+    .state-base {
+      fill: var(--map-base);
+      stroke: none;
+      pointer-events: none;
+    }
+
+    .region-fill {
+      fill: transparent;
+      stroke: none;
+      cursor: pointer;
+      pointer-events: all;
+      transition: fill 160ms ease;
+    }
+
+    .region-fill.is-selected {
+      fill: var(--map-strong);
+    }
+
+    .region-fill:hover,
+    .region-fill:focus {
+      fill: rgba(47, 111, 159, 0.72);
+      outline: none;
+    }
+
+    .state-outline {
+      fill: none;
+      stroke: var(--usu-blue);
+      stroke-width: 5;
+      cursor: pointer;
+      pointer-events: stroke;
+    }
+
+    .state-outline:hover,
+    .state-outline:focus {
+      stroke-width: 6.5;
+      outline: none;
+    }
+
+    .area-label {
+      pointer-events: none;
+      fill: var(--usu-blue);
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      paint-order: stroke;
+      stroke: rgba(255, 255, 255, 0.9);
+      stroke-width: 5px;
+      stroke-linejoin: round;
+    }
+
+    .map-note {
+      margin: 12px 2px 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .tooltip {
+      position: absolute;
+      z-index: 4;
+      min-width: 186px;
+      max-width: 260px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 14px 34px rgba(15, 36, 63, 0.18);
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(-50%, calc(-100% - 14px));
+      transition: opacity 120ms ease;
+    }
+
+    .tooltip.is-visible {
+      opacity: 1;
+    }
+
+    .tooltip-title {
+      margin: 0 0 4px;
+      color: var(--usu-blue);
+      font-weight: 700;
+    }
+
+    .tooltip-line {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .detail-panel {
+      min-height: 660px;
+      padding: clamp(20px, 3vw, 28px);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .detail-kicker {
+      margin: 0 0 5px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .detail-title {
+      margin: 0;
+      color: var(--usu-blue);
+      font-size: clamp(1.65rem, 2.4vw, 2.25rem);
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .detail-text {
+      margin: 8px 0 0;
+      color: var(--muted);
+    }
+
+    .count-card {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 16px;
+      align-items: center;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff, #f7fafc);
+    }
+
+    .count-value {
+      width: 96px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--usu-light-blue);
+      font-size: 2.45rem;
+      font-weight: 900;
+      box-shadow: inset 0 0 0 6px rgba(255, 255, 255, 0.24);
+    }
+
+    .count-label {
+      margin: 0;
+      color: var(--usu-blue);
+      font-weight: 700;
+    }
+
+    .count-context {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .researcher-list {
+      display: grid;
+      gap: 0;
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 8px;
+      scrollbar-color: #9cb2c3 #eef4f8;
+      scrollbar-width: thin;
+    }
+
+    .researcher-card {
+      padding: 13px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .researcher-card:first-child {
+      padding-top: 4px;
+    }
+
+    .researcher-card:last-child {
+      border-bottom: 0;
+    }
+
+    .researcher-name {
+      margin: 0;
+      color: var(--usu-blue);
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .researcher-meta {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.35;
+    }
+
+    .researcher-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      margin-top: 7px;
+      font-size: 0.84rem;
+    }
+
+    .researcher-link {
+      color: var(--usu-light-blue);
+      font-weight: 700;
+      overflow-wrap: anywhere;
+      text-underline-offset: 2px;
+    }
+
+    .researcher-link:hover,
+    .researcher-link:focus {
+      color: var(--usu-blue);
+    }
+
+    .researcher-empty {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .loading,
+    .error {
+      position: absolute;
+      inset: 74px 18px 18px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .error {
+      color: #8c2f1f;
+    }
+
+    @media (max-width: 980px) {
+      .geo-map__layout {
+        grid-template-columns: 1fr;
+      }
+
+      .map-panel,
+      .detail-panel {
+        min-height: 0;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .geo-map {
+        padding: 0;
+      }
+
+      .map-panel,
+      .detail-panel {
+        border-radius: 0;
+      }
+
+      .geo-map__layout {
+        gap: 0;
+      }
+
+      .map-panel,
+      .detail-panel {
+        border-left: 0;
+        border-right: 0;
+        box-shadow: none;
+      }
+
+      .area-button {
+        font-size: 0.82rem;
+      }
+
+      .count-card {
+        grid-template-columns: 1fr;
+      }
+
+      .count-value {
+        width: 82px;
+        font-size: 2.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="geo-map" aria-label="Utah water research geographic focus map">
+    <div class="geo-map__layout">
+      <section class="map-panel" aria-label="Interactive Utah map">
+        <div class="area-controls" id="areaControls" aria-label="Faculty research focus areas"></div>
+        <div class="map-wrap" id="mapWrap">
+          <div class="loading" id="loading">Loading Utah map...</div>
+          <svg class="utah-svg" id="utahSvg" role="img" aria-labelledby="mapTitle mapDesc"></svg>
+          <div class="tooltip" id="tooltip" role="tooltip" aria-hidden="true"></div>
+        </div>
+        <p class="map-note">This graphic reflects self-reported research areas from UWN faculty. It does not represent all water research conducted across Utah.</p>
+      </section>
+
+      <aside class="detail-panel" aria-live="polite">
+        <div>
+          <p class="detail-kicker" id="detailKicker">Selected area</p>
+          <h2 class="detail-title" id="detailTitle"></h2>
+          <p class="detail-text" id="detailText"></p>
+        </div>
+
+        <div class="count-card">
+          <div class="count-value" id="detailCount"></div>
+          <div>
+            <p class="count-label">Faculty members</p>
+            <p class="count-context" id="detailContext"></p>
+          </div>
+        </div>
+
+        <section>
+          <div class="researcher-list" id="researcherList"></div>
+        </section>
+
+      </aside>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+  <script>
+    const areaData = [
+      {
+        id: "gsl-basin",
+        label: "GSL Basin",
+        fullLabel: "Great Salt Lake Basin",
+        count: 38,
+        counties: ["49003", "49005", "49011", "49023", "49029", "49033", "49035", "49043", "49045", "49049", "49051", "49057"],
+        note: "Faculty members who reported research in the Great Salt Lake Basin."
+      },
+      {
+        id: "northern-utah",
+        label: "Northern Utah",
+        fullLabel: "Northern Utah",
+        count: 34,
+        counties: ["49003", "49005", "49011", "49029", "49033", "49057"],
+        note: "Faculty members who reported research in Northern Utah."
+      },
+      {
+        id: "wasatch-front",
+        label: "Wasatch Front",
+        fullLabel: "Wasatch Front",
+        count: 34,
+        counties: ["49011", "49035", "49045", "49049", "49057"],
+        note: "Faculty members who reported research along the Wasatch Front."
+      },
+      {
+        id: "colorado-river",
+        label: "Colorado River Basin",
+        fullLabel: "Colorado River Basin",
+        count: 28,
+        counties: ["49007", "49009", "49013", "49015", "49017", "49019", "49025", "49031", "49037", "49039", "49041", "49047", "49055"],
+        note: "Faculty members who reported research in the Colorado River Basin."
+      },
+      {
+        id: "southeastern-utah",
+        label: "Southeastern Utah",
+        fullLabel: "Southeastern Utah",
+        count: 12,
+        counties: ["49007", "49015", "49019", "49037", "49055"],
+        note: "Faculty members who reported research in Southeastern Utah."
+      },
+      {
+        id: "wasatch-back",
+        label: "Wasatch Back",
+        fullLabel: "Wasatch Back",
+        count: 11,
+        counties: ["49029", "49043", "49051"],
+        note: "Faculty members who reported research in the Wasatch Back."
+      },
+      {
+        id: "southwestern-utah",
+        label: "Southwestern Utah",
+        fullLabel: "Southwestern Utah",
+        count: 11,
+        counties: ["49001", "49017", "49021", "49025", "49031", "49053"],
+        note: "Faculty members who reported research in Southwestern Utah."
+      },
+      {
+        id: "uintah-basin",
+        label: "Uintah Basin / Northeastern Utah",
+        fullLabel: "Uintah Basin / Northeastern Utah",
+        count: 10,
+        counties: ["49009", "49013", "49047"],
+        note: "Faculty members who reported research in the Uintah Basin and Northeastern Utah."
+      }
+    ];
+
+    const countyNames = {
+      "49001": "Beaver", "49003": "Box Elder", "49005": "Cache", "49007": "Carbon",
+      "49009": "Daggett", "49011": "Davis", "49013": "Duchesne", "49015": "Emery",
+      "49017": "Garfield", "49019": "Grand", "49021": "Iron", "49023": "Juab",
+      "49025": "Kane", "49027": "Millard", "49029": "Morgan", "49031": "Piute",
+      "49033": "Rich", "49035": "Salt Lake", "49037": "San Juan", "49039": "Sanpete",
+      "49041": "Sevier", "49043": "Summit", "49045": "Tooele", "49047": "Uintah",
+      "49049": "Utah", "49051": "Wasatch", "49053": "Washington", "49055": "Wayne",
+      "49057": "Weber"
+    };
+
+    const labelPositions = {
+      "gsl-basin": [-112.45, 40.85],
+      "northern-utah": [-111.85, 41.45],
+      "wasatch-front": [-111.95, 40.35],
+      "colorado-river": [-110.25, 38.75],
+      "southeastern-utah": [-109.65, 38.05],
+      "wasatch-back": [-111.25, 40.75],
+      "southwestern-utah": [-113.05, 37.65],
+      "uintah-basin": [-109.85, 40.45],
+      "statewide": [-111.2, 39.35]
+    };
+
+    const statewideArea = {
+      id: "statewide",
+      label: "State-wide",
+      fullLabel: "State-wide",
+      count: 47,
+      counties: [],
+      note: "Faculty members who reported research across the state."
+    };
+    const allAreas = [...areaData, statewideArea];
+    const researcherData = {
+      "northern-utah": [
+        {
+          "name": "Michelle Baker",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "michelle.baker@usu.edu",
+          "profile": "https://artsci.usu.edu/biology/directory/baker-michelle"
+        },
+        {
+          "name": "Brent Black",
+          "title": "Professor and Extension Fruit Crop Specialist",
+          "university": "Utah State University",
+          "email": "brent.black@usu.edu",
+          "profile": ""
+        },
+        {
+          "name": "Roslynn Brain",
+          "title": "Professor, Sustainable Communities Extension Specialist",
+          "university": "Utah State University",
+          "email": "roslynn.brain@usu.edu",
+          "profile": "https://extension.usu.edu/sustainability/"
+        },
+        {
+          "name": "Paul Brooks",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "paul.brooks@utah.edu",
+          "profile": "https://scholar.google.com/citations?user=cJndGdYAAAAJ&hl=en"
+        },
+        {
+          "name": "Alice Carter",
+          "title": "Assistant Professor of the Practice",
+          "university": "Utah State University",
+          "email": "alice.carter@usu.edu",
+          "profile": "https://amcarter.github.io/alicecarter/"
+        },
+        {
+          "name": "Elizabeth Cohen",
+          "title": "Assistant Professor for Extension",
+          "university": "Utah State University",
+          "email": "elizabeth.cohen@usu.edu",
+          "profile": ""
+        },
+        {
+          "name": "Justin DeRose",
+          "title": "Associate Professor",
+          "university": "Utah State University",
+          "email": "justin.derose@usu.edu",
+          "profile": "https://qanr.usu.edu/wild/labs/derose-lab/"
+        },
+        {
+          "name": "Chelsea Duball",
+          "title": "Assistant Professor of Environmental Soil Science",
+          "university": "Utah State University",
+          "email": "chelsea.duball@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/duball-chelsea"
+        },
+        {
+          "name": "R Ryan Dupont",
+          "title": "Cazier Professor of Civil & Environmental Engineering",
+          "university": "Utah State University",
+          "email": "ryan.dupont@usu.edu",
+          "profile": "https://uwrl.usu.edu/people/faculty/dupont-robert"
+        },
+        {
+          "name": "Courtney Flint",
+          "title": "Professor/Assoc. Director UWRL",
+          "university": "Utah State University",
+          "email": "courtney.flint@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/flint-courtney"
+        },
+        {
+          "name": "Neil Hansen",
+          "title": "Professor",
+          "university": "Brigham Young University",
+          "email": "nel_hansen@byu.edu",
+          "profile": "https://pws.byu.edu/neil-hansen-lab"
+        },
+        {
+          "name": "John Horel",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "john.horel@utah.edu",
+          "profile": "https://horel.chpc.utah.edu"
+        },
+        {
+          "name": "Jeff Horsburgh",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "jeff.horsburgh@usu.edu",
+          "profile": "https://engineering.usu.edu/cee/people/faculty/horsburgh-jeff"
+        },
+        {
+          "name": "Scott Jones",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "scott.jones@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/jones-scott"
+        },
+        {
+          "name": "Amita Kaundal",
+          "title": "Associate Professor",
+          "university": "Utah State University",
+          "email": "amita.kaundal@usu.edu",
+          "profile": ""
+        },
+        {
+          "name": "Joan McLean",
+          "title": "Research Professor",
+          "university": "Utah State University",
+          "email": "joan.mclean@usu.edu",
+          "profile": "https://uwrl.usu.edu/people/faculty/mclean-joan"
+        },
+        {
+          "name": "Nathan Moodie",
+          "title": "Research Assistant Professor",
+          "university": "University of Utah",
+          "email": "nathan.moodie@m.cc.utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0061647"
+        },
+        {
+          "name": "Bethany Neilson",
+          "title": "Professor/Director",
+          "university": "Utah State University",
+          "email": "bethany.neilson@usu.edu",
+          "profile": "https://engineering.usu.edu/cee/people/faculty/neilson-bethany"
+        },
+        {
+          "name": "Sarah Null",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "sarah.null@usu.edu",
+          "profile": "https://sites.google.com/usu.edu/sarahnull-acwa/home"
+        },
+        {
+          "name": "Jake Powell",
+          "title": "Associate Professor, Extension Specialist",
+          "university": "Utah State University",
+          "email": "jake.powell@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/powell-jake"
+        },
+        {
+          "name": "Tammy Rittenour",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "tammy.rittenour@usu.edu",
+          "profile": "https://www.usu.edu/geo/osl/"
+        },
+        {
+          "name": "David Rosenberg",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "david.rosenberg@usu.edu",
+          "profile": "http://rosenberg.usu.edu"
+        },
+        {
+          "name": "Jessica Schad",
+          "title": "Professor of Rural and Natural Resource Sociology",
+          "university": "Utah State University",
+          "email": "jessica.schad@usu.edu",
+          "profile": "https://extension.usu.edu/directory/schad-jessica"
+        },
+        {
+          "name": "Pin Shuai",
+          "title": "Assistant Professor",
+          "university": "Utah State University",
+          "email": "Pin.shuai@usu.edu",
+          "profile": "https://groundwater.usu.edu/"
+        },
+        {
+          "name": "D. Kip Solomon",
+          "title": "Distinguished Professor",
+          "university": "University of Utah",
+          "email": "kip.solomon@utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0031586"
+        },
+        {
+          "name": "Courtenay Strong",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "court.strong@utah.edu",
+          "profile": "https://www.home.chpc.utah.edu/~strong/"
+        },
+        {
+          "name": "David Tarboton",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "david.tarboton@usu.edu",
+          "profile": "https://uwrl.usu.edu/people/faculty/tarboton-david"
+        },
+        {
+          "name": "Sara Warix",
+          "title": "Assistant Professor",
+          "university": "University of Utah",
+          "email": "sara.warix@utah.edu",
+          "profile": "https://sarawarix.com"
+        },
+        {
+          "name": "Matt Yost",
+          "title": "Professor and Agroclimate Extension Specialist",
+          "university": "Utah State University",
+          "email": "matt.yost@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/yost-matt"
+        }
+      ],
+      "wasatch-front": [
+        {
+          "name": "Michelle Baker",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "michelle.baker@usu.edu",
+          "profile": "https://artsci.usu.edu/biology/directory/baker-michelle"
+        },
+        {
+          "name": "Brent Black",
+          "title": "Professor and Extension Fruit Crop Specialist",
+          "university": "Utah State University",
+          "email": "brent.black@usu.edu",
+          "profile": ""
+        },
+        {
+          "name": "Hannah Bonner",
+          "title": "Assistant Professor",
+          "university": "Brigham Young University",
+          "email": "hbonner@byu.edu",
+          "profile": "https://geology.byu.edu/directory/hannah-bonner"
+        },
+        {
+          "name": "Roslynn Brain",
+          "title": "Professor, Sustainable Communities Extension Specialist",
+          "university": "Utah State University",
+          "email": "roslynn.brain@usu.edu",
+          "profile": "https://extension.usu.edu/sustainability/"
+        },
+        {
+          "name": "Paul Brooks",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "paul.brooks@utah.edu",
+          "profile": "https://scholar.google.com/citations?user=cJndGdYAAAAJ&hl=en"
+        },
+        {
+          "name": "Alice Carter",
+          "title": "Assistant Professor of the Practice",
+          "university": "Utah State University",
+          "email": "alice.carter@usu.edu",
+          "profile": "https://amcarter.github.io/alicecarter/"
+        },
+        {
+          "name": "Yoshi Chikamoto",
+          "title": "Associate Professor",
+          "university": "Utah State University",
+          "email": "yoshi.chikamoto@usu.edu",
+          "profile": "https://climate.usu.edu/people/yoshi/index.html"
+        },
+        {
+          "name": "Justin DeRose",
+          "title": "Associate Professor",
+          "university": "Utah State University",
+          "email": "justin.derose@usu.edu",
+          "profile": "https://qanr.usu.edu/wild/labs/derose-lab/"
+        },
+        {
+          "name": "Katherine Dowdell",
+          "title": "Assistant Professor",
+          "university": "University of Utah",
+          "email": "k.dowdell@utah.edu",
+          "profile": "https://www.katherinedowdell.com/"
+        },
+        {
+          "name": "Chelsea Duball",
+          "title": "Assistant Professor of Environmental Soil Science",
+          "university": "Utah State University",
+          "email": "chelsea.duball@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/duball-chelsea"
+        },
+        {
+          "name": "Courtney Flint",
+          "title": "Professor/Assoc. Director UWRL",
+          "university": "Utah State University",
+          "email": "courtney.flint@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/flint-courtney"
+        },
+        {
+          "name": "Jennifer Follstad Shah",
+          "title": "Associate Professor",
+          "university": "University of Utah",
+          "email": "jennifer.shah@ess.utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0957378"
+        },
+        {
+          "name": "Neil Hansen",
+          "title": "Professor",
+          "university": "Brigham Young University",
+          "email": "nel_hansen@byu.edu",
+          "profile": "https://pws.byu.edu/neil-hansen-lab"
+        },
+        {
+          "name": "John Horel",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "john.horel@utah.edu",
+          "profile": "https://horel.chpc.utah.edu"
+        },
+        {
+          "name": "Scott Hotaling",
+          "title": "Assistant Professor",
+          "university": "Utah State University",
+          "email": "scott.hotaling@usu.edu",
+          "profile": "https://qanr.usu.edu/research/ccml/"
+        },
+        {
+          "name": "Hilary Hungerford",
+          "title": "Professor",
+          "university": "Utah Valley University",
+          "email": "hilary.hungerford@uvu.edu",
+          "profile": "https://www.uvu.edu/directory/employee/?id=YTB0KzY1ZVUvdGl0UGxOcXU5eFQrdz09"
+        },
+        {
+          "name": "Joshua Lenart",
+          "title": "Associate Professor (Clinical)",
+          "university": "University of Utah",
+          "email": "j.lenart@utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0556171/about"
+        },
+        {
+          "name": "Fan-Chi Lin",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "FanChi.Lin@utah.edu",
+          "profile": "https://noise.earth.utah.edu/"
+        },
+        {
+          "name": "Bethany Neilson",
+          "title": "Professor/Director",
+          "university": "Utah State University",
+          "email": "bethany.neilson@usu.edu",
+          "profile": "https://engineering.usu.edu/cee/people/faculty/neilson-bethany"
+        },
+        {
+          "name": "Sarah Null",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "sarah.null@usu.edu",
+          "profile": "https://sites.google.com/usu.edu/sarahnull-acwa/home"
+        },
+        {
+          "name": "Matt Olson",
+          "title": "Assistant Professor",
+          "university": "Utah Valley University",
+          "email": "matt.olson@uvu.edu",
+          "profile": "https://www.uvu.edu/directory/employee/?id=aWRudXZiTlQ1U1pXTU1qV1l1ai94Zz09"
+        },
+        {
+          "name": "Kevin Perry",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "kevin.perry@utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0302380"
+        },
+        {
+          "name": "Jake Powell",
+          "title": "Associate Professor, Extension Specialist",
+          "university": "Utah State University",
+          "email": "jake.powell@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/powell-jake"
+        },
+        {
+          "name": "Annika Quick",
+          "title": "Assistant Professor",
+          "university": "Brigham Young University",
+          "email": "annika.quick@byu.edu",
+          "profile": "https://scholar.google.com/citations?user=m-1uMygAAAAJ&hl=en"
+        },
+        {
+          "name": "David Rosenberg",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "david.rosenberg@usu.edu",
+          "profile": "http://rosenberg.usu.edu"
+        },
+        {
+          "name": "D. Kip Solomon",
+          "title": "Distinguished Professor",
+          "university": "University of Utah",
+          "email": "kip.solomon@utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0031586"
+        },
+        {
+          "name": "Courtenay Strong",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "court.strong@utah.edu",
+          "profile": "https://www.home.chpc.utah.edu/~strong/"
+        },
+        {
+          "name": "Sara Warix",
+          "title": "Assistant Professor",
+          "university": "University of Utah",
+          "email": "sara.warix@utah.edu",
+          "profile": "https://sarawarix.com"
+        },
+        {
+          "name": "Matt Yost",
+          "title": "Professor and Agroclimate Extension Specialist",
+          "university": "Utah State University",
+          "email": "matt.yost@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/yost-matt"
+        }
+      ],
+      "wasatch-back": [
+        {
+          "name": "Maria Blevins",
+          "title": "Associate Professor",
+          "university": "Utah Valley University",
+          "email": "maria.blevins@uvu.edu",
+          "profile": "https://www.mariablevins.com/"
+        },
+        {
+          "name": "Paul Brooks",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "paul.brooks@utah.edu",
+          "profile": "https://scholar.google.com/citations?user=cJndGdYAAAAJ&hl=en"
+        },
+        {
+          "name": "Justin DeRose",
+          "title": "Associate Professor",
+          "university": "Utah State University",
+          "email": "justin.derose@usu.edu",
+          "profile": "https://qanr.usu.edu/wild/labs/derose-lab/"
+        },
+        {
+          "name": "Courtney Flint",
+          "title": "Professor/Assoc. Director UWRL",
+          "university": "Utah State University",
+          "email": "courtney.flint@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/flint-courtney"
+        },
+        {
+          "name": "Sarah Null",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "sarah.null@usu.edu",
+          "profile": "https://sites.google.com/usu.edu/sarahnull-acwa/home"
+        },
+        {
+          "name": "Matt Olson",
+          "title": "Assistant Professor",
+          "university": "Utah Valley University",
+          "email": "matt.olson@uvu.edu",
+          "profile": "https://www.uvu.edu/directory/employee/?id=aWRudXZiTlQ1U1pXTU1qV1l1ai94Zz09"
+        },
+        {
+          "name": "Jake Powell",
+          "title": "Associate Professor, Extension Specialist",
+          "university": "Utah State University",
+          "email": "jake.powell@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/powell-jake"
+        },
+        {
+          "name": "D. Kip Solomon",
+          "title": "Distinguished Professor",
+          "university": "University of Utah",
+          "email": "kip.solomon@utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0031586"
+        },
+        {
+          "name": "Courtenay Strong",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "court.strong@utah.edu",
+          "profile": "https://www.home.chpc.utah.edu/~strong/"
+        },
+        {
+          "name": "Sara Warix",
+          "title": "Assistant Professor",
+          "university": "University of Utah",
+          "email": "sara.warix@utah.edu",
+          "profile": "https://sarawarix.com"
+        },
+        {
+          "name": "Matt Yost",
+          "title": "Professor and Agroclimate Extension Specialist",
+          "university": "Utah State University",
+          "email": "matt.yost@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/yost-matt"
+        }
+      ],
+      "uintah-basin": [
+        {
+          "name": "Paul Brooks",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "paul.brooks@utah.edu",
+          "profile": "https://scholar.google.com/citations?user=cJndGdYAAAAJ&hl=en"
+        },
+        {
+          "name": "Justin DeRose",
+          "title": "Associate Professor",
+          "university": "Utah State University",
+          "email": "justin.derose@usu.edu",
+          "profile": "https://qanr.usu.edu/wild/labs/derose-lab/"
+        },
+        {
+          "name": "Courtney Flint",
+          "title": "Professor/Assoc. Director UWRL",
+          "university": "Utah State University",
+          "email": "courtney.flint@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/flint-courtney"
+        },
+        {
+          "name": "Nathan Moodie",
+          "title": "Research Assistant Professor",
+          "university": "University of Utah",
+          "email": "nathan.moodie@m.cc.utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0061647"
+        },
+        {
+          "name": "Sarah Null",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "sarah.null@usu.edu",
+          "profile": "https://sites.google.com/usu.edu/sarahnull-acwa/home"
+        },
+        {
+          "name": "Matt Olson",
+          "title": "Assistant Professor",
+          "university": "Utah Valley University",
+          "email": "matt.olson@uvu.edu",
+          "profile": "https://www.uvu.edu/directory/employee/?id=aWRudXZiTlQ1U1pXTU1qV1l1ai94Zz09"
+        },
+        {
+          "name": "Jake Powell",
+          "title": "Associate Professor, Extension Specialist",
+          "university": "Utah State University",
+          "email": "jake.powell@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/powell-jake"
+        },
+        {
+          "name": "Courtenay Strong",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "court.strong@utah.edu",
+          "profile": "https://www.home.chpc.utah.edu/~strong/"
+        },
+        {
+          "name": "Sara Warix",
+          "title": "Assistant Professor",
+          "university": "University of Utah",
+          "email": "sara.warix@utah.edu",
+          "profile": "https://sarawarix.com"
+        },
+        {
+          "name": "Matt Yost",
+          "title": "Professor and Agroclimate Extension Specialist",
+          "university": "Utah State University",
+          "email": "matt.yost@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/yost-matt"
+        }
+      ],
+      "southeastern-utah": [
+        {
+          "name": "Hannah Bonner",
+          "title": "Assistant Professor",
+          "university": "Brigham Young University",
+          "email": "hbonner@byu.edu",
+          "profile": "https://geology.byu.edu/directory/hannah-bonner"
+        },
+        {
+          "name": "Roslynn Brain",
+          "title": "Professor, Sustainable Communities Extension Specialist",
+          "university": "Utah State University",
+          "email": "roslynn.brain@usu.edu",
+          "profile": "https://extension.usu.edu/sustainability/"
+        },
+        {
+          "name": "Paul Brooks",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "paul.brooks@utah.edu",
+          "profile": "https://scholar.google.com/citations?user=cJndGdYAAAAJ&hl=en"
+        },
+        {
+          "name": "Alice Carter",
+          "title": "Assistant Professor of the Practice",
+          "university": "Utah State University",
+          "email": "alice.carter@usu.edu",
+          "profile": "https://amcarter.github.io/alicecarter/"
+        },
+        {
+          "name": "Courtney Flint",
+          "title": "Professor/Assoc. Director UWRL",
+          "university": "Utah State University",
+          "email": "courtney.flint@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/flint-courtney"
+        },
+        {
+          "name": "Scott Hotaling",
+          "title": "Assistant Professor",
+          "university": "Utah State University",
+          "email": "scott.hotaling@usu.edu",
+          "profile": "https://qanr.usu.edu/research/ccml/"
+        },
+        {
+          "name": "Joshua Lenart",
+          "title": "Associate Professor (Clinical)",
+          "university": "University of Utah",
+          "email": "j.lenart@utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0556171/about"
+        },
+        {
+          "name": "Sarah Null",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "sarah.null@usu.edu",
+          "profile": "https://sites.google.com/usu.edu/sarahnull-acwa/home"
+        },
+        {
+          "name": "Jake Powell",
+          "title": "Associate Professor, Extension Specialist",
+          "university": "Utah State University",
+          "email": "jake.powell@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/powell-jake"
+        },
+        {
+          "name": "Courtenay Strong",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "court.strong@utah.edu",
+          "profile": "https://www.home.chpc.utah.edu/~strong/"
+        },
+        {
+          "name": "Reagan Wytsalucy",
+          "title": "Agriculture|Natural Resources Associate Professor",
+          "university": "Utah State University",
+          "email": "reagan.wytsalucy@usu.edu",
+          "profile": "https://extension.usu.edu/directory/wytsalucy-reagan"
+        },
+        {
+          "name": "Matt Yost",
+          "title": "Professor and Agroclimate Extension Specialist",
+          "university": "Utah State University",
+          "email": "matt.yost@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/yost-matt"
+        }
+      ],
+      "southwestern-utah": [
+        {
+          "name": "Brent Black",
+          "title": "Professor and Extension Fruit Crop Specialist",
+          "university": "Utah State University",
+          "email": "brent.black@usu.edu",
+          "profile": ""
+        },
+        {
+          "name": "Hannah Bonner",
+          "title": "Assistant Professor",
+          "university": "Brigham Young University",
+          "email": "hbonner@byu.edu",
+          "profile": "https://geology.byu.edu/directory/hannah-bonner"
+        },
+        {
+          "name": "Roslynn Brain",
+          "title": "Professor, Sustainable Communities Extension Specialist",
+          "university": "Utah State University",
+          "email": "roslynn.brain@usu.edu",
+          "profile": "https://extension.usu.edu/sustainability/"
+        },
+        {
+          "name": "Courtney Flint",
+          "title": "Professor/Assoc. Director UWRL",
+          "university": "Utah State University",
+          "email": "courtney.flint@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/flint-courtney"
+        },
+        {
+          "name": "Nathan Moodie",
+          "title": "Research Assistant Professor",
+          "university": "University of Utah",
+          "email": "nathan.moodie@m.cc.utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0061647"
+        },
+        {
+          "name": "Sarah Null",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "sarah.null@usu.edu",
+          "profile": "https://sites.google.com/usu.edu/sarahnull-acwa/home"
+        },
+        {
+          "name": "Christie Pondell",
+          "title": "Assistant Professor",
+          "university": "Utah Tech University",
+          "email": "christina.pondell@utahtech.edu",
+          "profile": "https://ees.utahtech.edu/faculty-staff/christin-pondell/"
+        },
+        {
+          "name": "Jake Powell",
+          "title": "Associate Professor, Extension Specialist",
+          "university": "Utah State University",
+          "email": "jake.powell@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/powell-jake"
+        },
+        {
+          "name": "Tammy Rittenour",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "tammy.rittenour@usu.edu",
+          "profile": "https://www.usu.edu/geo/osl/"
+        },
+        {
+          "name": "Courtenay Strong",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "court.strong@utah.edu",
+          "profile": "https://www.home.chpc.utah.edu/~strong/"
+        },
+        {
+          "name": "Matt Yost",
+          "title": "Professor and Agroclimate Extension Specialist",
+          "university": "Utah State University",
+          "email": "matt.yost@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/yost-matt"
+        }
+      ],
+      "gsl-basin": [
+        {
+          "name": "Paul Brooks",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "paul.brooks@utah.edu",
+          "profile": "https://scholar.google.com/citations?user=cJndGdYAAAAJ&hl=en"
+        },
+        {
+          "name": "Yoshi Chikamoto",
+          "title": "Associate Professor",
+          "university": "Utah State University",
+          "email": "yoshi.chikamoto@usu.edu",
+          "profile": "https://climate.usu.edu/people/yoshi/index.html"
+        },
+        {
+          "name": "Brian Crookston",
+          "title": "Associate Professor",
+          "university": "Utah State University",
+          "email": "brian.crookston@usu.edu",
+          "profile": "https://engineering.usu.edu/cee/people/faculty/crookston-brian"
+        },
+        {
+          "name": "Justin DeRose",
+          "title": "Associate Professor",
+          "university": "Utah State University",
+          "email": "justin.derose@usu.edu",
+          "profile": "https://qanr.usu.edu/wild/labs/derose-lab/"
+        },
+        {
+          "name": "Chelsea Duball",
+          "title": "Assistant Professor of Environmental Soil Science",
+          "university": "Utah State University",
+          "email": "chelsea.duball@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/duball-chelsea"
+        },
+        {
+          "name": "Courtney Flint",
+          "title": "Professor/Assoc. Director UWRL",
+          "university": "Utah State University",
+          "email": "courtney.flint@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/flint-courtney"
+        },
+        {
+          "name": "Rick Forster",
+          "title": "professor",
+          "university": "University of Utah",
+          "email": "rick.forster@geog.utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0085651"
+        },
+        {
+          "name": "Neil Hansen",
+          "title": "Professor",
+          "university": "Brigham Young University",
+          "email": "nel_hansen@byu.edu",
+          "profile": "https://pws.byu.edu/neil-hansen-lab"
+        },
+        {
+          "name": "John Horel",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "john.horel@utah.edu",
+          "profile": "https://horel.chpc.utah.edu"
+        },
+        {
+          "name": "Scott Jones",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "scott.jones@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/jones-scott"
+        },
+        {
+          "name": "Joshua Lenart",
+          "title": "Associate Professor (Clinical)",
+          "university": "University of Utah",
+          "email": "j.lenart@utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0556171/about"
+        },
+        {
+          "name": "Fan-Chi Lin",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "FanChi.Lin@utah.edu",
+          "profile": "https://noise.earth.utah.edu/"
+        },
+        {
+          "name": "Joan McLean",
+          "title": "Research Professor",
+          "university": "Utah State University",
+          "email": "joan.mclean@usu.edu",
+          "profile": "https://uwrl.usu.edu/people/faculty/mclean-joan"
+        },
+        {
+          "name": "Bethany Neilson",
+          "title": "Professor/Director",
+          "university": "Utah State University",
+          "email": "bethany.neilson@usu.edu",
+          "profile": "https://engineering.usu.edu/cee/people/faculty/neilson-bethany"
+        },
+        {
+          "name": "Sarah Null",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "sarah.null@usu.edu",
+          "profile": "https://sites.google.com/usu.edu/sarahnull-acwa/home"
+        },
+        {
+          "name": "Matt Olson",
+          "title": "Assistant Professor",
+          "university": "Utah Valley University",
+          "email": "matt.olson@uvu.edu",
+          "profile": "https://www.uvu.edu/directory/employee/?id=aWRudXZiTlQ1U1pXTU1qV1l1ai94Zz09"
+        },
+        {
+          "name": "Kevin Perry",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "kevin.perry@utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0302380"
+        },
+        {
+          "name": "Jake Powell",
+          "title": "Associate Professor, Extension Specialist",
+          "university": "Utah State University",
+          "email": "jake.powell@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/powell-jake"
+        },
+        {
+          "name": "Annika Quick",
+          "title": "Assistant Professor",
+          "university": "Brigham Young University",
+          "email": "annika.quick@byu.edu",
+          "profile": "https://scholar.google.com/citations?user=m-1uMygAAAAJ&hl=en"
+        },
+        {
+          "name": "Tammy Rittenour",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "tammy.rittenour@usu.edu",
+          "profile": "https://www.usu.edu/geo/osl/"
+        },
+        {
+          "name": "David Rosenberg",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "david.rosenberg@usu.edu",
+          "profile": "http://rosenberg.usu.edu"
+        },
+        {
+          "name": "Summer Rupper",
+          "title": "Professor, Associate Dean of Research",
+          "university": "University of Utah",
+          "email": "summer.rupper@ess.utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u6002212"
+        },
+        {
+          "name": "Stacia Ryder",
+          "title": "Assistant Professor",
+          "university": "Utah State University",
+          "email": "stacia.ryder@usu.edu",
+          "profile": "https://artsci.usu.edu/social-sciences/sociology/directory/faculty-staff/stacia-ryder"
+        },
+        {
+          "name": "Pin Shuai",
+          "title": "Assistant Professor",
+          "university": "Utah State University",
+          "email": "Pin.shuai@usu.edu",
+          "profile": "https://groundwater.usu.edu/"
+        },
+        {
+          "name": "D. Kip Solomon",
+          "title": "Distinguished Professor",
+          "university": "University of Utah",
+          "email": "kip.solomon@utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0031586"
+        },
+        {
+          "name": "Courtenay Strong",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "court.strong@utah.edu",
+          "profile": "https://www.home.chpc.utah.edu/~strong/"
+        },
+        {
+          "name": "David Tarboton",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "david.tarboton@usu.edu",
+          "profile": "https://uwrl.usu.edu/people/faculty/tarboton-david"
+        },
+        {
+          "name": "Sara Warix",
+          "title": "Assistant Professor",
+          "university": "University of Utah",
+          "email": "sara.warix@utah.edu",
+          "profile": "https://sarawarix.com"
+        },
+        {
+          "name": "Wayne Wurtsbaugh",
+          "title": "Emeritus Professor",
+          "university": "Utah State University",
+          "email": "Wayne.wurtsbaugh@usu.edu",
+          "profile": "https://qanr.usu.edu/wild/directory/emeriti/wurtsbaugh-wayne"
+        },
+        {
+          "name": "Matt Yost",
+          "title": "Professor and Agroclimate Extension Specialist",
+          "university": "Utah State University",
+          "email": "matt.yost@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/yost-matt"
+        },
+        {
+          "name": "Amy Zhang",
+          "title": "Associate Professor",
+          "university": "Utah State University",
+          "email": "w.zhang@usu.edu",
+          "profile": "https://scholar.google.com/citations?hl=en&user=qnAR1zcAAAAJ&view_op=list_works&sortby=pubdate"
+        }
+      ],
+      "colorado-river": [
+        {
+          "name": "Dan Ames",
+          "title": "Professor",
+          "university": "Brigham Young University",
+          "email": "dan.ames@byu.edu",
+          "profile": "https://cce.byu.edu/directory/dan-ames"
+        },
+        {
+          "name": "Hannah Bonner",
+          "title": "Assistant Professor",
+          "university": "Brigham Young University",
+          "email": "hbonner@byu.edu",
+          "profile": "https://geology.byu.edu/directory/hannah-bonner"
+        },
+        {
+          "name": "Paul Brooks",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "paul.brooks@utah.edu",
+          "profile": "https://scholar.google.com/citations?user=cJndGdYAAAAJ&hl=en"
+        },
+        {
+          "name": "Yoshi Chikamoto",
+          "title": "Associate Professor",
+          "university": "Utah State University",
+          "email": "yoshi.chikamoto@usu.edu",
+          "profile": "https://climate.usu.edu/people/yoshi/index.html"
+        },
+        {
+          "name": "Chelsea Duball",
+          "title": "Assistant Professor of Environmental Soil Science",
+          "university": "Utah State University",
+          "email": "chelsea.duball@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/duball-chelsea"
+        },
+        {
+          "name": "Rick Forster",
+          "title": "professor",
+          "university": "University of Utah",
+          "email": "rick.forster@geog.utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0085651"
+        },
+        {
+          "name": "Gina Gilson",
+          "title": "Assistant Professor, Interim Director Center for Colorado River Studies",
+          "university": "Utah State University",
+          "email": "gina.gilson@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/gilson-gina"
+        },
+        {
+          "name": "Neil Hansen",
+          "title": "Professor",
+          "university": "Brigham Young University",
+          "email": "nel_hansen@byu.edu",
+          "profile": "https://pws.byu.edu/neil-hansen-lab"
+        },
+        {
+          "name": "John Horel",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "john.horel@utah.edu",
+          "profile": "https://horel.chpc.utah.edu"
+        },
+        {
+          "name": "Joshua Lenart",
+          "title": "Associate Professor (Clinical)",
+          "university": "University of Utah",
+          "email": "j.lenart@utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0556171/about"
+        },
+        {
+          "name": "Sarah Null",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "sarah.null@usu.edu",
+          "profile": "https://sites.google.com/usu.edu/sarahnull-acwa/home"
+        },
+        {
+          "name": "Matt Olson",
+          "title": "Assistant Professor",
+          "university": "Utah Valley University",
+          "email": "matt.olson@uvu.edu",
+          "profile": "https://www.uvu.edu/directory/employee/?id=aWRudXZiTlQ1U1pXTU1qV1l1ai94Zz09"
+        },
+        {
+          "name": "Christie Pondell",
+          "title": "Assistant Professor",
+          "university": "Utah Tech University",
+          "email": "christina.pondell@utahtech.edu",
+          "profile": "https://ees.utahtech.edu/faculty-staff/christin-pondell/"
+        },
+        {
+          "name": "Jake Powell",
+          "title": "Associate Professor, Extension Specialist",
+          "university": "Utah State University",
+          "email": "jake.powell@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/powell-jake"
+        },
+        {
+          "name": "Tammy Rittenour",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "tammy.rittenour@usu.edu",
+          "profile": "https://www.usu.edu/geo/osl/"
+        },
+        {
+          "name": "David Rosenberg",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "david.rosenberg@usu.edu",
+          "profile": "http://rosenberg.usu.edu"
+        },
+        {
+          "name": "Summer Rupper",
+          "title": "Professor, Associate Dean of Research",
+          "university": "University of Utah",
+          "email": "summer.rupper@ess.utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u6002212"
+        },
+        {
+          "name": "Pin Shuai",
+          "title": "Assistant Professor",
+          "university": "Utah State University",
+          "email": "Pin.shuai@usu.edu",
+          "profile": "https://groundwater.usu.edu/"
+        },
+        {
+          "name": "D. Kip Solomon",
+          "title": "Distinguished Professor",
+          "university": "University of Utah",
+          "email": "kip.solomon@utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0031586"
+        },
+        {
+          "name": "Courtenay Strong",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "court.strong@utah.edu",
+          "profile": "https://www.home.chpc.utah.edu/~strong/"
+        },
+        {
+          "name": "David Tarboton",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "david.tarboton@usu.edu",
+          "profile": "https://uwrl.usu.edu/people/faculty/tarboton-david"
+        },
+        {
+          "name": "Sara Warix",
+          "title": "Assistant Professor",
+          "university": "University of Utah",
+          "email": "sara.warix@utah.edu",
+          "profile": "https://sarawarix.com"
+        },
+        {
+          "name": "Matt Yost",
+          "title": "Professor and Agroclimate Extension Specialist",
+          "university": "Utah State University",
+          "email": "matt.yost@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/yost-matt"
+        },
+        {
+          "name": "Amy Zhang",
+          "title": "Associate Professor",
+          "university": "Utah State University",
+          "email": "w.zhang@usu.edu",
+          "profile": "https://scholar.google.com/citations?hl=en&user=qnAR1zcAAAAJ&view_op=list_works&sortby=pubdate"
+        }
+      ],
+      "statewide": [
+        {
+          "name": "David Anderson",
+          "title": "Professional Practice Professor",
+          "university": "Utah State University",
+          "email": "david.anderson@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/anderson-david"
+        },
+        {
+          "name": "Steven Barfuss",
+          "title": "Research Professor",
+          "university": "Utah State University",
+          "email": "steve.barfuss@usu.edu",
+          "profile": "https://uwrl.usu.edu/people/faculty/barfuss-steven"
+        },
+        {
+          "name": "Burdette Barker",
+          "title": "Extension Irrigation Specialist",
+          "university": "Utah State University",
+          "email": "burdette.barker@usu.edu",
+          "profile": "https://irrigation.usu.edu"
+        },
+        {
+          "name": "Hannah Bonner",
+          "title": "Assistant Professor",
+          "university": "Brigham Young University",
+          "email": "hbonner@byu.edu",
+          "profile": "https://geology.byu.edu/directory/hannah-bonner"
+        },
+        {
+          "name": "Damon Cann",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "damon.cann@usu.edu",
+          "profile": "https://artsci.usu.edu/social-sciences/political-science/directory/faculty-staff/cann-damon"
+        },
+        {
+          "name": "Grant Cardon",
+          "title": "Professor and Extension Soils Specialist",
+          "university": "Utah State University",
+          "email": "grant.cardon@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/cardon-grant"
+        },
+        {
+          "name": "Alice Carter",
+          "title": "Assistant Professor of the Practice",
+          "university": "Utah State University",
+          "email": "alice.carter@usu.edu",
+          "profile": "https://amcarter.github.io/alicecarter/"
+        },
+        {
+          "name": "Yoshi Chikamoto",
+          "title": "Associate Professor",
+          "university": "Utah State University",
+          "email": "yoshi.chikamoto@usu.edu",
+          "profile": "https://climate.usu.edu/people/yoshi/index.html"
+        },
+        {
+          "name": "Brian Crookston",
+          "title": "Associate Professor",
+          "university": "Utah State University",
+          "email": "brian.crookston@usu.edu",
+          "profile": "https://engineering.usu.edu/cee/people/faculty/crookston-brian"
+        },
+        {
+          "name": "Katherine Dowdell",
+          "title": "Assistant Professor",
+          "university": "University of Utah",
+          "email": "k.dowdell@utah.edu",
+          "profile": "https://www.katherinedowdell.com/"
+        },
+        {
+          "name": "Chelsea Duball",
+          "title": "Assistant Professor of Environmental Soil Science",
+          "university": "Utah State University",
+          "email": "chelsea.duball@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/duball-chelsea"
+        },
+        {
+          "name": "R Ryan Dupont",
+          "title": "Cazier Professor of Civil & Environmental Engineering",
+          "university": "Utah State University",
+          "email": "ryan.dupont@usu.edu",
+          "profile": "https://uwrl.usu.edu/people/faculty/dupont-robert"
+        },
+        {
+          "name": "Sarah Erwin",
+          "title": "Assistant Professor for Water Quality Stewardship & Watershed Education",
+          "university": "Utah State University",
+          "email": "sarah.erwin@usu.edu",
+          "profile": "https://extension.usu.edu/directory/erwin-sarah"
+        },
+        {
+          "name": "Courtney Flint",
+          "title": "Professor/Assoc. Director UWRL",
+          "university": "Utah State University",
+          "email": "courtney.flint@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/flint-courtney"
+        },
+        {
+          "name": "John Horel",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "john.horel@utah.edu",
+          "profile": "https://horel.chpc.utah.edu"
+        },
+        {
+          "name": "Jeff Horsburgh",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "jeff.horsburgh@usu.edu",
+          "profile": "https://engineering.usu.edu/cee/people/faculty/horsburgh-jeff"
+        },
+        {
+          "name": "Paul Johnson",
+          "title": "Professor/Associate Director",
+          "university": "Utah State University",
+          "email": "paul.johnson@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/johnson-paul"
+        },
+        {
+          "name": "Scott Jones",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "scott.jones@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/jones-scott"
+        },
+        {
+          "name": "Man-Keun Kim",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "mk.kim@usu.edu",
+          "profile": "https://sites.google.com/view/mkmkya/bio"
+        },
+        {
+          "name": "Kelly Kopp",
+          "title": "Professor and Extension Specialist",
+          "university": "Utah State University",
+          "email": "kelly.kopp@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/kopp-kelly"
+        },
+        {
+          "name": "Joshua Lenart",
+          "title": "Associate Professor (Clinical)",
+          "university": "University of Utah",
+          "email": "j.lenart@utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0556171/about"
+        },
+        {
+          "name": "Carlos Licon",
+          "title": "Associate Professor",
+          "university": "Utah State University",
+          "email": "carlos.licon@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/licon-carlos"
+        },
+        {
+          "name": "Fan-Chi Lin",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "FanChi.Lin@utah.edu",
+          "profile": "https://noise.earth.utah.edu/"
+        },
+        {
+          "name": "Joan McLean",
+          "title": "Research Professor",
+          "university": "Utah State University",
+          "email": "joan.mclean@usu.edu",
+          "profile": "https://uwrl.usu.edu/people/faculty/mclean-joan"
+        },
+        {
+          "name": "Jon Meyer",
+          "title": "Assistant State Climatologist",
+          "university": "Utah State University",
+          "email": "jon.meyer@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/meyer-jonathan"
+        },
+        {
+          "name": "Nathan Moodie",
+          "title": "Research Assistant Professor",
+          "university": "University of Utah",
+          "email": "nathan.moodie@m.cc.utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u0061647"
+        },
+        {
+          "name": "Bethany Neilson",
+          "title": "Professor/Director",
+          "university": "Utah State University",
+          "email": "bethany.neilson@usu.edu",
+          "profile": "https://engineering.usu.edu/cee/people/faculty/neilson-bethany"
+        },
+        {
+          "name": "Sarah Null",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "sarah.null@usu.edu",
+          "profile": "https://sites.google.com/usu.edu/sarahnull-acwa/home"
+        },
+        {
+          "name": "Jake Powell",
+          "title": "Associate Professor, Extension Specialist",
+          "university": "Utah State University",
+          "email": "jake.powell@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/powell-jake"
+        },
+        {
+          "name": "Annika Quick",
+          "title": "Assistant Professor",
+          "university": "Brigham Young University",
+          "email": "annika.quick@byu.edu",
+          "profile": "https://scholar.google.com/citations?user=m-1uMygAAAAJ&hl=en"
+        },
+        {
+          "name": "Tammy Rittenour",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "tammy.rittenour@usu.edu",
+          "profile": "https://www.usu.edu/geo/osl/"
+        },
+        {
+          "name": "David Rosenberg",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "david.rosenberg@usu.edu",
+          "profile": "http://rosenberg.usu.edu"
+        },
+        {
+          "name": "Summer Rupper",
+          "title": "Professor, Associate Dean of Research",
+          "university": "University of Utah",
+          "email": "summer.rupper@ess.utah.edu",
+          "profile": "https://profiles.faculty.utah.edu/u6002212"
+        },
+        {
+          "name": "Stacia Ryder",
+          "title": "Assistant Professor",
+          "university": "Utah State University",
+          "email": "stacia.ryder@usu.edu",
+          "profile": "https://artsci.usu.edu/social-sciences/sociology/directory/faculty-staff/stacia-ryder"
+        },
+        {
+          "name": "Jessica Schad",
+          "title": "Professor of Rural and Natural Resource Sociology",
+          "university": "Utah State University",
+          "email": "jessica.schad@usu.edu",
+          "profile": "https://extension.usu.edu/directory/schad-jessica"
+        },
+        {
+          "name": "Courtenay Strong",
+          "title": "Professor",
+          "university": "University of Utah",
+          "email": "court.strong@utah.edu",
+          "profile": "https://www.home.chpc.utah.edu/~strong/"
+        },
+        {
+          "name": "Yiming Su",
+          "title": "Assistant Professor",
+          "university": "Utah State University",
+          "email": "yiming.su@usu.edu",
+          "profile": "https://uwrl.usu.edu/people/faculty/su-yiming"
+        },
+        {
+          "name": "David Tarboton",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "david.tarboton@usu.edu",
+          "profile": "https://uwrl.usu.edu/people/faculty/tarboton-david"
+        },
+        {
+          "name": "Blake Tullis",
+          "title": "Professor",
+          "university": "Utah State University",
+          "email": "blake.tullis@usu.edu",
+          "profile": "https://engineering.usu.edu/cee/people/faculty/tullis-blake"
+        },
+        {
+          "name": "Sara Warix",
+          "title": "Assistant Professor",
+          "university": "University of Utah",
+          "email": "sara.warix@utah.edu",
+          "profile": "https://sarawarix.com"
+        },
+        {
+          "name": "Steven Wilcox",
+          "title": "Assistant Professor",
+          "university": "Utah State University",
+          "email": "steven.wilcox@usu.edu",
+          "profile": "https://www.swwilcox.com"
+        },
+        {
+          "name": "Larissa Yocom",
+          "title": "Director",
+          "university": "Utah State University",
+          "email": "larissa.yocom@usu.edu",
+          "profile": "https://qanr.usu.edu/ufri/"
+        },
+        {
+          "name": "Matt Yost",
+          "title": "Professor and Agroclimate Extension Specialist",
+          "university": "Utah State University",
+          "email": "matt.yost@usu.edu",
+          "profile": "https://qanr.usu.edu/directory/yost-matt"
+        }
+      ]
+    };
+    const controls = document.getElementById("areaControls");
+    const svg = d3.select("#utahSvg");
+    const loading = document.getElementById("loading");
+    const tooltip = document.getElementById("tooltip");
+    const mapWrap = document.getElementById("mapWrap");
+    const detailKicker = document.getElementById("detailKicker");
+    const detailTitle = document.getElementById("detailTitle");
+    const detailText = document.getElementById("detailText");
+    const detailCount = document.getElementById("detailCount");
+    const detailContext = document.getElementById("detailContext");
+    const researcherList = document.getElementById("researcherList");
+    let selectedArea = areaData[0];
+    let counties = [];
+    let countyTopology = null;
+    let countyGeometryById = new Map();
+    let stateFeature = null;
+    let projection = null;
+    let path = null;
+
+    function areaForId(id) {
+      return allAreas.find((area) => area.id === id) || areaData[0];
+    }
+
+    function areasForCounty(countyId) {
+      return areaData.filter((area) => area.counties.includes(countyId));
+    }
+
+    function mergedFeatureForArea(area) {
+      if (area.id === "statewide") return stateFeature;
+      const geometries = area.counties
+        .map((id) => countyGeometryById.get(id))
+        .filter(Boolean);
+      return topojson.merge(countyTopology, geometries);
+    }
+
+    function renderControls() {
+      controls.replaceChildren();
+      allAreas.forEach((area) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "area-button";
+        button.setAttribute("aria-pressed", area.id === selectedArea.id ? "true" : "false");
+        button.dataset.area = area.id;
+        button.textContent = `${area.label} (${area.count})`;
+        button.addEventListener("mouseenter", () => selectArea(area.id, false));
+        button.addEventListener("focus", () => selectArea(area.id, false));
+        button.addEventListener("click", () => selectArea(area.id, true));
+        controls.appendChild(button);
+      });
+    }
+
+    function renderResearchers(area) {
+      researcherList.replaceChildren();
+      const researchers = researcherData[area.id] || [];
+      if (!researchers.length) {
+        const empty = document.createElement("p");
+        empty.className = "researcher-empty";
+        empty.textContent = "No researchers are listed for this area.";
+        researcherList.appendChild(empty);
+        return;
+      }
+
+      researchers.forEach((researcher) => {
+        const card = document.createElement("article");
+        card.className = "researcher-card";
+
+        const name = document.createElement("p");
+        name.className = "researcher-name";
+        name.textContent = researcher.name;
+
+        const title = document.createElement("p");
+        title.className = "researcher-meta";
+        title.textContent = researcher.title;
+
+        const university = document.createElement("p");
+        university.className = "researcher-meta";
+        university.textContent = researcher.university;
+
+        const links = document.createElement("div");
+        links.className = "researcher-links";
+
+        const email = document.createElement("a");
+        email.className = "researcher-link";
+        email.href = `mailto:${researcher.email}`;
+        email.textContent = researcher.email;
+        links.appendChild(email);
+
+        if (researcher.profile) {
+          const profile = document.createElement("a");
+          profile.className = "researcher-link";
+          profile.href = researcher.profile;
+          profile.target = "_blank";
+          profile.rel = "noopener noreferrer";
+          profile.textContent = "View profile";
+          links.appendChild(profile);
+        }
+
+        card.append(name, title, university, links);
+        researcherList.appendChild(card);
+      });
+    }
+
+    function updateDetails(area) {
+      detailKicker.textContent = "Selected area";
+      detailTitle.textContent = area.fullLabel;
+      detailText.textContent = area.note;
+      detailCount.textContent = area.count;
+      detailContext.textContent = area.id === "statewide"
+        ? `${area.count} faculty members report research statewide.`
+        : `${area.count} faculty members report research in this area.`;
+      renderResearchers(area);
+    }
+
+    function updateMap() {
+      svg.selectAll(".region-fill")
+        .classed("is-selected", (d) => d.id === selectedArea.id);
+
+      svg.selectAll(".area-label")
+        .style("display", (d) => d.id === selectedArea.id ? null : "none");
+
+      controls.querySelectorAll(".area-button").forEach((button) => {
+        button.setAttribute("aria-pressed", button.dataset.area === selectedArea.id ? "true" : "false");
+      });
+    }
+
+    function selectArea(id) {
+      selectedArea = areaForId(id);
+      updateDetails(selectedArea);
+      updateMap();
+    }
+
+    function showTooltip(event, title, text) {
+      const rect = mapWrap.getBoundingClientRect();
+      tooltip.innerHTML = `
+        <p class="tooltip-title">${title}</p>
+        <p class="tooltip-line">${text}</p>
+      `;
+      tooltip.style.left = `${event.clientX - rect.left}px`;
+      tooltip.style.top = `${event.clientY - rect.top}px`;
+      tooltip.classList.add("is-visible");
+      tooltip.setAttribute("aria-hidden", "false");
+    }
+
+    function hideTooltip() {
+      tooltip.classList.remove("is-visible");
+      tooltip.setAttribute("aria-hidden", "true");
+    }
+
+    function showAreaTooltip(event, area) {
+      const text = area.id === "statewide"
+        ? `${area.count} faculty members report research statewide`
+        : `${area.count} faculty members report research in this area`;
+      showTooltip(event, area.fullLabel, text);
+    }
+
+    function drawMap() {
+      const width = Math.max(320, svg.node().clientWidth || 650);
+      const height = Math.max(500, Math.round(width * 1.02));
+      svg.attr("viewBox", `0 0 ${width} ${height}`).attr("height", height);
+      svg.selectAll("*").remove();
+
+      svg.append("title").attr("id", "mapTitle").text("Utah geographic focus areas");
+      svg.append("desc").attr("id", "mapDesc").text("Map of Utah highlighting faculty research focus areas and faculty member counts.");
+
+      projection = d3.geoAlbersUsa();
+      path = d3.geoPath(projection);
+      projection.fitSize([width - 28, height - 24], stateFeature);
+      projection.translate([projection.translate()[0] + 14, projection.translate()[1] + 12]);
+
+      svg.append("path")
+        .datum(stateFeature)
+        .attr("class", "state-base")
+        .attr("d", path);
+
+      svg.append("g")
+        .attr("aria-label", "Research focus regions")
+        .selectAll("path")
+        .data([statewideArea, ...areaData])
+        .join("path")
+        .attr("class", "region-fill")
+        .classed("is-selected", (d) => d.id === selectedArea.id)
+        .attr("d", (d) => path(mergedFeatureForArea(d)))
+        .attr("tabindex", 0)
+        .attr("role", "button")
+        .attr("aria-label", (d) => d.id === "statewide"
+          ? `${d.fullLabel}: ${d.count} faculty members report research statewide`
+          : `${d.fullLabel}: ${d.count} faculty members report research in this area`)
+        .on("mouseenter focus", (event, d) => showAreaTooltip(event, d))
+        .on("mousemove", (event, d) => showAreaTooltip(event, d))
+        .on("mouseleave blur", hideTooltip)
+        .on("click", (event, d) => selectArea(d.id));
+
+      svg.append("path")
+        .datum(stateFeature)
+        .attr("class", "state-outline")
+        .attr("d", path)
+        .attr("tabindex", 0)
+        .attr("role", "img")
+        .attr("aria-hidden", "true");
+
+      const labelGroup = svg.append("g").attr("aria-hidden", "true");
+      labelGroup.selectAll("text")
+        .data(allAreas)
+        .join("text")
+        .attr("class", "area-label")
+        .attr("x", (d) => projection(labelPositions[d.id])[0])
+        .attr("y", (d) => projection(labelPositions[d.id])[1])
+        .attr("text-anchor", "middle")
+        .selectAll("tspan")
+        .data((d) => {
+          const words = d.label.replace(" / ", " ").split(" ");
+          const lines = [];
+          let line = "";
+          words.forEach((word) => {
+            const test = line ? `${line} ${word}` : word;
+            if (test.length > 17 && line) {
+              lines.push(line);
+              line = word;
+            } else {
+              line = test;
+            }
+          });
+          lines.push(line);
+          lines.push(`${d.count} faculty`);
+          return lines.map((text, i) => ({ text, i }));
+        })
+        .join("tspan")
+        .attr("x", function() { return d3.select(this.parentNode).attr("x"); })
+        .attr("dy", (d) => d.i === 0 ? 0 : 17)
+        .text((d) => d.text);
+
+      updateMap();
+    }
+
+    async function init() {
+      renderControls();
+      updateDetails(selectedArea);
+
+      try {
+        const topology = await d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/counties-10m.json");
+        countyTopology = topology;
+        const allCounties = topojson.feature(topology, topology.objects.counties).features;
+        counties = allCounties.filter((feature) => String(feature.id).startsWith("49"));
+        const utahGeometries = topology.objects.counties.geometries.filter((geometry) => String(geometry.id).startsWith("49"));
+        countyGeometryById = new Map(utahGeometries.map((geometry) => [String(geometry.id), geometry]));
+        stateFeature = topojson.merge(topology, utahGeometries);
+        loading.remove();
+        drawMap();
+      } catch (error) {
+        loading.className = "error";
+        loading.textContent = "The Utah map could not load. Check the network connection and refresh this graphic.";
+        console.error(error);
+      }
+    }
+
+    init();
+    window.addEventListener("resize", () => {
+      if (counties.length) drawMap();
+    });
+  </script>
+</body>
+</html>
