@@ -1,0 +1,1359 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Water Challenges Interactive Map</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@500;700;900&display=swap");
+
+    :root {
+      color-scheme: light;
+      --usu-blue: #0f243f;
+      --usu-light-blue: #2f6f9f;
+      --usu-teal: #247c7a;
+      --usu-green: #5a7d2b;
+      --usu-gold: #b7791f;
+      --usu-red: #a53f2b;
+      --ink: #18212f;
+      --muted: #5c697a;
+      --line: #d7dee8;
+      --soft: #f5f7fa;
+      --panel: #ffffff;
+      --focus: #1b75bb;
+      --shadow: 0 18px 45px rgba(15, 36, 63, 0.12);
+      --radius: 8px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--soft);
+      font-size: 16px;
+      line-height: 1.45;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .water-map {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 18px;
+    }
+
+    .water-map__header {
+      margin-bottom: 20px;
+    }
+
+    .water-map__eyebrow {
+      margin: 0 0 6px;
+      color: var(--usu-light-blue);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .water-map h1 {
+      margin: 0;
+      color: var(--usu-blue);
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
+      font-size: clamp(1.75rem, 3vw, 2.6rem);
+      line-height: 1.1;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .water-map__lede {
+      max-width: 820px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 1.02rem;
+    }
+
+    .water-map__layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .water-map__visual,
+    .water-map__details {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .water-map__visual {
+      padding: 18px;
+    }
+
+    .tab-button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--ink);
+      background: #fff;
+      font: inherit;
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .challenge-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .challenge-summary-button {
+      min-height: 54px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      color: var(--ink);
+      background: #fff;
+      font: inherit;
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .challenge-summary-button:hover,
+    .challenge-summary-button:focus-visible,
+    .challenge-summary-button[aria-pressed="true"] {
+      border-color: var(--usu-light-blue);
+      box-shadow: inset 0 0 0 2px rgba(47, 111, 159, 0.2);
+    }
+
+    .challenge-summary-button:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
+
+    .challenge-summary-title {
+      display: block;
+      color: var(--usu-blue);
+      font-size: 0.9rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .challenge-summary-count {
+      display: block;
+      margin-top: 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.2;
+    }
+
+    .tab-button:hover {
+      border-color: var(--usu-light-blue);
+    }
+
+    .tab-button[aria-selected="true"] {
+      border-color: var(--usu-blue);
+      color: #fff;
+      background: var(--usu-blue);
+    }
+
+    .tab-button:focus-visible,
+    .challenge-node:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
+
+    .network-wrap {
+      position: relative;
+      min-height: 560px;
+    }
+
+    .network-svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 500px;
+    }
+
+    .connection {
+      fill: none;
+      stroke: #9aa8b8;
+      stroke-width: var(--connection-width, 2px);
+      stroke-linecap: round;
+      opacity: 0.42;
+      transition: opacity 180ms ease, stroke-width 180ms ease, stroke 180ms ease;
+    }
+
+    .connection.is-active {
+      opacity: 0.9;
+      stroke-width: var(--connection-active-width, 4px);
+      stroke: var(--usu-light-blue);
+    }
+
+    .connection.is-muted {
+      opacity: 0.12;
+    }
+
+    .connection-label {
+      fill: var(--muted);
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+    }
+
+    .connection-label.is-active {
+      opacity: 1;
+    }
+
+    .challenge-node {
+      border: 0;
+      padding: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .node-circle {
+      stroke: rgba(15, 36, 63, 0.28);
+      stroke-width: 1.5;
+      transition: stroke-width 180ms ease, filter 180ms ease, opacity 180ms ease;
+    }
+
+    .challenge-node[aria-pressed="true"] .node-circle,
+    .challenge-node:hover .node-circle {
+      stroke-width: 3;
+      filter: drop-shadow(0 10px 12px rgba(15, 36, 63, 0.22));
+    }
+
+    .challenge-node.is-muted {
+      opacity: 0.38;
+    }
+
+    .node-title {
+      fill: var(--usu-blue);
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      pointer-events: none;
+    }
+
+    .node-count {
+      fill: var(--muted);
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      pointer-events: none;
+    }
+
+    .center-label {
+      fill: var(--usu-blue);
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .center-sub {
+      fill: var(--muted);
+      font-size: 13px;
+    }
+
+    .water-map__details {
+      display: flex;
+      flex-direction: column;
+      min-height: 620px;
+      overflow: hidden;
+    }
+
+    .detail-header {
+      padding: 22px 22px 18px;
+      color: #fff;
+      background: var(--usu-blue);
+    }
+
+    .detail-kicker {
+      margin: 0 0 5px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      opacity: 0.82;
+    }
+
+    .detail-title {
+      margin: 0;
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
+      font-size: 1.55rem;
+      line-height: 1.15;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .detail-summary {
+      margin: 10px 0 0;
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .detail-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 14px 18px 4px;
+      background: #fff;
+    }
+
+    .detail-body {
+      flex: 1;
+      padding: 16px 22px 22px;
+      background: #fff;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .detail-list li {
+      padding-left: 14px;
+      border-left: 3px solid var(--usu-light-blue);
+      color: var(--ink);
+    }
+
+    .connection-summary {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .connection-summary h3 {
+      margin: 0 0 10px;
+      color: var(--usu-blue);
+      font-size: 1rem;
+    }
+
+    .connection-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .connection-pill {
+      border: 0;
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: var(--usu-blue);
+      background: #edf4f8;
+      font: inherit;
+      font-family: "Roboto Condensed", Arial, Helvetica, sans-serif;
+      font-size: 0.87rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .connection-pill:hover,
+    .connection-pill:focus-visible,
+    .connection-pill.is-active {
+      color: #fff;
+      background: var(--usu-blue);
+    }
+
+    .connection-pill:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .fallback {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 900px) {
+      .water-map__layout {
+        grid-template-columns: 1fr;
+      }
+
+      .network-wrap {
+        min-height: auto;
+      }
+
+      .water-map__details {
+        min-height: auto;
+      }
+
+      .challenge-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .water-map {
+        padding: 18px 12px;
+      }
+
+      .water-map__visual,
+      .water-map__details {
+        border-radius: 0;
+      }
+
+      .water-map__visual {
+        padding: 12px;
+      }
+
+      .challenge-summary {
+        grid-template-columns: 1fr;
+      }
+
+      .network-svg {
+        min-height: 420px;
+      }
+
+      .connection-label {
+        display: none;
+      }
+
+      .tab-button {
+        flex: 1 1 auto;
+        min-width: 132px;
+      }
+    }
+  
+.detail-header{background:#fff;color:var(--usu-blue);padding:18px 18px 8px;border-bottom:1px solid var(--line);text-align:center}
+.detail-kicker{font-size:.78rem;color:var(--muted);margin:0 0 5px}
+.detail-header>.detail-title{position:static;margin:0 0 8px;font-size:clamp(28px,3.1vw,38px);line-height:1.08;text-align:center;transform:none;width:auto;pointer-events:auto}
+.detail-ring{position:relative;width:100%;max-width:390px;aspect-ratio:400/360;margin:0 auto}
+.detail-ring svg{display:block;width:100%;height:100%;overflow:visible}
+.ring-segment{stroke:transparent;stroke-width:4;filter:drop-shadow(0 2px 2px rgba(15,36,63,.14));transition:fill .18s,stroke .18s,stroke-width .18s,filter .18s}
+.ring-drivers{fill:#c6d8e6}.ring-problems{fill:#eadca8}.ring-actions{fill:#d1e4d5}
+.ring-segment.is-selected{stroke:#526273;stroke-width:3;filter:drop-shadow(0 4px 5px rgba(15,36,63,.13))}
+.detail-ring .ring-tab{cursor:pointer;outline:none}
+.ring-label{fill:#111;font-family:'Roboto Condensed',Arial,sans-serif;font-size:25px;font-weight:800;letter-spacing:.6px;pointer-events:none}
+.ring-tab[aria-selected=true] .ring-label{font-weight:900}
+.ring-tab:focus-visible .ring-segment{stroke:#0f243f;stroke-width:4;stroke-dasharray:5 3}
+.ring-tab:hover .ring-segment{stroke:#526273;stroke-width:3;filter:brightness(1.025) drop-shadow(0 5px 5px rgba(15,36,63,.16))}
+.ring-tab:hover .ring-label,.ring-tab:focus-visible .ring-label{fill:var(--usu-blue)}
+.challenge-node.is-muted{opacity:1}
+.challenge-node.is-muted .node-title{opacity:.6}
+.ring-hint{margin:4px 0 6px;font-size:.85rem;color:var(--muted)}
+.section-heading{font-family:'Roboto Condensed',Arial,sans-serif;font-size:1.35rem;color:var(--usu-blue);margin:0 0 3px}
+.theme-hint{font-size:.78rem;color:var(--muted);margin:0 0 10px}
+@media(max-width:560px){.detail-header>.detail-title{font-size:28px}.detail-ring{max-width:340px}.ring-label{font-size:22px}.water-map__visual{overflow:hidden}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+</style>
+</head>
+<body>
+  <main class="water-map" id="water-map">
+    <div class="water-map__layout">
+      <section class="water-map__visual" aria-labelledby="network-title">
+        <h1 id="network-title" class="sr-only">Interactive water challenge network</h1>
+        <div class="challenge-summary" id="challenge-summary" aria-label="Water challenge areas"></div>
+        <div class="network-wrap">
+          <svg class="network-svg" viewBox="0 0 720 640" role="img" aria-labelledby="network-svg-title network-svg-desc">
+            <title id="network-svg-title">Six water challenge areas connected by shared topics</title>
+            <desc id="network-svg-desc">A network diagram with six clickable challenge areas. Selecting an area highlights related connections and updates the detail panel.</desc>
+            <g id="connections"></g>
+            <g id="connection-labels"></g>
+            <circle id="center-circle" cx="360" cy="305" r="86" fill="#f5f7fa" stroke="#d7dee8"></circle>
+            <text class="center-label" id="center-label-1" x="360" y="292" text-anchor="middle">Water</text>
+            <text class="center-label" id="center-label-2" x="360" y="315" text-anchor="middle">Challenges</text>
+            <text class="center-sub" id="center-label-3" x="360" y="339" text-anchor="middle"></text>
+            <g id="nodes"></g>
+          </svg>
+        </div>
+      </section>
+
+      <aside class="water-map__details" aria-live="polite" aria-labelledby="detail-title">
+<div class="detail-header">
+          <p class="detail-kicker" id="detail-kicker">EXPLORE THIS CHALLENGE AREA</p>
+          <h2 class="detail-title" id="detail-title"></h2>
+          <p class="ring-hint">Select Problems, Drivers, or Actions to explore.</p>
+          <div class="detail-ring">
+            <svg viewBox="0 20 400 360" role="tablist" aria-label="Drivers, problems, and actions">
+              <defs>
+                <path id="drivers-label-arc" d="M 74 200 A 126 126 0 0 1 326 200"/>
+                <path id="actions-label-arc" d="M 74 200 A 126 126 0 0 0 326 200"/>
+              </defs>
+              <g class="tab-button ring-tab" id="tab-drivers" role="tab" tabindex="-1" aria-label="Drivers" aria-controls="detail-panel" aria-selected="false" data-tab="drivers">
+                <path class="ring-segment ring-drivers" data-section="drivers" d="M 55.2 192.41 A 145 145 0 0 1 344.8 192.41 L 305.85 194.45 A 106 106 0 0 0 94.15 194.45 Z"/>
+                <text class="ring-label" dy="10" aria-hidden="true"><textPath href="#drivers-label-arc" startOffset="50%" text-anchor="middle">DRIVERS</textPath></text>
+              </g>
+              <g class="tab-button ring-tab" id="tab-actions" role="tab" tabindex="-1" aria-label="Actions" aria-controls="detail-panel" aria-selected="false" data-tab="actions">
+                <path class="ring-segment ring-actions" data-section="actions" d="M 55.2 207.59 A 145 145 0 0 0 344.8 207.59 L 305.85 205.55 A 106 106 0 0 1 94.15 205.55 Z"/>
+                <text class="ring-label" dy="10" aria-hidden="true"><textPath href="#actions-label-arc" startOffset="50%" text-anchor="middle">ACTIONS</textPath></text>
+              </g>
+              <g class="tab-button ring-tab" id="tab-problems" role="tab" tabindex="0" aria-label="Problems" aria-controls="detail-panel" aria-selected="true" data-tab="problems">
+                <circle class="ring-segment ring-problems" data-section="problems" cx="200" cy="200" r="86"/>
+                <text class="ring-label ring-problems-label" x="200" y="207" text-anchor="middle" aria-hidden="true">PROBLEMS</text>
+              </g>
+            </svg>
+          </div>
+          <p class="detail-summary" id="detail-summary" hidden></p>
+        </div>
+        <div class="detail-body" id="detail-panel" role="tabpanel" tabindex="-1" aria-labelledby="tab-problems">
+          <h3 id="section-heading" class="section-heading">Problems</h3><ul class="detail-list" id="detail-list"></ul>
+          <div class="connection-summary">
+            <h3>Connected themes</h3>
+            <p class="theme-hint">Hover, focus, or select a theme to highlight connections between water challenge areas</p><div class="connection-pills" id="connection-pills"></div>
+          </div>
+        </div>
+      </aside>
+    </div></main>
+
+  <script>
+    const areas = [
+  {
+    "id": "use",
+    "title": "Water Use & Demand",
+    "shortTitle": [
+      "Water",
+      "Use/Demand"
+    ],
+    "color": "#2f6f9f",
+    "summary": "",
+    "drivers": [
+      "Human water use",
+      "Overallocation",
+      "Competing uses/sectors/demands",
+      "Agriculture water use",
+      "Municipal & industrial water use",
+      "High Intensity water uses",
+      "Population growth & development",
+      "Residential landscaping"
+    ],
+    "problems": [
+      "Limited water supply",
+      "Disconnect between competing uses & current water supply",
+      "Quantity & uncertainty",
+      "Societal valuation of water in the West",
+      "Systems-level barriers to adopting water-wise landscaping",
+      "People not caring about the water they use"
+    ],
+    "actions": [
+      "Improved landscaping choices",
+      "Reduce water demand to balance with supply",
+      "Align water use and water conservation between users",
+      "Valuation of different uses of water",
+      "Conservation",
+      "Water use efficiency",
+      "Optimize water use in agriculture",
+      "Water recycling/reuse",
+      "Balance water between human and ecosystem needs"
+    ],
+    "themes": [
+      "Climate and drought",
+      "Data, monitoring, and modeling",
+      "Policy and governance",
+      "Infrastructure and systems",
+      "Water supply, demand, and distribution",
+      "Water quality and ecosystems",
+      "Hazards and cascading risk",
+      "Agriculture and land use",
+      "Human behavior and communication",
+      "Conservation, reuse, and efficiency",
+      "Energy and industry"
+    ],
+    "slide": 1
+  },
+  {
+    "id": "infra",
+    "title": "Water Infrastructure",
+    "shortTitle": [
+      "Water",
+      "Infrastructure"
+    ],
+    "color": "#5a7d2b",
+    "summary": "",
+    "drivers": [
+      "Climate change",
+      "Natural disasters (e.g., wildfire, flooding, earthquake)",
+      "Aging infrastructure",
+      "Human population growth & development",
+      "Policy/ regulation changes"
+    ],
+    "problems": [
+      "Sedimentation/debris",
+      "Workforce challenges",
+      "Inefficiencies (water loss)",
+      "Insufficient capacity",
+      "Insufficient funds",
+      "Infrastructure failure"
+    ],
+    "actions": [
+      "Plan and design water infrastructure for resiliency & redundancy",
+      "Workforce recruitment retention & training",
+      "Regional solutions (e.g., pipelines, desalination, processed water)",
+      "Funding",
+      "On farm optimization",
+      "Infrastructure investment and updates"
+    ],
+    "themes": [
+      "Climate and drought",
+      "Data, monitoring, and modeling",
+      "Policy and governance",
+      "Infrastructure and systems",
+      "Water supply, demand, and distribution",
+      "Water quality and ecosystems",
+      "Hazards and cascading risk",
+      "Agriculture and land use",
+      "Human behavior and communication"
+    ],
+    "slide": 2
+  },
+  {
+    "id": "gov",
+    "title": "Water Governance",
+    "shortTitle": [
+      "Water",
+      "Governance"
+    ],
+    "color": "#b7791f",
+    "summary": "",
+    "drivers": [
+      "Prior Appropriations Doctrine",
+      "Incentivization structures for water use",
+      "Power/Influence",
+      "Drought",
+      "Climate change",
+      "Water policies"
+    ],
+    "problems": [
+      "Imbalance between human and natural systems considerations",
+      "Capacity vs regulatory requirements",
+      "Disconnect between water governance and water management",
+      "Disconnect between in depth knowledge and management systems"
+    ],
+    "actions": [
+      "Develop policies considering economic and environmental value of water and water quality",
+      "Align governance and system conditions",
+      "Build relationships needed to solve water issues",
+      "Noncomplex, direct access to information and tools for decision making across water community",
+      "Better policies and regulations regarding conservation"
+    ],
+    "themes": [
+      "Data, monitoring, and modeling",
+      "Policy and governance",
+      "Water supply, demand, and distribution",
+      "Water quality and ecosystems",
+      "Hazards and cascading risk",
+      "Agriculture and land use",
+      "Human behavior and communication",
+      "Conservation, reuse, and efficiency",
+      "Energy and industry"
+    ],
+    "slide": 3
+  },
+  {
+    "id": "qty",
+    "title": "Water Quantity & Distribution",
+    "shortTitle": [
+      "Water Quantity",
+      "& Distribution"
+    ],
+    "color": "#247c7a",
+    "summary": "",
+    "drivers": [
+      "Drought",
+      "Variation in precipitation",
+      "Climate change",
+      "Runoff variability",
+      "Groundwater recharge variability",
+      "Prior Appropriation Doctrine"
+    ],
+    "problems": [
+      "Water scarcity",
+      "Snowpack decline",
+      "Flooding",
+      "Aging infrastructure",
+      "Lack of predictability in water supply and demand",
+      "Limited water data management and coordination",
+      "Lack of high-quality data",
+      "Insufficient communication and transparency",
+      "Declining Great Salt Lake Levels"
+    ],
+    "actions": [
+      "Comprehensive hydrologic monitoring",
+      "Communication and collaboration among stakeholders",
+      "Guide decision making with reliable prediction",
+      "Adapt to water and climate variability",
+      "Improve understanding of water fluxes",
+      "Data interoperability and access",
+      "Conservation"
+    ],
+    "themes": [
+      "Climate and drought",
+      "Data, monitoring, and modeling",
+      "Policy and governance",
+      "Infrastructure and systems",
+      "Water supply, demand, and distribution",
+      "Water quality and ecosystems",
+      "Hazards and cascading risk",
+      "Agriculture and land use",
+      "Human behavior and communication",
+      "Conservation, reuse, and efficiency",
+      "Energy and industry",
+      "Great Salt Lake and water-air links"
+    ],
+    "slide": 4
+  },
+  {
+    "id": "quality",
+    "title": "Water Quality & Ecosystems",
+    "shortTitle": [
+      "Water Quality",
+      "& Ecosystems"
+    ],
+    "color": "#6f5aa7",
+    "summary": "",
+    "drivers": [
+      "Human water use",
+      "Drought",
+      "Dust",
+      "Floods",
+      "Wildfire",
+      "Agriculture",
+      "Runoff",
+      "Mining",
+      "Industry",
+      "Wastewater treatment, energy & materials",
+      "Oil & Gas",
+      "Produced water treatment",
+      "Point and non-point source pollutions"
+    ],
+    "problems": [
+      "Biological Contaminants (HABs, invasive species, microbes, disease)",
+      "Chemical contaminants (e.g., salinity, heavy metals, nutrients, hydrocarbons)",
+      "Physical contaminants (e.g., sediment)",
+      "Emerging contaminants (e.g., pharmaceuticals, personal care products, PFAS, plastics)",
+      "Habitat/species loss",
+      "Water supply and management limitations for human and ecosystem needs"
+    ],
+    "actions": [
+      "Solving the water quality issue to increase water quantity",
+      "Methods for treatment",
+      "Policy and regulations",
+      "Drinking water treatment",
+      "Nutrient management",
+      "Green infrastructure",
+      "BMPs",
+      "Engagement",
+      "Buy-in (public)",
+      "Buy-in (decision makers)",
+      "Prioritize biodiversity and ecosystem health",
+      "Behavior change"
+    ],
+    "themes": [
+      "Climate and drought",
+      "Policy and governance",
+      "Infrastructure and systems",
+      "Water supply, demand, and distribution",
+      "Water quality and ecosystems",
+      "Hazards and cascading risk",
+      "Agriculture and land use",
+      "Human behavior and communication",
+      "Conservation, reuse, and efficiency",
+      "Energy and industry",
+      "Great Salt Lake and water-air links"
+    ],
+    "slide": 5
+  },
+  {
+    "id": "hazards",
+    "title": "Hazards",
+    "shortTitle": [
+      "Hazards"
+    ],
+    "color": "#a53f2b",
+    "summary": "",
+    "drivers": [
+      "Climate change",
+      "Extreme weather hazards",
+      "Growth & development",
+      "Industrial sources",
+      "Ecosystem Impacts",
+      "GSL Desiccation"
+    ],
+    "problems": [
+      "Compound/cascading hazards",
+      "Drought",
+      "Dust/Air Quality",
+      "Wildfire",
+      "Post-wildfire flooding and debris flows",
+      "Flooding (flash, pluvial, snowmelt, debris/sediment, ice dams)",
+      "Inaccurate flood inundation mapping",
+      "Water infrastructure impacts",
+      "Emerging contaminants",
+      "Health hazards/water nexus"
+    ],
+    "actions": [
+      "Community planning",
+      "Mitigation, preparedness, response, recovery",
+      "Forecasting /monitoring advances",
+      "Post-fire reclamation",
+      "Management & planning"
+    ],
+    "themes": [
+      "Climate and drought",
+      "Data, monitoring, and modeling",
+      "Policy and governance",
+      "Infrastructure and systems",
+      "Water supply, demand, and distribution",
+      "Water quality and ecosystems",
+      "Hazards and cascading risk",
+      "Agriculture and land use",
+      "Human behavior and communication",
+      "Energy and industry",
+      "Great Salt Lake and water-air links"
+    ],
+    "slide": 6
+  }
+];
+
+    const connections = [
+  {
+    "source": "use",
+    "target": "infra",
+    "themes": [
+      "Population growth & development",
+      "Agriculture"
+    ],
+    "weight": 2,
+    "label": "2 shared topics"
+  },
+  {
+    "source": "use",
+    "target": "gov",
+    "themes": [
+      "Agriculture",
+      "Conservation & water use efficiency",
+      "Human and ecosystem needs"
+    ],
+    "weight": 3,
+    "label": "3 shared topics"
+  },
+  {
+    "source": "use",
+    "target": "qty",
+    "themes": [
+      "Water supply limitations",
+      "Conservation & water use efficiency"
+    ],
+    "weight": 2,
+    "label": "2 shared topics"
+  },
+  {
+    "source": "use",
+    "target": "quality",
+    "themes": [
+      "Human water use",
+      "Agriculture",
+      "Industry",
+      "Water supply limitations",
+      "Human and ecosystem needs"
+    ],
+    "weight": 5,
+    "label": "5 shared topics"
+  },
+  {
+    "source": "use",
+    "target": "hazards",
+    "themes": [
+      "Population growth & development",
+      "Industry"
+    ],
+    "weight": 2,
+    "label": "2 shared topics"
+  },
+  {
+    "source": "infra",
+    "target": "gov",
+    "themes": [
+      "Agriculture",
+      "Policy and regulations"
+    ],
+    "weight": 2,
+    "label": "2 shared topics"
+  },
+  {
+    "source": "infra",
+    "target": "qty",
+    "themes": [
+      "Climate change",
+      "Flooding",
+      "Aging infrastructure"
+    ],
+    "weight": 3,
+    "label": "3 shared topics"
+  },
+  {
+    "source": "infra",
+    "target": "quality",
+    "themes": [
+      "Agriculture",
+      "Wildfire",
+      "Flooding",
+      "Policy and regulations",
+      "Sediment & debris"
+    ],
+    "weight": 5,
+    "label": "5 shared topics"
+  },
+  {
+    "source": "infra",
+    "target": "hazards",
+    "themes": [
+      "Population growth & development",
+      "Climate change",
+      "Wildfire",
+      "Flooding",
+      "Sediment & debris"
+    ],
+    "weight": 5,
+    "label": "5 shared topics"
+  },
+  {
+    "source": "gov",
+    "target": "qty",
+    "themes": [
+      "Conservation & water use efficiency",
+      "Prior Appropriation Doctrine",
+      "Information access",
+      "Relationships & collaboration"
+    ],
+    "weight": 4,
+    "label": "4 shared topics"
+  },
+  {
+    "source": "gov",
+    "target": "quality",
+    "themes": [
+      "Agriculture",
+      "Human and ecosystem needs",
+      "Policy and regulations"
+    ],
+    "weight": 3,
+    "label": "3 shared topics"
+  },
+  {
+    "source": "qty",
+    "target": "quality",
+    "themes": [
+      "Water supply limitations",
+      "Flooding",
+      "Drought",
+      "Runoff"
+    ],
+    "weight": 4,
+    "label": "4 shared topics"
+  },
+  {
+    "source": "qty",
+    "target": "hazards",
+    "themes": [
+      "Climate change",
+      "Flooding",
+      "Drought",
+      "Monitoring & prediction"
+    ],
+    "weight": 4,
+    "label": "4 shared topics"
+  },
+  {
+    "source": "quality",
+    "target": "hazards",
+    "themes": [
+      "Industry",
+      "Wildfire",
+      "Flooding",
+      "Sediment & debris",
+      "Drought",
+      "Dust",
+      "Emerging contaminants"
+    ],
+    "weight": 7,
+    "label": "7 shared topics"
+  },
+  {
+    "source": "gov",
+    "target": "hazards",
+    "themes": [
+      "Policy and regulations"
+    ],
+    "weight": 1,
+    "label": "1 shared topic"
+  }
+];
+
+    const connectedThemesByArea = connections.reduce((themesByArea, connection) => {
+      [connection.source, connection.target].forEach((areaId) => {
+        if (!themesByArea[areaId]) themesByArea[areaId] = new Set();
+        connection.themes.forEach((theme) => themesByArea[areaId].add(theme));
+      });
+      return themesByArea;
+    }, {});
+
+    areas.forEach((area) => {
+      area.themes = Array.from(connectedThemesByArea[area.id] || []).sort();
+    });
+
+    const state = {
+      selectedArea: "qty",
+      selectedTab: "problems",
+      hoveredTheme: "",
+      layoutName: ""
+    };
+
+    const layouts = {
+      desktop: {
+        width: 720,
+        height: 640,
+        cx: 360,
+        cy: 305,
+        centerR: 86,
+        nodeR: 66,
+        positions: {
+          use: [360, 84],
+          infra: [598, 218],
+          gov: [598, 440],
+          qty: [360, 540],
+          quality: [122, 440],
+          hazards: [122, 218]
+        }
+      },
+      mobile: {
+        width: 360,
+        height: 620,
+        cx: 180,
+        cy: 305,
+        centerR: 66,
+        nodeR: 52,
+        positions: {
+          use: [180, 76],
+          infra: [306, 210],
+          gov: [306, 422],
+          qty: [180, 544],
+          quality: [54, 422],
+          hazards: [54, 210]
+        }
+      }
+    };
+
+    let currentLayout = layouts.desktop;
+
+    const areaById = Object.fromEntries(areas.map((area) => [area.id, area]));
+    const svg = document.querySelector(".network-svg");
+    const challengeSummary = document.getElementById("challenge-summary");
+    const nodeGroup = document.getElementById("nodes");
+    const connectionGroup = document.getElementById("connections");
+    const labelGroup = document.getElementById("connection-labels");
+    const detailTitle = document.getElementById("detail-title");
+    const detailSummary = document.getElementById("detail-summary");
+    const detailList = document.getElementById("detail-list");
+    const connectionPills = document.getElementById("connection-pills");
+    const tabPanel = document.getElementById("detail-panel");
+
+    function applyLayout() {
+      const nextName = window.matchMedia("(max-width: 560px)").matches ? "mobile" : "desktop";
+      state.layoutName = nextName;
+      currentLayout = layouts[nextName];
+      svg.setAttribute("viewBox", `0 0 ${currentLayout.width} ${currentLayout.height}`);
+      areas.forEach((area) => {
+        const [x, y] = currentLayout.positions[area.id];
+        area.x = x;
+        area.y = y;
+      });
+      document.getElementById("center-circle").setAttribute("cx", currentLayout.cx);
+      document.getElementById("center-circle").setAttribute("cy", currentLayout.cy);
+      document.getElementById("center-circle").setAttribute("r", currentLayout.centerR);
+      document.getElementById("center-label-1").setAttribute("x", currentLayout.cx);
+      document.getElementById("center-label-1").setAttribute("y", currentLayout.cy - 13);
+      document.getElementById("center-label-2").setAttribute("x", currentLayout.cx);
+      document.getElementById("center-label-2").setAttribute("y", currentLayout.cy + 10);
+      document.getElementById("center-label-3").setAttribute("x", currentLayout.cx);
+      document.getElementById("center-label-3").setAttribute("y", currentLayout.cy + 34);
+    }
+
+    function connectionPath(source, target) {
+      const sx = source.x;
+      const sy = source.y;
+      const tx = target.x;
+      const ty = target.y;
+      const cx = currentLayout.cx + (sx + tx - currentLayout.cx * 2) * 0.14;
+      const cy = currentLayout.cy + (sy + ty - currentLayout.cy * 2) * 0.14;
+      return `M ${sx} ${sy} Q ${cx} ${cy} ${tx} ${ty}`;
+    }
+
+    function midpoint(source, target) {
+      return {
+        x: (source.x + target.x) / 2,
+        y: (source.y + target.y) / 2
+      };
+    }
+
+    function renderNetwork() {
+      connectionGroup.innerHTML = "";
+      labelGroup.innerHTML = "";
+      nodeGroup.innerHTML = "";
+
+      connections.forEach((connection, index) => {
+        const source = areaById[connection.source];
+        const target = areaById[connection.target];
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("class", "connection");
+        path.setAttribute("id", `connection-${index}`);
+        path.setAttribute("d", connectionPath(source, target));
+        path.style.setProperty("--connection-width", `${1.2 + connection.weight * 0.38}px`);
+        path.style.setProperty("--connection-active-width", `${2.4 + connection.weight * 0.5}px`);
+        path.dataset.source = connection.source;
+        path.dataset.target = connection.target;
+        path.dataset.themes = connection.themes.join("|");
+        path.dataset.weight = String(connection.weight);
+        path.setAttribute("aria-label", `${source.title} to ${target.title}`);
+        connectionGroup.appendChild(path);
+
+
+      });
+
+      areas.forEach((area) => {
+        const button = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        button.setAttribute("class", "challenge-node");
+        button.setAttribute("role", "button");
+        button.setAttribute("tabindex", "0");
+        button.setAttribute("aria-label", `Show details for ${area.title}`);
+        button.setAttribute("aria-controls", "detail-panel");
+        button.setAttribute("aria-pressed", "false");
+        button.dataset.area = area.id;
+
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("class", "node-circle");
+        circle.setAttribute("cx", area.x);
+        circle.setAttribute("cy", area.y);
+        circle.setAttribute("r", currentLayout.nodeR);
+        const rgb = area.color.slice(1).match(/../g).map(v => Math.round(parseInt(v,16)*0.15+255*0.85));
+        circle.setAttribute("fill", `rgb(${rgb.join(',')})`);
+        button.appendChild(circle);
+
+        area.shortTitle.forEach((line, index) => {
+          const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          text.setAttribute("class", "node-title");
+          text.setAttribute("x", area.x);
+          text.setAttribute("y", area.y - (area.shortTitle.length - 1) * 9 + 5 + index * 18);
+          text.setAttribute("text-anchor", "middle");
+          text.textContent = line;
+          button.appendChild(text);
+        });
+
+
+
+        button.addEventListener("click", () => selectArea(area.id));
+        button.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            selectArea(area.id);
+          }
+        });
+
+        nodeGroup.appendChild(button);
+      });
+    }
+
+    function isConnectionActive(connection) {
+      if (state.hoveredTheme) {
+        const themes = Array.isArray(connection.themes) ? connection.themes : String(connection.themes || "").split("|");
+        return themes.includes(state.hoveredTheme);
+      }
+      return connection.source === state.selectedArea || connection.target === state.selectedArea;
+    }
+
+    function updateNetwork() {
+      const activeConnections = connections.filter(isConnectionActive);
+      const activeAreaIds = new Set([state.selectedArea]);
+      activeConnections.forEach((connection) => {
+        activeAreaIds.add(connection.source);
+        activeAreaIds.add(connection.target);
+      });
+
+      document.querySelectorAll(".connection").forEach((path) => {
+        const active = isConnectionActive(path.dataset);
+        path.classList.toggle("is-active", active);
+        path.classList.toggle("is-muted", !active);
+      });
+
+      document.querySelectorAll(".connection-label").forEach((label) => {
+        label.classList.toggle("is-active", isConnectionActive(label.dataset));
+      });
+
+      document.querySelectorAll(".challenge-node").forEach((node) => {
+        const areaId = node.dataset.area;
+        node.setAttribute("aria-pressed", String(areaId === state.selectedArea));
+        node.classList.toggle("is-muted", !activeAreaIds.has(areaId));
+      });
+
+      document.querySelectorAll(".challenge-summary-button").forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.area === state.selectedArea));
+      });
+
+      document.querySelectorAll(".connection-pill").forEach((pill) => {
+        const active = pill.dataset.theme === state.hoveredTheme;
+        pill.classList.toggle("is-active", active);
+        pill.setAttribute("aria-pressed", String(active));
+      });
+    }
+
+    function renderChallengeSummary() {
+      challengeSummary.innerHTML = "";
+      areas.forEach((area) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "challenge-summary-button";
+        button.dataset.area = area.id;
+        button.setAttribute("aria-controls", "detail-panel");
+        button.setAttribute("aria-pressed", String(area.id === state.selectedArea));
+        button.innerHTML = `<span class="challenge-summary-title">${area.title}</span>`;
+        button.addEventListener("click", () => selectArea(area.id));
+        button.addEventListener("mouseenter", () => selectArea(area.id));
+        button.addEventListener("focus", () => selectArea(area.id));
+        challengeSummary.appendChild(button);
+      });
+    }
+
+    function updateDetails() {
+      const area = areaById[state.selectedArea];
+      detailTitle.textContent = area.title;
+      detailSummary.textContent = area.summary;
+      document.getElementById("section-heading").textContent = state.selectedTab[0].toUpperCase()+state.selectedTab.slice(1);
+      document.querySelectorAll('.ring-segment').forEach(s=>s.classList.toggle('is-selected',s.dataset.section===state.selectedTab));
+      detailList.innerHTML = "";
+
+      const items = area[state.selectedTab] || [];
+      if (items.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = `No ${state.selectedTab} items are listed for this challenge area.`;
+        detailList.appendChild(li);
+      }
+
+      items.forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        detailList.appendChild(li);
+      });
+
+      connectionPills.innerHTML = "";
+      area.themes.forEach((theme) => {
+        const pill = document.createElement("button");
+        pill.type = "button";
+        pill.className = "connection-pill";
+        pill.dataset.theme = theme;
+        pill.textContent = theme;
+        pill.setAttribute("aria-label", `Highlight connections for ${theme}`);
+        pill.setAttribute("aria-pressed", "false");
+        pill.addEventListener("click", () => highlightTheme(theme));
+        pill.addEventListener("mouseenter", () => highlightTheme(theme));
+        pill.addEventListener("focus", () => highlightTheme(theme));
+        pill.addEventListener("mouseleave", () => {
+          if (document.activeElement !== pill) clearThemeHighlight();
+        });
+        pill.addEventListener("blur", clearThemeHighlight);
+        connectionPills.appendChild(pill);
+      });
+
+      tabPanel.setAttribute("aria-labelledby", `tab-${state.selectedTab}`);
+      requestHeightUpdate();
+    }
+
+    function selectArea(areaId) {
+      state.selectedArea = areaId;
+      state.hoveredTheme = "";
+      update();
+    }
+
+    function highlightTheme(theme) {
+      state.hoveredTheme = theme;
+      updateNetwork();
+    }
+
+    function clearThemeHighlight() {
+      state.hoveredTheme = "";
+      updateNetwork();
+    }
+
+    function selectTab(tab) {
+      state.selectedTab = tab;
+      document.querySelectorAll(".tab-button").forEach((button) => {
+        const selected = button.dataset.tab === tab;
+        button.setAttribute("aria-selected", String(selected));
+        button.setAttribute("tabindex", selected ? "0" : "-1");
+      });
+      updateDetails();
+    }
+
+    function update() {
+      updateNetwork();
+      updateDetails();
+      requestHeightUpdate();
+    }
+
+    function postFrameHeight() {
+      const height = Math.ceil(document.documentElement.scrollHeight);
+      window.parent.postMessage({
+        type: "waterChallengeMapHeight",
+        height
+      }, "*");
+    }
+
+    function requestHeightUpdate() {
+      window.requestAnimationFrame(postFrameHeight);
+    }
+
+    document.querySelectorAll(".tab-button").forEach((button) => {
+      button.addEventListener("click", () => selectTab(button.dataset.tab));
+    });
+
+    document.querySelectorAll('.tab-button').forEach((b,i,all)=>b.addEventListener('keydown',e=>{
+      if(e.key==='Enter'||e.key===' '){e.preventDefault();selectTab(b.dataset.tab);return;}
+      let n;if(e.key==='ArrowRight')n=(i+1)%all.length;else if(e.key==='ArrowLeft')n=(i+all.length-1)%all.length;else if(e.key==='Home')n=0;else if(e.key==='End')n=all.length-1;else return;
+      e.preventDefault();all[n].focus();selectTab(all[n].dataset.tab);
+    }));
+
+    applyLayout();
+    renderChallengeSummary();
+    renderNetwork();
+    update();
+
+    window.addEventListener("resize", () => {
+      const nextName = window.matchMedia("(max-width: 560px)").matches ? "mobile" : "desktop";
+      if (nextName !== state.layoutName) {
+        applyLayout();
+        renderNetwork();
+        update();
+      }
+      requestHeightUpdate();
+    });
+
+    window.addEventListener("load", requestHeightUpdate);
+  </script>
+</body>
+</html>
+
+
+
