@@ -109,8 +109,12 @@
     .area-button:hover,
     .area-button:focus-visible {
       border-color: var(--usu-light-blue);
-      outline: none;
       transform: translateY(-1px);
+    }
+
+    .area-button:focus-visible {
+      outline: 3px solid var(--usu-light-blue);
+      outline-offset: 2px;
     }
 
     .area-button[aria-pressed="true"] {
@@ -153,6 +157,12 @@
     .region-fill:focus {
       fill: rgba(47, 111, 159, 0.72);
       outline: none;
+    }
+
+    .region-fill:focus-visible {
+      stroke: var(--usu-blue);
+      stroke-width: 4px;
+      vector-effect: non-scaling-stroke;
     }
 
     .state-outline {
@@ -412,18 +422,20 @@
 </head>
 <body>
   <main class="geo-map" aria-label="Utah water research geographic focus map">
+    <h1 class="sr-only">Utah water research geographic focus map</h1>
     <div class="geo-map__layout">
       <section class="map-panel" aria-label="Interactive Utah map">
         <div class="area-controls" id="areaControls" aria-label="Faculty research focus areas"></div>
         <div class="map-wrap" id="mapWrap">
-          <div class="loading" id="loading">Loading Utah map...</div>
+          <div class="loading" id="loading" role="status" aria-live="polite">Loading Utah map...</div>
           <svg class="utah-svg" id="utahSvg" role="img" aria-labelledby="mapTitle mapDesc"></svg>
           <div class="tooltip" id="tooltip" role="tooltip" aria-hidden="true"></div>
         </div>
         <p class="map-note">This graphic reflects self-reported research areas from UWN faculty. It does not represent all water research conducted across Utah.</p>
       </section>
 
-      <aside class="detail-panel" aria-live="polite">
+      <aside class="detail-panel">
+        <p class="sr-only" id="selectionStatus" role="status" aria-live="polite" aria-atomic="true"></p>
         <div>
           <p class="detail-kicker" id="detailKicker">Selected area</p>
           <h2 class="detail-title" id="detailTitle"></h2>
@@ -438,7 +450,7 @@
           </div>
         </div>
 
-        <section>
+        <section aria-label="Researchers in selected area">
           <div class="researcher-list" id="researcherList"></div>
         </section>
 
@@ -1978,6 +1990,7 @@
     const detailText = document.getElementById("detailText");
     const detailCount = document.getElementById("detailCount");
     const detailContext = document.getElementById("detailContext");
+    const selectionStatus = document.getElementById("selectionStatus");
     const researcherList = document.getElementById("researcherList");
     let selectedArea = areaData[0];
     let counties = [];
@@ -2062,6 +2075,7 @@
           profile.target = "_blank";
           profile.rel = "noopener noreferrer";
           profile.textContent = "View profile";
+          profile.setAttribute("aria-label", `View profile for ${researcher.name}`);
           links.appendChild(profile);
         }
 
@@ -2078,6 +2092,7 @@
       detailContext.textContent = area.id === "statewide"
         ? `${area.count} faculty members report research statewide.`
         : `${area.count} faculty members report research in this area.`;
+      selectionStatus.textContent = `${area.fullLabel}. ${detailContext.textContent}`;
       renderResearchers(area);
     }
 
@@ -2158,14 +2173,18 @@
         .on("mouseenter focus", (event, d) => showAreaTooltip(event, d))
         .on("mousemove", (event, d) => showAreaTooltip(event, d))
         .on("mouseleave blur", hideTooltip)
+        .on("keydown", (event, d) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            selectArea(d.id);
+          }
+        })
         .on("click", (event, d) => selectArea(d.id));
 
       svg.append("path")
         .datum(stateFeature)
         .attr("class", "state-outline")
         .attr("d", path)
-        .attr("tabindex", 0)
-        .attr("role", "img")
         .attr("aria-hidden", "true");
 
       const labelGroup = svg.append("g").attr("aria-hidden", "true");
@@ -2218,6 +2237,8 @@
         drawMap();
       } catch (error) {
         loading.className = "error";
+        loading.setAttribute("role", "alert");
+        loading.setAttribute("aria-live", "assertive");
         loading.textContent = "The Utah map could not load. Check the network connection and refresh this graphic.";
         console.error(error);
       }
