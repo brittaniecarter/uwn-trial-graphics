@@ -731,6 +731,33 @@
     ]
   },
   {
+    "name": "Jennifer Givens",
+    "lastName": "Givens",
+    "email": "jennifer.givens@usu.edu",
+    "university": "Utah State University",
+    "department": "Sociology",
+    "title": "Associate Professor",
+    "website": "https://artsci.usu.edu/social-sciences/sociology/directory/faculty-staff/jennifer-givens",
+    "specific": "• Water behaviors & policy • Global water • Great Salt Lake • Water perceptions • Sociology",
+    "specificItems": [
+      "Water behaviors & policy",
+      "Global water",
+      "Great Salt Lake",
+      "Water perceptions",
+      "Sociology"
+    ],
+    "challenges": [
+      "Water governance",
+      "Water quantity and distribution"
+    ],
+    "regions": [
+      "Colorado River Basin",
+      "Great Salt Lake Basin",
+      "Utah Statewide",
+      "Wasatch Front"
+    ]
+  },
+  {
     "name": "Neil Hansen",
     "lastName": "Hansen",
     "email": "nel_hansen@byu.edu",
