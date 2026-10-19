@@ -1,6 +1,6 @@
 <section class="uwn-db" id="uwn-faculty-database">
   <div class="uwn-db__inner">
-    <section class="uwn-db__detail" id="uwn-selected-profile" data-db-detail hidden aria-label="Selected profile" tabindex="-1"></section>
+    <section class="uwn-db__detail" id="uwn-selected-profile" data-db-detail hidden aria-label="Selected Faculty" tabindex="-1"></section>
 
     <div class="uwn-db__layout">
       <aside class="uwn-db__filters" aria-label="Database filters">
@@ -557,10 +557,10 @@ window.UWN_FACULTY_DATA = [{"name": "Sherzod Akhundjanov", "lastName": "Akhundja
       detail.innerHTML = "";
       return;
     }
-    const profile = item.website ? `<a href="${escapeHtml(item.website)}" target="_blank" rel="noopener" aria-label="Profile for ${escapeHtml(item.name)} (opens in a new tab)">Profile <span aria-hidden="true">↗</span></a>` : "";
+    const profile = item.website ? `<a href="${escapeHtml(item.website)}" target="_blank" rel="noopener" aria-label="Website for ${escapeHtml(item.name)} (opens in a new tab)">Website <span aria-hidden="true">↗</span></a>` : "";
     const email = item.email ? `<a href="mailto:${escapeHtml(item.email)}">${escapeHtml(item.email)}</a>` : "";
     detail.innerHTML = `
-      <div class="uwn-db__selected-label">Selected profile</div>
+      <div class="uwn-db__selected-label">Selected Faculty</div>
       <div>
         <h2 id="uwn-selected-name">${escapeHtml(item.name)}</h2>
         <div class="uwn-db__muted">${escapeHtml([item.title, item.department, item.university].filter(Boolean).join(", "))}</div>
