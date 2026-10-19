@@ -755,6 +755,29 @@
     ]
   },
   {
+    "name": "Daniella Hirschfeld",
+    "lastName": "Hirschfeld",
+    "email": "daniella.hirschfeld@usu.edu",
+    "university": "Utah State University",
+    "department": "Landscape Architecture & Environmental Planning",
+    "title": "Associate Professor",
+    "website": "https://qanr.usu.edu/directory/hirschfeld-daniella",
+    "specific": "• Urban water management • Water reuse • Climate adaptation • Resilience • Nature based solutions",
+    "specificItems": [
+      "Urban water management",
+      "Water reuse",
+      "Climate adaptation",
+      "Resilience",
+      "Nature based solutions"
+    ],
+    "challenges": [
+      "Hazards",
+      "Water governance",
+      "Water infrastructure"
+    ],
+    "regions": []
+  },
+  {
     "name": "John Horel",
     "lastName": "Horel",
     "email": "john.horel@utah.edu",
@@ -1054,6 +1077,29 @@
     ],
     "regions": [
       "Utah Statewide"
+    ]
+  },
+  {
+    "name": "Chris Lant",
+    "lastName": "Lant",
+    "email": "chris.lant@usu.edu",
+    "university": "Utah State University",
+    "department": "Environment & Society",
+    "title": "Professor",
+    "website": "https://qanr.usu.edu/envs/labs/lant-lab/",
+    "specific": "• Virtual water trade • Water rights • Policy, economics, & geography",
+    "specificItems": [
+      "Virtual water trade",
+      "Water rights",
+      "Policy, economics, & geography"
+    ],
+    "challenges": [
+      "Water governance",
+      "Water quantity and distribution",
+      "Water use and demand"
+    ],
+    "regions": [
+      "Great Salt Lake Basin"
     ]
   },
   {
@@ -1712,6 +1758,27 @@
     ]
   },
   {
+    "name": "Alfonso Torres-Rua",
+    "lastName": "Torres-Rua",
+    "email": "alfonso.torres@usu.edu",
+    "university": "Utah State University",
+    "department": "Civil & Environmental Engineering",
+    "title": "Associate Professor",
+    "website": "https://engineering.usu.edu/cee/people/faculty/torres-alfonso",
+    "specific": "• Remote sensing • Irrigation • Agriculture",
+    "specificItems": [
+      "Remote sensing",
+      "Irrigation",
+      "Agriculture"
+    ],
+    "challenges": [
+      "Water use and demand"
+    ],
+    "regions": [
+      "Utah Statewide"
+    ]
+  },
+  {
     "name": "Blake Tullis",
     "lastName": "Tullis",
     "email": "blake.tullis@usu.edu",
@@ -1942,6 +2009,29 @@
       "Uintah Basin/Northeastern Utah",
       "Utah Statewide",
       "Wasatch Back",
+      "Wasatch Front"
+    ]
+  },
+  {
+    "name": "Sierra Young",
+    "lastName": "Young",
+    "email": "sierra.young@usu.edu",
+    "university": "Utah State University",
+    "department": "Civil & Environmental Engineering",
+    "title": "Associate Professor",
+    "website": "https://www.thedaisylab.com/",
+    "specific": "• Remote sensing/computer vision • Water quality/quantity • Water sensing & sampling technology",
+    "specificItems": [
+      "Remote sensing/computer vision",
+      "Water quality/quantity",
+      "Water sensing & sampling technology"
+    ],
+    "challenges": [
+      "Water quality and ecosystems",
+      "Water quantity and distribution"
+    ],
+    "regions": [
+      "Northern Utah",
       "Wasatch Front"
     ]
   },
