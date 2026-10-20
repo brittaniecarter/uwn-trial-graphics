@@ -1785,6 +1785,27 @@
     ]
   },
   {
+    "name": "Jeffrey Taylor",
+    "lastName": "Taylor",
+    "email": "jeffrey.taylor@usu.edu",
+    "university": "Utah State University",
+    "department": "Center for Anticipatory Intelligence, USU Extension Ag & Natural Resources",
+    "title": "Professional Practice Extension Assistant Professor, Associate Director",
+    "website": "https://www.usu.edu/cai/about/leadership-team",
+    "specific": "• Water system mapping • Water risk assessment • Stakeholder alignment • Resilience • Systems & complexity",
+    "specificItems": [
+      "Water system mapping",
+      "Water risk assessment",
+      "Stakeholder alignment",
+      "Resilience",
+      "Systems & complexity"
+    ],
+    "challenges": [
+      "Hazards"
+    ],
+    "regions": []
+  },
+  {
     "name": "Alfonso Torres-Rua",
     "lastName": "Torres-Rua",
     "email": "alfonso.torres@usu.edu",
