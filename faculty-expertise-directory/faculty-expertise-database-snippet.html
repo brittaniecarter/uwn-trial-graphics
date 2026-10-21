@@ -563,7 +563,8 @@ window.UWN_FACULTY_DATA = [{"name": "Sherzod Akhundjanov", "lastName": "Akhundja
       <div class="uwn-db__selected-label">Selected Faculty</div>
       <div>
         <h2 id="uwn-selected-name">${escapeHtml(item.name)}</h2>
-        <div class="uwn-db__muted">${escapeHtml([item.title, item.department, item.university].filter(Boolean).join(", "))}</div>
+        <div class="uwn-db__muted">${escapeHtml([item.title, item.department].filter(Boolean).join(", "))}</div>
+        ${item.university ? `<div class="uwn-db__university">${escapeHtml(item.university)}</div>` : ""}
       </div>
       <div class="uwn-db__detail-grid">
         <div class="uwn-db__field">
