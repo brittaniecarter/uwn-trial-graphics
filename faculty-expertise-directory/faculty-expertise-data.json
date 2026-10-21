@@ -589,6 +589,30 @@
     ]
   },
   {
+    "name": "Som Dutta",
+    "lastName": "Dutta",
+    "email": "som.dutta@usu.edu",
+    "university": "Utah State University",
+    "department": "Mechanical & Aerospace Engineering",
+    "title": "Associate Professor",
+    "website": "https://engineering.usu.edu/mae/people/faculty/dutta-som",
+    "specific": "• Hydraulics • Computational fluid hydraulics • Sediment transport • AI and machine learning",
+    "specificItems": [
+      "Hydraulics",
+      "Computational fluid hydraulics",
+      "Sediment transport",
+      "AI and machine learning"
+    ],
+    "challenges": [
+      "Hazards",
+      "Water infrastructure",
+      "Water quantity and distribution"
+    ],
+    "regions": [
+      "Great Salt Lake Basin"
+    ]
+  },
+  {
     "name": "Sarah Erwin",
     "lastName": "Erwin",
     "email": "sarah.erwin@usu.edu",
