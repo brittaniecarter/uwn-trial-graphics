@@ -240,6 +240,28 @@
     ]
   },
   {
+    "name": "Janice Brahney",
+    "lastName": "Brahney",
+    "email": "jbrahney@gmail.com",
+    "university": "Utah State University",
+    "department": "Water, Earth, & Environmental Sciences",
+    "title": "Professor",
+    "website": "https://janicebrahney.weebly.com/",
+    "specific": "• Limnology • Biogeochemistry • Water quality & pollution",
+    "specificItems": [
+      "Limnology",
+      "Biogeochemistry",
+      "Water quality & pollution"
+    ],
+    "challenges": [
+      "Water quality and ecosystems",
+      "Water quantity and distribution"
+    ],
+    "regions": [
+      "Utah Statewide"
+    ]
+  },
+  {
     "name": "Roslynn Brain",
     "lastName": "Brain",
     "email": "roslynn.brain@usu.edu",
@@ -611,6 +633,24 @@
     "regions": [
       "Great Salt Lake Basin"
     ]
+  },
+  {
+    "name": "Catrin Edgeley",
+    "lastName": "Edgeley",
+    "email": "catrin.edgeley@usu.edu",
+    "university": "Utah State University",
+    "department": "Environment & Society",
+    "title": "Assistant Professor",
+    "website": "https://qanr.usu.edu/directory/edgeley-catrin",
+    "specific": "• Post-fire flood management • Post-fire planning",
+    "specificItems": [
+      "Post-fire flood management",
+      "Post-fire planning"
+    ],
+    "challenges": [
+      "Hazards"
+    ],
+    "regions": []
   },
   {
     "name": "Sarah Erwin",
@@ -1695,6 +1735,28 @@
       "Colorado River Basin",
       "Great Salt Lake Basin",
       "Northern Utah"
+    ]
+  },
+  {
+    "name": "Ronald Sims",
+    "lastName": "Sims",
+    "email": "ron.sims@usu.edu",
+    "university": "Utah State University",
+    "department": "Biological & Chemical Engineering, Sustainable Waste to Bioproducts Engineering Center",
+    "title": "Professor",
+    "website": "https://engineering.usu.edu/bce/people/faculty/sims-ronald",
+    "specific": "• Transforming chemicals into bioproducts • Use of microorganisms in biological reactors",
+    "specificItems": [
+      "Transforming chemicals into bioproducts",
+      "Use of microorganisms in biological reactors"
+    ],
+    "challenges": [
+      "Water quality and ecosystems"
+    ],
+    "regions": [
+      "Northern Utah",
+      "Utah Statewide",
+      "Wasatch Front"
     ]
   },
   {
