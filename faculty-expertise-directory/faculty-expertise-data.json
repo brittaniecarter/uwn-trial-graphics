@@ -772,6 +772,28 @@
     ]
   },
   {
+    "name": "Jordan Gilbert",
+    "lastName": "Gilbert",
+    "email": "jordan.gilbert@usu.edu",
+    "university": "Utah State University",
+    "department": "Water, Earth, & Environmental Sciences",
+    "title": "Research Assistant Professor",
+    "website": "",
+    "specific": "• Riverscape health & restoration • Restoration monitoring",
+    "specificItems": [
+      "Riverscape health & restoration",
+      "Restoration monitoring"
+    ],
+    "challenges": [
+      "Hazards",
+      "Water quality and ecosystems",
+      "Water quantity and distribution"
+    ],
+    "regions": [
+      "Utah Statewide"
+    ]
+  },
+  {
     "name": "Gina Gilson",
     "lastName": "Gilson",
     "email": "gina.gilson@usu.edu",
@@ -1170,6 +1192,32 @@
     ],
     "regions": [
       "Utah Statewide"
+    ]
+  },
+  {
+    "name": "Belize Lane",
+    "lastName": "Lane",
+    "email": "belize.lane@usu.edu",
+    "university": "Utah State University",
+    "department": "Civil & Environmental Engineering",
+    "title": "Associate Professor",
+    "website": "https://uwrl.usu.edu/people/faculty/lane-belize",
+    "specific": "• Flooding • Post-fire hazards • Ecohydraulics • River restoration & design • Environmental flows",
+    "specificItems": [
+      "Flooding",
+      "Post-fire hazards",
+      "Ecohydraulics",
+      "River restoration & design",
+      "Environmental flows"
+    ],
+    "challenges": [
+      "Hazards",
+      "Water quality and ecosystems",
+      "Water quantity and distribution"
+    ],
+    "regions": [
+      "Great Salt Lake Basin",
+      "Northern Utah"
     ]
   },
   {
