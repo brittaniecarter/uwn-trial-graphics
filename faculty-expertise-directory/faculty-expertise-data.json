@@ -257,9 +257,7 @@
       "Water quality and ecosystems",
       "Water quantity and distribution"
     ],
-    "regions": [
-      "Utah Statewide"
-    ]
+    "regions": []
   },
   {
     "name": "Roslynn Brain",
@@ -650,7 +648,9 @@
     "challenges": [
       "Hazards"
     ],
-    "regions": []
+    "regions": [
+      "Utah Statewide"
+    ]
   },
   {
     "name": "Sarah Erwin",
