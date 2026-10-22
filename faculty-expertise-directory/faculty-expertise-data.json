@@ -870,6 +870,25 @@
     ]
   },
   {
+    "name": "Chuck Hawkins",
+    "lastName": "Hawkins",
+    "email": "chuck.hawkins@usu.edu",
+    "university": "Utah State University",
+    "department": "Wildland Resources, National Aquatic Monitoring Center",
+    "title": "Professor & Director",
+    "website": "https://qanr.usu.edu/directory/hawkins-charles",
+    "specific": "• Monitoring & assessment • Aquatic biodiversity & conservation • Research designs • Predictive modeling • Science communication",
+    "specificItems": [
+      "Monitoring & assessment",
+      "Aquatic biodiversity & conservation",
+      "Research designs",
+      "Predictive modeling",
+      "Science communication"
+    ],
+    "challenges": [],
+    "regions": []
+  },
+  {
     "name": "Daniella Hirschfeld",
     "lastName": "Hirschfeld",
     "email": "daniella.hirschfeld@usu.edu",
@@ -1511,6 +1530,32 @@
       "Great Salt Lake Basin",
       "Uintah Basin/Northeastern Utah",
       "Wasatch Back",
+      "Wasatch Front"
+    ]
+  },
+  {
+    "name": "Beth Parker",
+    "lastName": "Parker",
+    "email": "beth.parker@law.utah.edu",
+    "university": "University of Utah",
+    "department": "SJ Quinney College of Law",
+    "title": "Assistant Professor",
+    "website": "https://www.law.utah.edu/faculty-directory/beth-parker/",
+    "specific": "• Water law & policy • Water security • Great Salt Lake law & policy • Environmental law & policy • Air pollution law",
+    "specificItems": [
+      "Water law & policy",
+      "Water security",
+      "Great Salt Lake law & policy",
+      "Environmental law & policy",
+      "Air pollution law"
+    ],
+    "challenges": [
+      "Water governance"
+    ],
+    "regions": [
+      "Colorado River Basin",
+      "Great Salt Lake Basin",
+      "Northern Utah",
       "Wasatch Front"
     ]
   },
