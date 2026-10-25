@@ -655,6 +655,27 @@
     ]
   },
   {
+    "name": "Clare Entwistle",
+    "lastName": "Entwistle",
+    "email": "clare.entwistle@usu.edu",
+    "university": "Utah State University",
+    "department": "Water, Earth, & Environmental Sciences",
+    "title": "Assistant Professor & Extension Water Quality Specialist",
+    "website": "https://qanr.usu.edu/directory/entwistle-clare",
+    "specific": "• Water quality & monitoring • Watershed management & planning • Nature based solutions",
+    "specificItems": [
+      "Water quality & monitoring",
+      "Watershed management & planning",
+      "Nature based solutions"
+    ],
+    "challenges": [
+      "Water quality and ecosystems"
+    ],
+    "regions": [
+      "Utah Statewide"
+    ]
+  },
+  {
     "name": "Sarah Erwin",
     "lastName": "Erwin",
     "email": "sarah.erwin@usu.edu",
@@ -2031,6 +2052,27 @@
     "regions": [
       "Utah Statewide"
     ]
+  },
+  {
+    "name": "Luguang Wang",
+    "lastName": "Wang",
+    "email": "luguang.wang@usu.edu",
+    "university": "Utah State University",
+    "department": "Biological & Chemical Engineering, Utah Water Research Laboratory",
+    "title": "Assistant Professor",
+    "website": "https://engineering.usu.edu/bce/people/faculty/wang-luguang",
+    "specific": "• Biological wastewater treatment • Agricultural waste valorization • Bioenergy production • Alternative protein production",
+    "specificItems": [
+      "Biological wastewater treatment",
+      "Agricultural waste valorization",
+      "Bioenergy production",
+      "Alternative protein production"
+    ],
+    "challenges": [
+      "Hazards",
+      "Water quality and ecosystems"
+    ],
+    "regions": []
   },
   {
     "name": "Xuming Wang",
