@@ -1493,6 +1493,27 @@
     ]
   },
   {
+    "name": "Dennis Newell",
+    "lastName": "Newell",
+    "email": "dennis.newell@usu.edu",
+    "university": "Utah State University",
+    "department": "Water, Earth, & Environmental Sciences",
+    "title": "Professor & Department Head",
+    "website": "https://qanr.usu.edu/directory/newell-dennis",
+    "specific": "• Aqueous & stable isotope geology • Groundwater hydrogeochemistry",
+    "specificItems": [
+      "Aqueous & stable isotope geology",
+      "Groundwater hydrogeochemistry"
+    ],
+    "challenges": [
+      "Water quality and ecosystems"
+    ],
+    "regions": [
+      "Great Salt Lake Basin",
+      "Northern Utah"
+    ]
+  },
+  {
     "name": "Sarah Null",
     "lastName": "Null",
     "email": "sarah.null@usu.edu",
