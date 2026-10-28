@@ -869,7 +869,7 @@
   {
     "name": "Neil Hansen",
     "lastName": "Hansen",
-    "email": "nel_hansen@byu.edu",
+    "email": "neil_hansen@byu.edu",
     "university": "Brigham Young University",
     "department": "Plant & Wildlife Sciences",
     "title": "Professor",
@@ -1547,6 +1547,29 @@
       "Utah Statewide",
       "Wasatch Back",
       "Wasatch Front"
+    ]
+  },
+  {
+    "name": "Erin O'Brian",
+    "lastName": "O'Brian",
+    "email": "erin.obrien@utahtech.edu",
+    "university": "Utah Tech University",
+    "department": "Biological Sciences, Community Engaged Learning",
+    "title": "Professor & Director",
+    "website": "https://biology.utahtech.edu/faculty/erin-obrien/",
+    "specific": "• Sustainable agriculture • Water conservation • Cultivation techniques • Plant/crop ecology • Plant conservation biology",
+    "specificItems": [
+      "Sustainable agriculture",
+      "Water conservation",
+      "Cultivation techniques",
+      "Plant/crop ecology",
+      "Plant conservation biology"
+    ],
+    "challenges": [
+      "Water quality and ecosystems"
+    ],
+    "regions": [
+      "Southwestern Utah"
     ]
   },
   {
