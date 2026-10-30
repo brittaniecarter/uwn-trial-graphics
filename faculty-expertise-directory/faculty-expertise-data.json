@@ -509,6 +509,27 @@
     ]
   },
   {
+    "name": "Brig Daniels",
+    "lastName": "Daniels",
+    "email": "brigham.daniels@law.utah.edu",
+    "university": "University of Utah",
+    "department": "Law",
+    "title": "Professor & Co-Director",
+    "website": "",
+    "specific": "• Water law & policy",
+    "specificItems": [
+      "Water law & policy"
+    ],
+    "challenges": [
+      "Water governance"
+    ],
+    "regions": [
+      "Great Salt Lake Basin",
+      "Colorado River Basin",
+      "Utah Statewide"
+    ]
+  },
+  {
     "name": "Justin DeRose",
     "lastName": "DeRose",
     "email": "justin.derose@usu.edu",
@@ -1371,6 +1392,32 @@
       "Water infrastructure"
     ],
     "regions": []
+  },
+  {
+    "name": "Daniel McCool",
+    "lastName": "McCool",
+    "email": "dan.mccool@poli-sci.utah.edu",
+    "university": "University of Utah",
+    "department": "Political Science",
+    "title": "Professor Emeritus",
+    "website": "",
+    "specific": "• Water policy making • Native American water rights • Water infrastructure funding",
+    "specificItems": [
+      "Water policy making",
+      "Native American water rights",
+      "Water infrastructure funding"
+    ],
+    "challenges": [
+      "Water quantity and distribution",
+      "Water use and demand",
+      "Water infrastructure",
+      "Water governance"
+    ],
+    "regions": [
+      "Great Salt Lake Basin",
+      "Colorado River Basin",
+      "Utah Statewide"
+    ]
   },
   {
     "name": "Joan McLean",
