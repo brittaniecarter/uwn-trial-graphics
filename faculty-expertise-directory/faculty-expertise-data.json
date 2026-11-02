@@ -526,7 +526,8 @@
     "regions": [
       "Great Salt Lake Basin",
       "Colorado River Basin",
-      "Utah Statewide"
+      "Utah Statewide",
+      "Utah Other"
     ]
   },
   {
@@ -929,6 +930,27 @@
     ],
     "challenges": [],
     "regions": []
+  },
+  {
+    "name": "Sarah Hinners",
+    "lastName": "Hinners",
+    "email": "sarah.hinners@utah.edu",
+    "university": "University of Utah",
+    "department": "Red Butte Garden & Arboretum",
+    "title": "Director of Conservation & Research",
+    "website": "",
+    "specific": "• Urban & watershed management • Stormwater • Ecology",
+    "specificItems": [
+      "Urban & watershed management",
+      "Stormwater",
+      "Ecology"
+    ],
+    "challenges": [
+      "Water quality and ecosystems"
+    ],
+    "regions": [
+      "Wasatch Front"
+    ]
   },
   {
     "name": "Daniella Hirschfeld",
@@ -1994,6 +2016,27 @@
     ]
   },
   {
+    "name": "Alyssa Stansfield",
+    "lastName": "Stansfield",
+    "email": "Alyssa.stansfield@utah.edu",
+    "university": "University of Utah",
+    "department": "Atmospheric Sciences",
+    "title": "Assistant Professor",
+    "website": "https://alyssa-stansfield.github.io/",
+    "specific": "• Precipitation extremes & physical processes • Atmospheric modeling",
+    "specificItems": [
+      "Precipitation extremes & physical processes",
+      "Atmospheric modeling"
+    ],
+    "challenges": [
+      "Water quantity and distribution",
+      "Hazards"
+    ],
+    "regions": [
+      "Utah Statewide"
+    ]
+  },
+  {
     "name": "Courtenay Strong",
     "lastName": "Strong",
     "email": "court.strong@utah.edu",
@@ -2395,6 +2438,30 @@
     "regions": [
       "Northern Utah",
       "Wasatch Front"
+    ]
+  },
+  {
+    "name": "Ling Zang",
+    "lastName": "Zang",
+    "email": "lzang@eng.utah.edu",
+    "university": "University of Utah",
+    "department": "Materials Science & Engineering",
+    "title": "Distinguished Professor",
+    "website": "https://zang.mse.utah.edu/",
+    "specific": "• PFAS detection, removal & destruction • Chemical sensors • Sorbent",
+    "specificItems": [
+      "PFAS detection, removal & destruction",
+      "Chemical sensors",
+      "Sorbent"
+    ],
+    "challenges": [
+      "Water quality and ecosystems",
+      "Water use and demand",
+      "Hazards"
+    ],
+    "regions": [
+      "Wasatch Front",
+      "Great Salt Lake Basin"
     ]
   },
   {
