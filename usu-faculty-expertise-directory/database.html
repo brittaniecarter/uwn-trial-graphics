@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Utah water expertise database</title>
+</head>
+<body style="margin:0">
+<main aria-label="Faculty expertise directory">
+<h1 class="uwn-db__sr-only">Faculty expertise directory</h1>
+<section class="uwn-db" id="uwn-faculty-database">
+  <div class="uwn-db__inner">
+    <section class="uwn-db__detail" id="uwn-selected-profile" data-db-detail hidden aria-label="Selected Faculty" tabindex="-1"></section>
+
+    <div class="uwn-db__layout">
+      <aside class="uwn-db__filters" aria-label="Database filters">
+        <button type="button" class="uwn-db__clear" data-db-clear>Clear filters</button>
+        <label>
+          Search records
+          <input data-db-search type="search" placeholder="hydrology, policy, irrigation" autocomplete="off">
+        </label>
+        <label>
+          Region
+          <select data-db-region>
+            <option value="">All regions</option>
+          </select>
+        </label>
+        <div>
+          <div class="uwn-db__label">Water challenge</div>
+          <div class="uwn-db__topic-list" data-db-topics role="group" aria-label="Water challenge filters"></div>
+        </div>
+      </aside>
+
+      <section class="uwn-db__main" aria-label="Directory results">
+        <div class="uwn-db__status" data-db-status aria-live="polite">0 experts</div>
+        <div class="uwn-db__table-wrap">
+          <table>
+            <caption class="uwn-db__sr-only">Faculty water expertise. Select a name to view the full profile.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Faculty</th>
+                <th scope="col">Institution</th>
+                <th scope="col">Water expertise</th>
+                <th scope="col">Challenges</th>
+                <th scope="col">Regions</th>
+              </tr>
+            </thead>
+            <tbody data-db-body></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+<style>
+
+:root {
+  --uwn-db-ink: #18242d;
+  --uwn-db-muted: #53636f;
+  --uwn-db-line: #d8e0e5;
+  --uwn-db-bg: #f4f7f8;
+  --uwn-db-panel: #ffffff;
+  --uwn-db-blue: #1c5d85;
+  --uwn-db-blue-soft: #e7f1f7;
+  --uwn-db-teal-soft: #e4f1ee;
+  --uwn-db-gold-soft: #f8efdd;
+}
+
+.uwn-db {
+  color: var(--uwn-db-ink);
+  background: var(--uwn-db-bg);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.4;
+  padding: 20px;
+}
+
+.uwn-db * {
+  box-sizing: border-box;
+}
+
+.uwn-db__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.uwn-db :focus-visible,
+.uwn-db__detail:focus {
+  outline: 3px solid #075e57;
+  outline-offset: 3px;
+}
+
+.uwn-db input, .uwn-db select, .uwn-db button {
+  border-color: #74818d !important;
+}
+
+.uwn-db__inner {
+  max-width: 1220px;
+  margin: 0 auto;
+}
+
+.uwn-db__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+
+.uwn-db h2 {
+  margin: 0 0 4px;
+  font-size: clamp(1.45rem, 2vw, 2rem);
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+.uwn-db__intro,
+.uwn-db__status,
+.uwn-db__muted {
+  color: var(--uwn-db-muted);
+}
+
+.uwn-db__intro {
+  margin: 0;
+}
+
+.uwn-db__status {
+  padding: 9px 12px;
+  border-left: 4px solid #128070;
+  background: var(--uwn-db-panel);
+  font-weight: 700;
+}
+
+.uwn-db__layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 14px;
+}
+
+.uwn-db__filters,
+.uwn-db__table-wrap,
+.uwn-db__detail {
+  border: 1px solid var(--uwn-db-line);
+  border-radius: 8px;
+  background: var(--uwn-db-panel);
+}
+
+.uwn-db__filters {
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  align-self: start;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.uwn-db label {
+  display: grid;
+  gap: 5px;
+  color: var(--uwn-db-muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.uwn-db input,
+.uwn-db select {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--uwn-db-line);
+  border-radius: 6px;
+  color: var(--uwn-db-ink);
+  background: #fff;
+  font: inherit;
+  padding: 8px 9px;
+}
+
+.uwn-db input:focus,
+.uwn-db select:focus,
+.uwn-db button:focus {
+  outline: 3px solid #075e57;
+  outline-offset: 2px;
+}
+
+.uwn-db__topic-list {
+  display: grid;
+  gap: 6px;
+}
+
+.uwn-db button {
+  border: 1px solid var(--uwn-db-line);
+  color: var(--uwn-db-ink);
+  background: var(--uwn-db-panel);
+  font: inherit;
+  cursor: pointer;
+}
+
+.uwn-db__topic-list button {
+  min-height: 34px;
+  border-radius: 6px;
+  padding: 6px 8px;
+  text-align: left;
+  font-weight: 700;
+}
+
+.uwn-db__topic-list button[aria-pressed="true"] {
+  border-color: var(--uwn-db-blue);
+  color: #fff;
+  background: var(--uwn-db-blue);
+}
+
+.uwn-db__main {
+  display: grid;
+  gap: 12px;
+}
+
+.uwn-db__table-wrap {
+  overflow-x: auto;
+}
+
+.uwn-db table {
+  width: 100%;
+  min-width: 780px;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.uwn-db th,
+.uwn-db td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--uwn-db-line);
+  vertical-align: top;
+  text-align: left;
+}
+
+.uwn-db th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  color: var(--uwn-db-muted);
+  background: #f9fbfc;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.uwn-db tr:last-child td {
+  border-bottom: 0;
+}
+
+.uwn-db tr.is-selected td {
+  background: var(--uwn-db-blue-soft);
+}
+
+.uwn-db__name-button {
+  border: 0;
+  padding: 0;
+  color: var(--uwn-db-blue);
+  background: transparent;
+  font-weight: 700;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.uwn-db__small {
+  display: block;
+  color: var(--uwn-db-muted);
+  font-size: 0.82rem;
+  margin-top: 2px;
+}
+
+.uwn-db__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.uwn-db__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: var(--uwn-db-blue-soft);
+  color: var(--uwn-db-ink);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.uwn-db__chip--region {
+  background: var(--uwn-db-teal-soft);
+}
+
+.uwn-db__chip--term {
+  background: var(--uwn-db-gold-soft);
+}
+
+.uwn-db__detail {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+  margin-bottom: 20px;
+  background: #eaf4f4;
+  border: 1px solid #a8cecc;
+  border-top: 5px solid #0d766d;
+  box-shadow: 0 4px 14px rgba(15, 65, 70, 0.10);
+  scroll-margin-top: 12px;
+}
+
+.uwn-db__detail[hidden] {
+  display: none;
+}
+
+.uwn-db__detail .uwn-db__chip,
+.uwn-db__table-wrap .uwn-db__chip {
+  background: #c7dfef;
+  border: 1px solid #42799b;
+  color: #153d56;
+  padding: 5px 10px;
+}
+
+.uwn-db__detail .uwn-db__chip--region,
+.uwn-db__table-wrap .uwn-db__chip--region {
+  background: #bce0d4;
+  border-color: #367d68;
+  color: #154b3b;
+}
+
+.uwn-db__selected-label {
+  color: #075e57;
+  font-size: .78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.uwn-db__clear {
+  padding: 9px 12px;
+  border-radius: 6px;
+  font-weight: 700 !important;
+}
+
+.uwn-db__list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.uwn-db__list li + li {
+  margin-top: 4px;
+}
+
+.uwn-db__detail h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.uwn-db__detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.uwn-db__field {
+  align-content: start;
+  display: grid;
+  gap: 4px;
+}
+
+.uwn-db__detail-side {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+
+.uwn-db__label {
+  color: var(--uwn-db-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.uwn-db__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.uwn-db a {
+  overflow-wrap: anywhere;
+  min-width: 0;
+  color: var(--uwn-db-blue);
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.uwn-db__empty {
+  padding: 18px;
+  color: var(--uwn-db-muted);
+}
+
+@media (max-width: 860px) {
+  .uwn-db {
+    padding: 14px;
+  }
+
+  .uwn-db__header,
+  .uwn-db__layout,
+  .uwn-db__detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .uwn-db__filters {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
+@media (max-width: 640px) {
+  .uwn-db table {
+    min-width: 0;
+    table-layout: fixed;
+    font-size: 0.86rem;
+  }
+
+  .uwn-db th,
+  .uwn-db td {
+    padding: 9px 10px;
+  }
+
+  .uwn-db th:nth-child(1),
+  .uwn-db td:nth-child(1) {
+    width: 34%;
+  }
+
+  .uwn-db th:nth-child(2),
+  .uwn-db td:nth-child(2) {
+    width: 31%;
+  }
+
+  .uwn-db th:nth-child(3),
+  .uwn-db td:nth-child(3) {
+    width: 35%;
+  }
+
+  .uwn-db th:nth-child(4),
+  .uwn-db td:nth-child(4),
+  .uwn-db th:nth-child(5),
+  .uwn-db td:nth-child(5) {
+    display: none;
+  }
+
+  .uwn-db__name-button {
+    border-radius: 0;
+    background: transparent;
+    appearance: none;
+  }
+}
+
+</style>
+<script>
+window.UWN_FACULTY_DATA = [{"name": "Sherzod Akhundjanov", "lastName": "Akhundjanov", "email": "sherzod.akhundjanov@usu.edu", "university": "Utah State University", "department": "Agricultural & Resource Economics", "title": "Professor", "website": "https://qanr.usu.edu/directory/akhundjanov-sherzod", "specific": "• Water policies & institutions • Economic analysis • Water transfers", "specificItems": ["Water policies & institutions", "Economic analysis", "Water transfers"], "challenges": ["Water governance", "Water quantity and distribution"], "regions": ["Colorado River Basin", "Great Salt Lake Basin"]}, {"name": "David Anderson", "lastName": "Anderson", "email": "david.anderson@usu.edu", "university": "Utah State University", "department": "Landscape Architecture & Environmental Planning", "title": "Professional Practice Professor", "website": "https://qanr.usu.edu/directory/anderson-david", "specific": "• Water-wise landscaping • Stormwater management • Water conservation", "specificItems": ["Water-wise landscaping", "Stormwater management", "Water conservation"], "challenges": ["Water quality and ecosystems", "Water use and demand"], "regions": ["Utah Statewide"]}, {"name": "Michelle Baker", "lastName": "Baker", "email": "michelle.baker@usu.edu", "university": "Utah State University", "department": "Biology", "title": "Professor", "website": "https://artsci.usu.edu/biology/directory/baker-michelle", "specific": "• Biogeochemistry • Hydrology & ecology • Energy flow & nutrient cycling • Ecosystem structure & function", "specificItems": ["Biogeochemistry", "Hydrology & ecology", "Energy flow & nutrient cycling", "Ecosystem structure & function"], "challenges": ["Water quality and ecosystems"], "regions": ["Northern Utah", "Wasatch Front"]}, {"name": "Steven Barfuss", "lastName": "Barfuss", "email": "steve.barfuss@usu.edu", "university": "Utah State University", "department": "Civil & Environmental Engineering, Utah Water Research Laboratory", "title": "Research Professor", "website": "https://uwrl.usu.edu/people/faculty/barfuss-steven", "specific": "• Flow measurement • Physical modeling", "specificItems": ["Flow measurement", "Physical modeling"], "challenges": ["Water quantity and distribution"], "regions": ["Utah Statewide"]}, {"name": "Burdette Barker", "lastName": "Barker", "email": "burdette.barker@usu.edu", "university": "Utah State University", "department": "Civil & Environmental Engineering, Utah Water Research Laboratory", "title": "Assistant Professor & Extension Irrigation Specialist", "website": "https://irrigation.usu.edu", "specific": "• Irrigation • Evapotranspiration • Measurement & modeling", "specificItems": ["Irrigation", "Evapotranspiration", "Measurement & modeling"], "challenges": ["Water quantity and distribution", "Water use and demand"], "regions": ["Utah Statewide"]}, {"name": "Brennan Bean", "lastName": "Bean", "email": "brennan.bean@usu.edu", "university": "Utah State University", "department": "Mathematics & Statistics", "title": "Associate Professor", "website": "https://artsci.usu.edu/math-stats/directory/faculty/bean-brennan", "specific": "• Extreme snow accumulation • Snow mapping • Spatial statistics", "specificItems": ["Extreme snow accumulation", "Snow mapping", "Spatial statistics"], "challenges": ["Hazards"], "regions": []}, {"name": "Brent Black", "lastName": "Black", "email": "brent.black@usu.edu", "university": "Utah State University", "department": "Plants, Soils & Climate", "title": "Professor & Extension Fruit Crop Specialist", "website": "", "specific": "• Irrigation • Remote sensing of plant water stress • Water conservation", "specificItems": ["Irrigation", "Remote sensing of plant water stress", "Water conservation"], "challenges": ["Water use and demand"], "regions": ["Northern Utah", "Southwestern Utah", "Wasatch Front"]}, {"name": "Janice Brahney", "lastName": "Brahney", "email": "jbrahney@gmail.com", "university": "Utah State University", "department": "Water, Earth, & Environmental Sciences", "title": "Professor", "website": "https://janicebrahney.weebly.com/", "specific": "• Limnology • Biogeochemistry • Water quality & pollution", "specificItems": ["Limnology", "Biogeochemistry", "Water quality & pollution"], "challenges": ["Water quality and ecosystems", "Water quantity and distribution"], "regions": ["Utah Statewide"]}, {"name": "Roslynn Brain", "lastName": "Brain", "email": "roslynn.brain@usu.edu", "university": "Utah State University", "department": "Environment & Society", "title": "Professor & Sustainable Communities Extension Specialist", "website": "https://extension.usu.edu/sustainability/", "specific": "• Water-harvesting earthworks • Environmental behavior", "specificItems": ["Water-harvesting earthworks", "Environmental behavior"], "challenges": ["Water infrastructure", "Water quality and ecosystems", "Water quantity and distribution"], "regions": ["Northern Utah", "Southeastern Utah", "Southwestern Utah", "Wasatch Front"]}, {"name": "Damon Cann", "lastName": "Cann", "email": "damon.cann@usu.edu", "university": "Utah State University", "department": "Political Science", "title": "Professor", "website": "https://artsci.usu.edu/social-sciences/political-science/directory/faculty-staff/cann-damon", "specific": "• Municipal water systems & governance", "specificItems": ["Municipal water systems & governance"], "challenges": ["Water governance"], "regions": ["Utah Statewide"]}, {"name": "Grant Cardon", "lastName": "Cardon", "email": "grant.cardon@usu.edu", "university": "Utah State University", "department": "Plants, Soils & Climate", "title": "Professor & Extension Soils Specialist", "website": "https://qanr.usu.edu/directory/cardon-grant", "specific": "• Irrigation management • Soil-water-plant-atmosphere • Soil/water salinity", "specificItems": ["Irrigation management", "Soil-water-plant-atmosphere", "Soil/water salinity"], "challenges": ["Water quality and ecosystems", "Water quantity and distribution", "Water use and demand"], "regions": ["Utah Statewide"]}, {"name": "Alice Carter", "lastName": "Carter", "email": "alice.carter@usu.edu", "university": "Utah State University", "department": "Mathematics & Statistics", "title": "Assistant Professor of Practice", "website": "https://amcarter.github.io/alicecarter/", "specific": "• Biogeochemistry • Carbon cycling • Algae • Ecosystem processes & metabolism • Time series modeling • Statistics", "specificItems": ["Biogeochemistry", "Carbon cycling", "Algae", "Ecosystem processes & metabolism", "Time series modeling", "Statistics"], "challenges": ["Hazards", "Water quality and ecosystems"], "regions": ["Northern Utah", "Southeastern Utah", "Utah Statewide", "Wasatch Front"]}, {"name": "Brent Chamberlain", "lastName": "Chamberlain", "email": "brent.chamberlain@usu.edu", "university": "Utah State University", "department": "Landscape Architecture & Environmental Planning", "title": "Professor", "website": "https://qanr.usu.edu/directory/chamberlain-brent", "specific": "• Water-wise development • Sea-level rise • Urban/regional planning • GIS & GeoAI • Environmental visualization", "specificItems": ["Water-wise development", "Sea-level rise", "Urban/regional planning", "GIS & GeoAI", "Environmental visualization"], "challenges": ["Hazards"], "regions": []}, {"name": "Yoshi Chikamoto", "lastName": "Chikamoto", "email": "yoshi.chikamoto@usu.edu", "university": "Utah State University", "department": "Plants, Soils & Climate", "title": "Associate Professor", "website": "https://climate.usu.edu/people/yoshi/index.html", "specific": "• Drought forecasting • Water supply forecasting • Climate dynamics", "specificItems": ["Drought forecasting", "Water supply forecasting", "Climate dynamics"], "challenges": ["Hazards"], "regions": ["Colorado River Basin", "Great Salt Lake Basin", "Utah Statewide", "Wasatch Front"]}, {"name": "Elizabeth Cohen", "lastName": "Cohen", "email": "elizabeth.cohen@usu.edu", "university": "Utah State University", "department": "Extension - Ag & Natural Resources", "title": "Assistant Professor", "website": "", "specific": "• Nonpoint source pollution • Agriculture • Water quality", "specificItems": ["Nonpoint source pollution", "Agriculture", "Water quality"], "challenges": ["Water quality and ecosystems"], "regions": ["Utah Other"]}, {"name": "Brian Crookston", "lastName": "Crookston", "email": "brian.crookston@usu.edu", "university": "Utah State University", "department": "Utah Water Research Laboratory", "title": "Associate Professor", "website": "https://engineering.usu.edu/cee/people/faculty/crookston-brian", "specific": "• Hydraulics • Hazard/risk assessments • Dams, spillways & flooding • Public safety • Surface hydrology • Water sustainability • Instrumentation", "specificItems": ["Hydraulics", "Hazard/risk assessments", "Dams, spillways & flooding", "Public safety", "Surface hydrology", "Water sustainability", "Instrumentation"], "challenges": ["Hazards", "Water infrastructure", "Water quantity and distribution"], "regions": ["Great Salt Lake Basin", "Utah Other", "Utah Statewide"]}, {"name": "Lawrence Culver", "lastName": "Culver", "email": "lawrence.culver@usu.edu", "university": "Utah State University", "department": "History", "title": "Associate Professor", "website": "https://artsci.usu.edu/history-cultures-ideas/history/directory/lawrence-culver", "specific": "• Water use/infrastructure history • Environmental hazards • Environmental/urban history • Climate history", "specificItems": ["Water use/infrastructure history", "Environmental hazards", "Environmental/urban history", "Climate history"], "challenges": ["Hazards", "Water infrastructure"], "regions": ["Great Salt Lake Basin", "Northern Utah", "Wasatch Front"]}, {"name": "Justin DeRose", "lastName": "DeRose", "email": "justin.derose@usu.edu", "university": "Utah State University", "department": "Wildland Resources", "title": "Associate Professor", "website": "https://qanr.usu.edu/wild/labs/derose-lab/", "specific": "• Dendrochronology • Water-climate reconstruction • Stream flow • Forest ecology", "specificItems": ["Dendrochronology", "Water-climate reconstruction", "Stream flow", "Forest ecology"], "challenges": ["Hazards", "Water quantity and distribution"], "regions": ["Great Salt Lake Basin", "Northern Utah", "Uintah Basin/Northeastern Utah", "Wasatch Back", "Wasatch Front"]}, {"name": "Chelsea Duball", "lastName": "Duball", "email": "chelsea.duball@usu.edu", "university": "Utah State University", "department": "Plants, Soils & Climate", "title": "Assistant Professor", "website": "https://qanr.usu.edu/directory/duball-chelsea", "specific": "• Wetland ecosystem science • Wetland identification • Biogeochemistry • Soil science", "specificItems": ["Wetland ecosystem science", "Wetland identification", "Biogeochemistry", "Soil science"], "challenges": ["Water quality and ecosystems", "Water quantity and distribution"], "regions": ["Colorado River Basin", "Great Salt Lake Basin", "Northern Utah", "Utah Statewide", "Wasatch Front"]}, {"name": "R Ryan Dupont", "lastName": "Dupont", "email": "ryan.dupont@usu.edu", "university": "Utah State University", "department": "Civil & Environmental Engineering, Utah Water Research Laboratory", "title": "Cazier Professor of Civil & Environmental Engineering", "website": "https://uwrl.usu.edu/people/faculty/dupont-robert", "specific": "• Biological wastewater treatment • Water reuse • Biosolids management • Environmental engineering", "specificItems": ["Biological wastewater treatment", "Water reuse", "Biosolids management", "Environmental engineering"], "challenges": ["Water quality and ecosystems"], "regions": ["Northern Utah", "Utah Statewide"]}, {"name": "Som Dutta", "lastName": "Dutta", "email": "som.dutta@usu.edu", "university": "Utah State University", "department": "Mechanical & Aerospace Engineering", "title": "Associate Professor", "website": "https://engineering.usu.edu/mae/people/faculty/dutta-som", "specific": "• Hydraulics • Computational fluid hydraulics • Sediment transport • AI and machine learning", "specificItems": ["Hydraulics", "Computational fluid hydraulics", "Sediment transport", "AI and machine learning"], "challenges": ["Hazards", "Water infrastructure", "Water quantity and distribution"], "regions": ["Great Salt Lake Basin"]}, {"name": "Catrin Edgeley", "lastName": "Edgeley", "email": "catrin.edgeley@usu.edu", "university": "Utah State University", "department": "Environment & Society", "title": "Assistant Professor", "website": "https://qanr.usu.edu/directory/edgeley-catrin", "specific": "• Post-fire flood management • Post-fire planning", "specificItems": ["Post-fire flood management", "Post-fire planning"], "challenges": ["Hazards"], "regions": ["Utah Statewide"]}, {"name": "Clare Entwistle", "lastName": "Entwistle", "email": "clare.entwistle@usu.edu", "university": "Utah State University", "department": "Water, Earth, & Environmental Sciences", "title": "Assistant Professor & Extension Water Quality Specialist", "website": "https://qanr.usu.edu/directory/entwistle-clare", "specific": "• Water quality & monitoring • Watershed management & planning • Nature based solutions", "specificItems": ["Water quality & monitoring", "Watershed management & planning", "Nature based solutions"], "challenges": ["Water quality and ecosystems"], "regions": ["Utah Statewide"]}, {"name": "Sarah Erwin", "lastName": "Erwin", "email": "sarah.erwin@usu.edu", "university": "Utah State University", "department": "Extension - Water Quality", "title": "Assistant Professor", "website": "https://extension.usu.edu/directory/erwin-sarah", "specific": "• Water quality stewardship • Watershed education • Wetland/riparian habitat preservation • Nonpoint source pollution • Community outreach", "specificItems": ["Water quality stewardship", "Watershed education", "Wetland/riparian habitat preservation", "Nonpoint source pollution", "Community outreach"], "challenges": ["Water quality and ecosystems"], "regions": ["Utah Statewide"]}, {"name": "Courtney Flint", "lastName": "Flint", "email": "courtney.flint@usu.edu", "university": "Utah State University", "department": "Environment & Society, Utah Water Research Laboratory", "title": "Professor & Associate Director", "website": "https://qanr.usu.edu/directory/flint-courtney", "specific": "• Water hazard management • Water governance & management • Community engagement • Public perceptions • Human dimensions of water", "specificItems": ["Water hazard management", "Water governance & management", "Community engagement", "Public perceptions", "Human dimensions of water"], "challenges": ["Hazards", "Water governance", "Water use and demand"], "regions": ["Great Salt Lake Basin", "Northern Utah", "Southeastern Utah", "Southwestern Utah", "Uintah Basin/Northeastern Utah", "Utah Statewide", "Wasatch Back", "Wasatch Front"]}, {"name": "Jordan Gilbert", "lastName": "Gilbert", "email": "jordan.gilbert@usu.edu", "university": "Utah State University", "department": "Water, Earth, & Environmental Sciences", "title": "Research Assistant Professor", "website": "", "specific": "• Riverscape health & restoration • Restoration monitoring", "specificItems": ["Riverscape health & restoration", "Restoration monitoring"], "challenges": ["Hazards", "Water quality and ecosystems", "Water quantity and distribution"], "regions": ["Utah Statewide"]}, {"name": "Gina Gilson", "lastName": "Gilson", "email": "gina.gilson@usu.edu", "university": "Utah State University", "department": "Environment & Society, Center for Colorado River Studies", "title": "Assistant Professor, Interim Director", "website": "https://qanr.usu.edu/directory/gilson-gina", "specific": "• Water policy & governance • Stakeholder engagement • Institutions • Trust and social norms", "specificItems": ["Water policy & governance", "Stakeholder engagement", "Institutions", "Trust and social norms"], "challenges": ["Hazards", "Water governance", "Water quantity and distribution", "Water use and demand"], "regions": ["Colorado River Basin"]}, {"name": "Jennifer Givens", "lastName": "Givens", "email": "jennifer.givens@usu.edu", "university": "Utah State University", "department": "Sociology", "title": "Associate Professor", "website": "https://artsci.usu.edu/social-sciences/sociology/directory/faculty-staff/jennifer-givens", "specific": "• Water behaviors & policy • Global water • Great Salt Lake • Water perceptions • Sociology", "specificItems": ["Water behaviors & policy", "Global water", "Great Salt Lake", "Water perceptions", "Sociology"], "challenges": ["Water governance", "Water quantity and distribution"], "regions": ["Colorado River Basin", "Great Salt Lake Basin", "Utah Statewide", "Wasatch Front"]}, {"name": "Chuck Hawkins", "lastName": "Hawkins", "email": "chuck.hawkins@usu.edu", "university": "Utah State University", "department": "Wildland Resources, National Aquatic Monitoring Center", "title": "Professor & Director", "website": "https://qanr.usu.edu/directory/hawkins-charles", "specific": "• Monitoring & assessment • Aquatic biodiversity & conservation • Research designs • Predictive modeling • Science communication", "specificItems": ["Monitoring & assessment", "Aquatic biodiversity & conservation", "Research designs", "Predictive modeling", "Science communication"], "challenges": [], "regions": []}, {"name": "Daniella Hirschfeld", "lastName": "Hirschfeld", "email": "daniella.hirschfeld@usu.edu", "university": "Utah State University", "department": "Landscape Architecture & Environmental Planning", "title": "Associate Professor", "website": "https://qanr.usu.edu/directory/hirschfeld-daniella", "specific": "• Urban water management • Water reuse • Climate adaptation • Resilience • Nature based solutions", "specificItems": ["Urban water management", "Water reuse", "Climate adaptation", "Resilience", "Nature based solutions"], "challenges": ["Hazards", "Water governance", "Water infrastructure"], "regions": []}, {"name": "Jeff Horsburgh", "lastName": "Horsburgh", "email": "jeff.horsburgh@usu.edu", "university": "Utah State University", "department": "Civil & Environmental Engineering, Utah Water Research Laboratory", "title": "Professor", "website": "https://engineering.usu.edu/cee/people/faculty/horsburgh-jeff", "specific": "• Hydroinformatics • Environmental sensing • Monitoring networks • Surface water hydrology • Water quality • Cyberinfrastructure • Modeling & infrastructure", "specificItems": ["Hydroinformatics", "Environmental sensing", "Monitoring networks", "Surface water hydrology", "Water quality", "Cyberinfrastructure", "Modeling & infrastructure"], "challenges": ["Water infrastructure", "Water quality and ecosystems", "Water quantity and distribution", "Water use and demand"], "regions": ["Northern Utah", "Utah Statewide"]}, {"name": "Scott Hotaling", "lastName": "Hotaling", "email": "scott.hotaling@usu.edu", "university": "Utah State University", "department": "Wildland Resources", "title": "Assistant Professor", "website": "https://qanr.usu.edu/research/ccml/", "specific": "• Stream biodiversity/ecology • Cryosphere • Water supply • Climate change", "specificItems": ["Stream biodiversity/ecology", "Cryosphere", "Water supply", "Climate change"], "challenges": ["Water quality and ecosystems", "Water quantity and distribution"], "regions": ["Southeastern Utah", "Wasatch Front"]}, {"name": "Liyuan Hou", "lastName": "Hou", "email": "liyuan.hou@usu.edu", "university": "Utah State University", "department": "Biological & Chemical Engineering", "title": "Assistant Professor", "website": "https://www.thehoulab.com/", "specific": "• Emerging contaminants • Microbial biogeochemical cycles • Aquatic environments • Water pollution & treatment", "specificItems": ["Emerging contaminants", "Microbial biogeochemical cycles", "Aquatic environments", "Water pollution & treatment"], "challenges": ["Hazards", "Water quality and ecosystems"], "regions": []}, {"name": "Michael Johnson", "lastName": "Johnson", "email": "michael.johnson@usu.edu", "university": "Utah State University", "department": "Utah Water Research Laboratory", "title": "Research Professor", "website": "https://uwrl.usu.edu/people/faculty/johnson-michael", "specific": "• Fluid mechanics & hydraulics • Water conveyance • Water control & measurement", "specificItems": ["Fluid mechanics & hydraulics", "Water conveyance", "Water control & measurement"], "challenges": ["Water infrastructure", "Water quantity and distribution"], "regions": []}, {"name": "Paul Johnson", "lastName": "Johnson", "email": "paul.johnson@usu.edu", "university": "Utah State University", "department": "Plants, Soils & Climate, Utah Agricultural Experiment Station", "title": "Professor & Associate Director", "website": "https://qanr.usu.edu/directory/johnson-paul", "specific": "• Urban landscape water use • Turfgrass", "specificItems": ["Urban landscape water use", "Turfgrass"], "challenges": ["Water use and demand"], "regions": ["Utah Statewide"]}, {"name": "Scott Jones", "lastName": "Jones", "email": "scott.jones@usu.edu", "university": "Utah State University", "department": "Plants, Soils & Climate", "title": "Professor", "website": "https://qanr.usu.edu/directory/jones-scott", "specific": "• Soil water content/flux • Measurement & monitoring • Evapotranspiration • Environmental soil physics", "specificItems": ["Soil water content/flux", "Measurement & monitoring", "Evapotranspiration", "Environmental soil physics"], "challenges": ["Water quantity and distribution", "Water use and demand"], "regions": ["Great Salt Lake Basin", "Northern Utah", "Utah Statewide"]}, {"name": "Amita Kaundal", "lastName": "Kaundal", "email": "amita.kaundal@usu.edu", "university": "Utah State University", "department": "Plants, Soils & Climate", "title": "Associate Professor", "website": "", "specific": "• Drought resilient crops • Plant stress physiology • Plant-microbe interactions", "specificItems": ["Drought resilient crops", "Plant stress physiology", "Plant-microbe interactions"], "challenges": ["Water use and demand"], "regions": ["Northern Utah"]}, {"name": "Karin Kettenring", "lastName": "Kettenring", "email": "karin.kettenring@usu.edu", "university": "Utah State University", "department": "Wildland Resources", "title": "Professor", "website": "https://karinkettenring.com", "specific": "Hydrologic extremes & plants; Wetland restoration; Invasive species (phragmites)", "specificItems": ["Hydrologic extremes & plants", "Wetland restoration", "Invasive species (phragmites)"], "challenges": ["Water quality and ecosystems", "Water quantity and distribution"], "regions": ["Great Salt Lake Basin", "Northern Utah", "Wasatch Front"]}, {"name": "Man-Keun Kim", "lastName": "Kim", "email": "mk.kim@usu.edu", "university": "Utah State University", "department": "Agricultural & Resource Economics", "title": "Professor", "website": "https://sites.google.com/view/mkmkya/bio", "specific": "• Water use & demand • Water conservation/allocation economics • Regional drought economics • Ecosystem services", "specificItems": ["Water use & demand", "Water conservation/allocation economics", "Regional drought economics", "Ecosystem services"], "challenges": ["Hazards", "Water quality and ecosystems", "Water use and demand"], "regions": ["Utah Statewide"]}, {"name": "Kelly Kopp", "lastName": "Kopp", "email": "kelly.kopp@usu.edu", "university": "Utah State University", "department": "Plants, Soils & Climate", "title": "Professor & Extension Specialist", "website": "https://qanr.usu.edu/directory/kopp-kelly", "specific": "• Landscape/plant water use efficiency • Landscape ecosystem services • Sustainable landscape management • Irrigation technologies", "specificItems": ["Landscape/plant water use efficiency", "Landscape ecosystem services", "Sustainable landscape management", "Irrigation technologies"], "challenges": ["Water use and demand"], "regions": ["Utah Statewide"]}, {"name": "Belize Lane", "lastName": "Lane", "email": "belize.lane@usu.edu", "university": "Utah State University", "department": "Civil & Environmental Engineering", "title": "Associate Professor", "website": "https://uwrl.usu.edu/people/faculty/lane-belize", "specific": "• Flooding • Post-fire hazards • Ecohydraulics • River restoration & design • Environmental flows", "specificItems": ["Flooding", "Post-fire hazards", "Ecohydraulics", "River restoration & design", "Environmental flows"], "challenges": ["Hazards", "Water quality and ecosystems", "Water quantity and distribution"], "regions": ["Great Salt Lake Basin", "Northern Utah"]}, {"name": "Chris Lant", "lastName": "Lant", "email": "chris.lant@usu.edu", "university": "Utah State University", "department": "Environment & Society", "title": "Professor", "website": "https://qanr.usu.edu/envs/labs/lant-lab/", "specific": "• Virtual water trade • Water rights • Policy, economics, & geography", "specificItems": ["Virtual water trade", "Water rights", "Policy, economics, & geography"], "challenges": ["Water governance", "Water quantity and distribution", "Water use and demand"], "regions": ["Great Salt Lake Basin"]}, {"name": "Carlos Licon", "lastName": "Licon", "email": "carlos.licon@usu.edu", "university": "Utah State University", "department": "Landscape Architecture & Environmental Planning", "title": "Associate Professor", "website": "https://qanr.usu.edu/directory/licon-carlos", "specific": "• Environmental planning • Sustainability", "specificItems": ["Environmental planning", "Sustainability"], "challenges": [], "regions": ["Utah Statewide"]}, {"name": "Joan McLean", "lastName": "McLean", "email": "joan.mclean@usu.edu", "university": "Utah State University", "department": "Utah Water Research Laboratory", "title": "Research Professor", "website": "https://uwrl.usu.edu/people/faculty/mclean-joan", "specific": "• Contaminant fate & behavior • Water & soil systems • Biogeochemistry", "specificItems": ["Contaminant fate & behavior", "Water & soil systems", "Biogeochemistry"], "challenges": ["Water quality and ecosystems", "Water quantity and distribution"], "regions": ["Great Salt Lake Basin", "Northern Utah", "Utah Other", "Utah Statewide"]}, {"name": "Jon Meyer", "lastName": "Meyer", "email": "jon.meyer@usu.edu", "university": "Utah State University", "department": "Plants, Soils & Climate", "title": "Assistant State Climatologist", "website": "https://qanr.usu.edu/directory/meyer-jonathan", "specific": "• Drought monitoring • Irrigation & water use guidance • Cloud seeding", "specificItems": ["Drought monitoring", "Irrigation & water use guidance", "Cloud seeding"], "challenges": ["Water use and demand"], "regions": ["Utah Statewide"]}, {"name": "Kyle Moor", "lastName": "Moor", "email": "kyle.moor@usu.edu", "university": "Utah State University", "department": "Biological & Chemical Engineering, Utah Water Research Laboratory", "title": "Assistant Professor", "website": "https://uwrl.usu.edu/people/faculty/moor-kyle", "specific": "• Pollutants • Surface water photochemistry • Environmental chemistry", "specificItems": ["Pollutants", "Surface water photochemistry", "Environmental chemistry"], "challenges": ["Hazards"], "regions": []}, {"name": "Bethany Neilson", "lastName": "Neilson", "email": "bethany.neilson@usu.edu", "university": "Utah State University", "department": "Civil & Environmental Engineering, Utah Water Research Laboratory", "title": "Professor & Director", "website": "https://engineering.usu.edu/cee/people/faculty/neilson-bethany", "specific": "• Hydrology • Hydrologic measurement & modeling • Groundwater/surface water • Water management • Surface water quality • Karst hydrology •Permafrost hydrology", "specificItems": ["Hydrology", "Hydrologic measurement & modeling", "Groundwater/surface water", "Water management", "Surface water quality", "Karst hydrology", "Permafrost hydrology"], "challenges": ["Water governance", "Water quality and ecosystems", "Water quantity and distribution", "Water use and demand"], "regions": ["Great Salt Lake Basin", "Northern Utah", "Utah Statewide", "Wasatch Front"]}, {"name": "Dennis Newell", "lastName": "Newell", "email": "dennis.newell@usu.edu", "university": "Utah State University", "department": "Water, Earth, & Environmental Sciences", "title": "Professor & Department Head", "website": "https://qanr.usu.edu/directory/newell-dennis", "specific": "• Aqueous & stable isotope geology • Groundwater hydrogeochemistry", "specificItems": ["Aqueous & stable isotope geology", "Groundwater hydrogeochemistry"], "challenges": ["Water quality and ecosystems"], "regions": ["Great Salt Lake Basin", "Northern Utah"]}, {"name": "Sarah Null", "lastName": "Null", "email": "sarah.null@usu.edu", "university": "Utah State University", "department": "Water, Earth, & Environmental Sciences", "title": "Professor", "website": "https://sites.google.com/usu.edu/sarahnull-acwa/home", "specific": "• Environmental water management • Aquatic ecosystems • Water resource/systems modeling • Climate adaptation • Saline lakes", "specificItems": ["Environmental water management", "Aquatic ecosystems", "Water resource/systems modeling", "Climate adaptation", "Saline lakes"], "challenges": ["Water governance", "Water infrastructure", "Water quality and ecosystems", "Water quantity and distribution", "Water use and demand"], "regions": ["Colorado River Basin", "Great Salt Lake Basin", "Northern Utah", "Southeastern Utah", "Southwestern Utah", "Uintah Basin/Northeastern Utah", "Utah Other", "Utah Statewide", "Wasatch Back", "Wasatch Front"]}, {"name": "Emma Payne", "lastName": "Payne", "email": "emma.payne@usu.edu", "university": "Utah State University", "department": "Utah Water Research Laboratory", "title": "Research Assistant Professor", "website": "", "specific": "• Water quality/treatment • Water reuse • Emerging contaminants • Environmental organic chemistry", "specificItems": ["Water quality/treatment", "Water reuse", "Emerging contaminants", "Environmental organic chemistry"], "challenges": ["Water infrastructure", "Water quality and ecosystems"], "regions": []}, {"name": "Jake Powell", "lastName": "Powell", "email": "jake.powell@usu.edu", "university": "Utah State University", "department": "Landscape Architecture & Environmental Planning", "title": "Associate Professor, Extension Specialist", "website": "https://qanr.usu.edu/directory/powell-jake", "specific": "• Waterwise landscape design • Green stormwater infrastructure", "specificItems": ["Waterwise landscape design", "Green stormwater infrastructure"], "challenges": ["Water use and demand"], "regions": ["Colorado River Basin", "Great Salt Lake Basin", "Northern Utah", "Southeastern Utah", "Southwestern Utah", "Uintah Basin/Northeastern Utah", "Utah Statewide", "Wasatch Back", "Wasatch Front"]}, {"name": "Tammy Rittenour", "lastName": "Rittenour", "email": "tammy.rittenour@usu.edu", "university": "Utah State University", "department": "Water, Earth, & Environmental Sciences", "title": "Professor", "website": "https://www.usu.edu/geo/osl/", "specific": "• Geoarchaeology • Past water levels and flows • Geomorphology • Climate change", "specificItems": ["Geoarchaeology", "Past water levels and flows", "Geomorphology", "Climate change"], "challenges": ["Hazards"], "regions": ["Colorado River Basin", "Great Salt Lake Basin", "Northern Utah", "Southwestern Utah", "Utah Statewide"]}, {"name": "David Rosenberg", "lastName": "Rosenberg", "email": "david.rosenberg@usu.edu", "university": "Utah State University", "department": "Civil & Environmental Engineering, Utah Water Research Laboratory", "title": "Professor", "website": "http://rosenberg.usu.edu", "specific": "• Water resources management & conservation • Participatory/collaborative modeling • Integrated water systems modeling", "specificItems": ["Water resources management & conservation", "Participatory/collaborative modeling", "Integrated water systems modeling"], "challenges": ["Water governance", "Water infrastructure", "Water quality and ecosystems", "Water quantity and distribution", "Water use and demand"], "regions": ["Colorado River Basin", "Great Salt Lake Basin", "Northern Utah", "Utah Statewide", "Wasatch Front"]}, {"name": "Stacia Ryder", "lastName": "Ryder", "email": "stacia.ryder@usu.edu", "university": "Utah State University", "department": "Sociology, School of Social Sciences", "title": "Assistant Professor", "website": "https://artsci.usu.edu/social-sciences/sociology/directory/faculty-staff/stacia-ryder", "specific": "• Environmental and climate justice • Drying lakes in arid climates • Great Salt Lake • Sociology", "specificItems": ["Environmental and climate justice", "Drying lakes in arid climates", "Great Salt Lake", "Sociology"], "challenges": ["Hazards", "Water governance"], "regions": ["Great Salt Lake Basin", "Utah Statewide"]}, {"name": "Jessica Schad", "lastName": "Schad", "email": "jessica.schad@usu.edu", "university": "Utah State University", "department": "Sociology, School of Social Sciences", "title": "Professor", "website": "https://extension.usu.edu/directory/schad-jessica", "specific": "• Water perceptions • Ag soil & water conservation • Water quality • Sociology", "specificItems": ["Water perceptions", "Ag soil & water conservation", "Water quality", "Sociology"], "challenges": ["Water governance", "Water quality and ecosystems"], "regions": ["Northern Utah", "Utah Statewide"]}, {"name": "Pin Shuai", "lastName": "Shuai", "email": "Pin.shuai@usu.edu", "university": "Utah State University", "department": "Civil & Environmental Engineering", "title": "Assistant Professor", "website": "https://groundwater.usu.edu/", "specific": "• Groundwater-surface water interactions • Contaminant transport • Hydrologic modeling", "specificItems": ["Groundwater-surface water interactions", "Contaminant transport", "Hydrologic modeling"], "challenges": ["Water quality and ecosystems", "Water quantity and distribution", "Water use and demand"], "regions": ["Colorado River Basin", "Great Salt Lake Basin", "Northern Utah"]}, {"name": "Ronald Sims", "lastName": "Sims", "email": "ron.sims@usu.edu", "university": "Utah State University", "department": "Biological & Chemical Engineering, Sustainable Waste to Bioproducts Engineering Center", "title": "Professor", "website": "https://engineering.usu.edu/bce/people/faculty/sims-ronald", "specific": "• Transforming chemicals into bioproducts • Use of microorganisms in biological reactors", "specificItems": ["Transforming chemicals into bioproducts", "Use of microorganisms in biological reactors"], "challenges": ["Water quality and ecosystems"], "regions": ["Northern Utah", "Utah Statewide", "Wasatch Front"]}, {"name": "Yiming Su", "lastName": "Su", "email": "yiming.su@usu.edu", "university": "Utah State University", "department": "Biological & Chemical Engineering, Utah Water Research Laboratory", "title": "Assistant Professor", "website": "https://uwrl.usu.edu/people/faculty/su-yiming", "specific": "• Emerging contaminants • Nanomaterials • Water chemistry/geochemistry • Physical chemical processes", "specificItems": ["Emerging contaminants", "Nanomaterials", "Water chemistry/geochemistry", "Physical chemical processes"], "challenges": ["Hazards", "Water quality and ecosystems"], "regions": ["Utah Statewide"]}, {"name": "David Tarboton", "lastName": "Tarboton", "email": "david.tarboton@usu.edu", "university": "Utah State University", "department": "Civil & Environmental Engineering, Utah Water Research Laboratory", "title": "Professor", "website": "https://uwrl.usu.edu/people/faculty/tarboton-david", "specific": "• Surface water hydrology • Stochastic hydrology • Digital elevation models • Information systems • Terrain analysis", "specificItems": ["Surface water hydrology", "Stochastic hydrology", "Digital elevation models", "Information systems", "Terrain analysis"], "challenges": ["Hazards", "Water quantity and distribution", "Water use and demand"], "regions": ["Colorado River Basin", "Great Salt Lake Basin", "Northern Utah", "Utah Statewide"]}, {"name": "Jeffrey Taylor", "lastName": "Taylor", "email": "jeffrey.taylor@usu.edu", "university": "Utah State University", "department": "Center for Anticipatory Intelligence, Extension Ag & Natural Resources", "title": "Professional Practice Extension Assistant Professor, Associate Director", "website": "https://www.usu.edu/cai/about/leadership-team", "specific": "• Water system mapping • Water risk assessment • Stakeholder alignment • Resilience • Systems & complexity", "specificItems": ["Water system mapping", "Water risk assessment", "Stakeholder alignment", "Resilience", "Systems & complexity"], "challenges": ["Hazards"], "regions": []}, {"name": "Alfonso Torres-Rua", "lastName": "Torres-Rua", "email": "alfonso.torres@usu.edu", "university": "Utah State University", "department": "Civil & Environmental Engineering, Utah Water Research Laboratory", "title": "Associate Professor", "website": "https://engineering.usu.edu/cee/people/faculty/torres-alfonso", "specific": "• Remote sensing • Irrigation • Agriculture", "specificItems": ["Remote sensing", "Irrigation", "Agriculture"], "challenges": ["Water use and demand"], "regions": ["Utah Statewide"]}, {"name": "Blake Tullis", "lastName": "Tullis", "email": "blake.tullis@usu.edu", "university": "Utah State University", "department": "Civil & Environmental Engineering, Utah Water Research Laboratory", "title": "Professor", "website": "https://engineering.usu.edu/cee/people/faculty/tullis-blake", "specific": "• Hydraulic structures • Fluid mechanics • Erosion control • Valves & flow meters • Workforce development", "specificItems": ["Hydraulic structures", "Fluid mechanics", "Erosion control", "Valves & flow meters", "Workforce development"], "challenges": ["Hazards", "Water infrastructure", "Water quantity and distribution"], "regions": ["Utah Statewide"]}, {"name": "Luguang Wang", "lastName": "Wang", "email": "luguang.wang@usu.edu", "university": "Utah State University", "department": "Biological & Chemical Engineering, Utah Water Research Laboratory", "title": "Assistant Professor", "website": "https://engineering.usu.edu/bce/people/faculty/wang-luguang", "specific": "• Biological wastewater treatment • Agricultural waste valorization • Bioenergy production • Alternative protein production", "specificItems": ["Biological wastewater treatment", "Agricultural waste valorization", "Bioenergy production", "Alternative protein production"], "challenges": ["Hazards", "Water quality and ecosystems"], "regions": []}, {"name": "Steven Wilcox", "lastName": "Wilcox", "email": "steven.wilcox@usu.edu", "university": "Utah State University", "department": "Agricultural & Resource Economics", "title": "Assistant Professor", "website": "https://www.swwilcox.com", "specific": "• Water pricing • Municipal & state policies • Air quality/dust • Bonneville Basin", "specificItems": ["Water pricing", "Municipal & state policies", "Air quality/dust", "Bonneville Basin"], "challenges": ["Hazards", "Water governance", "Water quantity and distribution", "Water use and demand"], "regions": ["Utah Statewide"]}, {"name": "Wayne Wurtsbaugh", "lastName": "Wurtsbaugh", "email": "Wayne.wurtsbaugh@usu.edu", "university": "Utah State University", "department": "Wildland Resources", "title": "Emeritus Professor", "website": "https://qanr.usu.edu/wild/directory/emeriti/wurtsbaugh-wayne", "specific": "• Limnology • Fish ecology • Water pollution • Cyanobacteria", "specificItems": ["Limnology", "Fish ecology", "Water pollution", "Cyanobacteria"], "challenges": ["Water quality and ecosystems"], "regions": ["Great Salt Lake Basin"]}, {"name": "Reagan Wytsalucy", "lastName": "Wytsalucy", "email": "reagan.wytsalucy@usu.edu", "university": "Utah State University", "department": "Extension - Ag & Natural Resources", "title": "Associate Professor", "website": "https://extension.usu.edu/directory/wytsalucy-reagan", "specific": "• Agricultural water use • Horticulture", "specificItems": ["Agricultural water use", "Horticulture"], "challenges": ["Water quantity and distribution"], "regions": ["Southeastern Utah"]}, {"name": "Larissa Yocom", "lastName": "Yocom", "email": "larissa.yocom@usu.edu", "university": "Utah State University", "department": "Utah Forest Restoration Institute", "title": "Director", "website": "https://qanr.usu.edu/ufri/", "specific": "• Wildfire & water quality/quantity • Soil moisture & drought", "specificItems": ["Wildfire & water quality/quantity", "Soil moisture & drought"], "challenges": ["Hazards", "Water quality and ecosystems", "Water quantity and distribution"], "regions": ["Utah Statewide"]}, {"name": "Matt Yost", "lastName": "Yost", "email": "matt.yost@usu.edu", "university": "Utah State University", "department": "Plants, Soils & Climate", "title": "Professor & Agroclimate Extension Specialist", "website": "https://qanr.usu.edu/directory/yost-matt", "specific": "• Agriculture water optimization • Irrigation • Nutrient management • Soil health • Distribution system measurements", "specificItems": ["Agriculture water optimization", "Irrigation", "Nutrient management", "Soil health", "Distribution system measurements"], "challenges": ["Water quality and ecosystems", "Water quantity and distribution", "Water use and demand"], "regions": ["Colorado River Basin", "Great Salt Lake Basin", "Northern Utah", "Southeastern Utah", "Southwestern Utah", "Uintah Basin/Northeastern Utah", "Utah Statewide", "Wasatch Back", "Wasatch Front"]}, {"name": "Sierra Young", "lastName": "Young", "email": "sierra.young@usu.edu", "university": "Utah State University", "department": "Civil & Environmental Engineering", "title": "Associate Professor", "website": "https://www.thedaisylab.com/", "specific": "• Remote sensing/computer vision • Water quality/quantity • Water sensing & sampling technology", "specificItems": ["Remote sensing/computer vision", "Water quality/quantity", "Water sensing & sampling technology"], "challenges": ["Water quality and ecosystems", "Water quantity and distribution"], "regions": ["Northern Utah", "Wasatch Front"]}, {"name": "Wei Zhang", "lastName": "Zhang", "email": "w.zhang@usu.edu", "university": "Utah State University", "department": "Plants, Soils & Climate", "title": "Associate Professor", "website": "https://scholar.google.com/citations?hl=en&user=qnAR1zcAAAAJ&view_op=list_works&sortby=pubdate", "specific": "• Hydroclimate • Water prediction & budgets • Droughts/floods • Modeling", "specificItems": ["Hydroclimate", "Water prediction & budgets", "Droughts/floods", "Modeling"], "challenges": ["Hazards", "Water quantity and distribution"], "regions": ["Colorado River Basin", "Great Salt Lake Basin"]}];
+</script>
+<script>
+
+(function () {
+  const root = document.getElementById("uwn-faculty-database");
+  if (!root) return;
+
+  const data = window.UWN_FACULTY_DATA || [];
+  const search = root.querySelector("[data-db-search]");
+  const region = root.querySelector("[data-db-region]");
+  const topics = root.querySelector("[data-db-topics]");
+  const status = root.querySelector("[data-db-status]");
+  const body = root.querySelector("[data-db-body]");
+  const detail = root.querySelector("[data-db-detail]");
+  let activeTopic = "All";
+  let selectedEmail = "";
+
+  const challengeNames = ["Water quantity and distribution", "Water quality and ecosystems", "Water use and demand", "Water infrastructure", "Water governance", "Hazards"];
+  const regions = [...new Set(data.flatMap(item => item.regions || []))].sort();
+
+  function escapeHtml(value) {
+    return String(value || "").replace(/[&<>"']/g, character => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[character]));
+  }
+
+  function addOption(select, value) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+    select.appendChild(option);
+  }
+
+  regions.forEach(value => addOption(region, value));
+
+  function searchable(item) {
+    return [
+      item.name,
+      item.email,
+      item.university,
+      item.department,
+      item.title,
+      item.specific,
+      ...(item.challenges || []),
+      ...(item.regions || [])
+    ].join(" ").toLowerCase();
+  }
+
+  function matches(item) {
+    const query = search.value.trim().toLowerCase();
+    if (query && !searchable(item).includes(query)) return false;
+    if (region.value && !(item.regions || []).includes(region.value)) return false;
+    if (activeTopic !== "All" && !(item.challenges || []).includes(activeTopic)) return false;
+    return true;
+  }
+
+  function chips(values, modifier) {
+    return (values || []).map(value => `<span class="uwn-db__chip${modifier ? ` ${modifier}` : ""}">${escapeHtml(value)}</span>`).join("");
+  }
+
+  function listItems(values) {
+    const items = (values || []).filter(Boolean);
+    if (!items.length) return "Not listed";
+    return `<ul class="uwn-db__list">${items.map(value => `<li>${escapeHtml(value)}</li>`).join("")}</ul>`;
+  }
+
+  function renderTopics() {
+    if (topics.children.length) {
+      topics.querySelectorAll("button[data-topic]").forEach(button => {
+        button.setAttribute("aria-pressed", String(button.dataset.topic === activeTopic));
+      });
+      return;
+    }
+    topics.innerHTML = ["All", ...challengeNames].map(topic => {
+      return `<button type="button" aria-pressed="${topic === activeTopic ? "true" : "false"}" data-topic="${escapeHtml(topic)}">${escapeHtml(topic)}</button>`;
+    }).join("");
+  }
+
+  function renderDetail(item) {
+    detail.hidden = !item;
+    if (!item) {
+      detail.innerHTML = "";
+      return;
+    }
+    const profile = item.website ? `<a href="${escapeHtml(item.website)}" target="_blank" rel="noopener" aria-label="Website for ${escapeHtml(item.name)} (opens in a new tab)">Website <span aria-hidden="true">↗</span></a>` : "";
+    const email = item.email ? `<a href="mailto:${escapeHtml(item.email)}">${escapeHtml(item.email)}</a>` : "";
+    detail.innerHTML = `
+      <div class="uwn-db__selected-label">Selected Faculty</div>
+      <div>
+        <h2 id="uwn-selected-name">${escapeHtml(item.name)}</h2>
+        <div class="uwn-db__muted">${escapeHtml([item.title, item.department].filter(Boolean).join(", "))}</div>
+        ${item.university ? `<div class="uwn-db__university">${escapeHtml(item.university)}</div>` : ""}
+      </div>
+      <div class="uwn-db__detail-grid">
+        <div class="uwn-db__field">
+          <div class="uwn-db__label">Water expertise</div>
+          <div>${listItems(item.specificItems || (item.specific ? [item.specific] : []))}</div>
+        </div>
+        <div class="uwn-db__detail-side">
+        <div class="uwn-db__field">
+          <div class="uwn-db__label">Water challenge areas</div>
+          <div class="uwn-db__chips">${chips(item.challenges, "") || "Not listed"}</div>
+        </div>
+        <div class="uwn-db__field">
+          <div class="uwn-db__label">Utah regions</div>
+          <div class="uwn-db__chips">${chips(item.regions, "uwn-db__chip--region") || "Not listed"}</div>
+        </div>
+        </div>
+      </div>
+      ${(profile || email) ? `<div class="uwn-db__links">${[profile, email].filter(Boolean).join("")}</div>` : ""}
+    `;
+  }
+
+  function render() {
+    const filtered = data.filter(matches);
+    if (!filtered.some(item => item.email === selectedEmail)) {
+      selectedEmail = "";
+    }
+    status.textContent = `${filtered.length} of ${data.length} experts`;
+    body.innerHTML = filtered.length ? filtered.map(item => {
+      const selected = item.email === selectedEmail;
+      return `
+        <tr class="${selected ? "is-selected" : ""}">
+          <td>
+            <button type="button" class="uwn-db__name-button" data-select="${escapeHtml(item.email)}" aria-controls="uwn-selected-profile" aria-expanded="${selected}">${escapeHtml(item.name)}</button>
+            <span class="uwn-db__small">${escapeHtml(item.title || "")}</span>
+          </td>
+          <td>${escapeHtml(item.university || "")}<span class="uwn-db__small">${escapeHtml(item.department || "")}</span></td>
+          <td>${listItems(item.specificItems || [])}</td>
+          <td><div class="uwn-db__chips">${chips(item.challenges, "")}</div></td>
+          <td><div class="uwn-db__chips">${chips(item.regions, "uwn-db__chip--region")}</div></td>
+        </tr>`;
+    }).join("") : `<tr><td colspan="5"><div class="uwn-db__empty">No matching faculty found. Try a broader term or clear one of the filters.</div></td></tr>`;
+    renderDetail(filtered.find(item => item.email === selectedEmail));
+  }
+
+  root.querySelector("[data-db-clear]").addEventListener("click", () => {
+    selectedEmail = "";
+    search.value = "";
+    region.value = "";
+    activeTopic = "All";
+    renderTopics();
+    render();
+  });
+
+  topics.addEventListener("click", event => {
+    const button = event.target.closest("button[data-topic]");
+    if (!button) return;
+    activeTopic = button.dataset.topic;
+    renderTopics();
+    render();
+  });
+
+  body.addEventListener("click", event => {
+    const button = event.target.closest("button[data-select]");
+    if (!button) return;
+    selectedEmail = button.dataset.select;
+    render();
+    detail.focus({ preventScroll: true });
+    detail.scrollIntoView({ block: "start", behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? "instant" : "smooth" });
+  });
+
+  [search, region].forEach(control => {
+    control.addEventListener("input", render);
+    control.addEventListener("change", render);
+  });
+
+  renderTopics();
+  render();
+}());
+
+</script>
+
+</main>
+</body>
+</html>
