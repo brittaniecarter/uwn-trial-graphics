@@ -1422,6 +1422,30 @@
     ]
   },
   {
+    "name": "John Lin",
+    "lastName": "Lin",
+    "email": "John.Lin@utah.edu",
+    "university": "University of Utah",
+    "department": "Atmospheric Sciences & Wilkes Center for Climate Science & Policy",
+    "title": "Professor & Scientific Director, Wilkes Center for Climate Science & Policy",
+    "website": "https://wilkescenter.utah.edu/about/john-lin/",
+    "specific": "I serve on the Great Salt Lake Strike Team and help coordinate activities related to water research as the Scientific Director of the Wilkes Center for Climate Science & Policy",
+    "challenges": [
+      "Hazards"
+    ],
+    "regions": [
+      "Northern Utah",
+      "Wasatch Front",
+      "Wasatch Back",
+      "Uintah Basin/Northeastern Utah",
+      "Great Salt Lake Basin",
+      "Utah Statewide"
+    ],
+    "specificItems": [
+      "I serve on the Great Salt Lake Strike Team and help coordinate activities related to water research as the Scientific Director of the Wilkes Center for Climate Science & Policy"
+    ]
+  },
+  {
     "name": "Michael Christopher Low",
     "lastName": "Low",
     "email": "m.chris.low@utah.edu",
