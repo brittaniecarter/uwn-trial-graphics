@@ -1426,10 +1426,10 @@
     "lastName": "Lin",
     "email": "John.Lin@utah.edu",
     "university": "University of Utah",
-    "department": "Atmospheric Sciences & Wilkes Center for Climate Science & Policy",
-    "title": "Professor & Scientific Director, Wilkes Center for Climate Science & Policy",
+    "department": "Atmospheric Sciences",
+    "title": "Professor & Scientific Director of the Wilkes Center for Climate Science & Policy",
     "website": "https://wilkescenter.utah.edu/about/john-lin/",
-    "specific": "I serve on the Great Salt Lake Strike Team and help coordinate activities related to water research as the Scientific Director of the Wilkes Center for Climate Science & Policy",
+    "specific": "Atmospheric Science; Air Quality; Great Salt Lake",
     "challenges": [
       "Hazards"
     ],
@@ -1442,7 +1442,9 @@
       "Utah Statewide"
     ],
     "specificItems": [
-      "I serve on the Great Salt Lake Strike Team and help coordinate activities related to water research as the Scientific Director of the Wilkes Center for Climate Science & Policy"
+      "Atmospheric Science",
+      "Air Quality",
+      "Great Salt Lake"
     ]
   },
   {
